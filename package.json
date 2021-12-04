@@ -6,6 +6,8 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
+    "format": "prettier --write \"./**/*.{ts,tsx,js,json}\"",
+    "lint": "eslint \"app/**/*.{ts,tsx}\"",
     "postinstall": "remix setup node",
     "start": "remix-serve build"
   },

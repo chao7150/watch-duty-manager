@@ -8,6 +8,7 @@
     "dev": "remix dev",
     "format": "prettier --write \"./**/*.{ts,tsx,js,json}\"",
     "lint": "eslint \"app/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
     "postinstall": "remix setup node",
     "start": "remix-serve build"
   },

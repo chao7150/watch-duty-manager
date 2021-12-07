@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// アニメ作品
+model Work {
+  id              Int       @id @default(autoincrement())
+  episodes        Episode[]
+  title           String
+  officialSiteUrl String
+  twitterId       String
+  hashtag         String
+  imageUrl        String
+}
+
+// アニメの単話
+model Episode {
+  id          Int       @id @default(autoincrement())
+  work        Work      @relation(fields: [workId], references: [id])
+  workId      Int
+  programs    Program[]
+  title       String
+  count       Int
+  description String    @db.Text
+  durationMin Int
+}
+
+// あるチャンネルである日時に放送された番組
+model Program {
+  id         Int      @id @default(autoincrement())
+  episode    Episode  @relation(fields: [episodeId], references: [id])
+  episodeId  Int
+  streamedAt String // テレビのチャンネルか配信サービス名
+  startAt    DateTime
+}

@@ -33,11 +33,20 @@ model Episode {
   durationMin Int
 }
 
+// テレビのチャンネルまたはネット配信サービス
+model Channel {
+  id         Int       @id @default(autoincrement())
+  programs   Program[]
+  name       String
+  isRealtime Boolean
+}
+
 // あるチャンネルである日時に放送された番組
 model Program {
   id         Int      @id @default(autoincrement())
   episode    Episode  @relation(fields: [episodeId], references: [id])
   episodeId  Int
-  streamedAt String // テレビのチャンネルか配信サービス名
-  startAt    DateTime
+  channel    Channel  @relation(fields: [channelId], references: [id])
+  channelId  Int
+  releasedAt DateTime
 }

@@ -12,10 +12,12 @@ import type { LinksFunction } from "remix";
 
 import globalStylesUrl from "~/styles/global.css";
 import darkStylesUrl from "~/styles/dark.css";
+import styles from "./tailwind.css";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
   return [
+    { rel: "stylesheet", href: styles },
     { rel: "stylesheet", href: globalStylesUrl },
     {
       rel: "stylesheet",

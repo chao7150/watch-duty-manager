@@ -7,17 +7,14 @@ export type Props = {
   episodes: Readonly<Episode.Props>[];
 };
 
-export const Component: React.VFC<Props> = ({
-  title,
-  episodes,
-}: Props) => {
+export const Component: React.VFC<Props> = ({ title, episodes }: Props) => {
   return (
     <div>
       <h2>{title}</h2>
       <ul>
         {episodes.map((episode) => {
           return (
-            <li key={episode.id}>
+            <li key={episode.id} className={"my-1"}>
               <Episode.Component {...episode}></Episode.Component>
             </li>
           );

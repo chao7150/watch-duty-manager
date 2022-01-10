@@ -7,3 +7,5 @@ node_modules
 .env
 prisma/seed.ts
 app/tailwind.css
+
+firebase-service-account.json

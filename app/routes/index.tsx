@@ -1,9 +1,9 @@
 import { Channel, Episode, Program, Work } from ".prisma/client";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { format, formatISO, parseISO } from "date-fns";
+import { format, formatISO, parseISO, sub } from "date-fns";
 import React from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
-import type { MetaFunction, LoaderFunction } from "remix";
+import type { MetaFunction } from "remix";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import * as EpisodeTimeline from "../components/domain/episode-timeline/EpisodeTimeline";
@@ -24,13 +24,23 @@ type IndexData = {
 };
 
 // TODO DBから過去と未来の未視聴番組を取得し放送開始時間でソートして返す
+const defaultData: IndexData = { userId: undefined, backlog: [] };
 export const loader = async (args: DataFunctionArgs): Promise<IndexData> => {
   const session = await getSession(args.request.headers.get("Cookie"));
   if (!session.has("uid")) {
-    return { userId: undefined, backlog: [] };
+    return defaultData;
   }
   const userId = session.get("uid");
+  if (typeof userId !== "string") {
+    return defaultData;
+  }
   const programs = await db.program.findMany({
+    where: {
+      AND: [
+        { episode: { work: { users: { some: { user: { uid: userId } } } } } },
+        { channel: { users: { some: { user: { uid: userId } } } } },
+      ],
+    },
     include: { episode: { include: { work: true } }, channel: true },
   });
   return {

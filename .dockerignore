@@ -1,3 +1,9 @@
 node_modules
-build
-.cache
+
+/.cache
+/build
+/public/build
+/prisma/dbml
+
+.env
+app/tailwind.css

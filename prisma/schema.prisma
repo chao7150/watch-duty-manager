@@ -16,53 +16,28 @@ generator dbml {
 
 // アニメ作品
 model Work {
-  id              Int                     @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   episodes        Episode[]
-  title           String
-  officialSiteUrl String
-  twitterId       String
-  hashtag         String
-  imageUrl        String
+  title           String?
+  officialSiteUrl String?
+  twitterId       String?
+  hashtag         String?
   users           SubscribedWorksOnUser[]
 }
 
 // アニメの単話
 model Episode {
-  id                    Int                     @id @default(autoincrement())
-  work                  Work                    @relation(fields: [workId], references: [id])
-  workId                Int
-  programs              Program[]
-  title                 String
-  count                 Int
-  description           String                  @db.Text
-  durationMin           Int
+  id     Int  @id @default(autoincrement())
+  work   Work @relation(fields: [workId], references: [id])
+  workId Int
+  count  Int
   WatchedEpisodesOnUser WatchedEpisodesOnUser[]
-}
-
-// テレビのチャンネルまたはネット配信サービス
-model Channel {
-  id         Int                        @id @default(autoincrement())
-  programs   Program[]
-  name       String
-  isRealtime Boolean
-  users      SubscribedChannelsOnUser[]
-}
-
-// あるチャンネルである日時に放送された番組
-model Program {
-  id         Int      @id @default(autoincrement())
-  episode    Episode  @relation(fields: [episodeId], references: [id])
-  episodeId  Int
-  channel    Channel  @relation(fields: [channelId], references: [id])
-  channelId  Int
-  releasedAt DateTime
 }
 
 model User {
   id                 Int                        @id @default(autoincrement())
   uid                String
   subscribedWorks    SubscribedWorksOnUser[]
-  subscribedChannels SubscribedChannelsOnUser[]
   watchedEpisodes    WatchedEpisodesOnUser[]
 }
 
@@ -74,16 +49,6 @@ model SubscribedWorksOnUser {
 
   @@id([userId, workId])
 }
-
-model SubscribedChannelsOnUser {
-  user      User    @relation(fields: [userId], references: [id])
-  userId    Int
-  channel   Channel @relation(fields: [channelId], references: [id])
-  channelId Int
-
-  @@id([userId, channelId])
-}
-
 model WatchedEpisodesOnUser {
   user      User    @relation(fields: [userId], references: [id])
   userId    Int

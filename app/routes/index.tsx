@@ -1,30 +1,17 @@
-import { Channel, Episode, Program, Work } from ".prisma/client";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { format, formatISO, parseISO, sub } from "date-fns";
 import React from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
 import type { MetaFunction } from "remix";
 import { useLoaderData } from "remix";
-import { db } from "~/utils/db.server";
-import * as EpisodeTimeline from "../components/domain/episode-timeline/EpisodeTimeline";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { getSession } from "~/session";
 
 type IndexData = {
   userId: string | undefined;
-  backlog: ReadonlyArray<
-    Omit<Program, "releasedAt"> & { releasedAt: string } & {
-      channel: Channel;
-      episode: Episode & {
-        work: Work;
-      };
-    }
-  >;
 };
 
-// TODO DBから過去と未来の未視聴番組を取得し放送開始時間でソートして返す
-const defaultData: IndexData = { userId: undefined, backlog: [] };
+const defaultData: IndexData = { userId: undefined };
 export const loader = async (args: DataFunctionArgs): Promise<IndexData> => {
   const session = await getSession(args.request.headers.get("Cookie"));
   if (!session.has("uid")) {
@@ -34,21 +21,8 @@ export const loader = async (args: DataFunctionArgs): Promise<IndexData> => {
   if (typeof userId !== "string") {
     return defaultData;
   }
-  const programs = await db.program.findMany({
-    where: {
-      AND: [
-        { episode: { work: { users: { some: { user: { uid: userId } } } } } },
-        { channel: { users: { some: { user: { uid: userId } } } } },
-      ],
-    },
-    include: { episode: { include: { work: true } }, channel: true },
-  });
   return {
     userId,
-    backlog: programs.map((program) => ({
-      ...program,
-      releasedAt: formatISO(program.releasedAt),
-    })),
   };
 };
 
@@ -86,7 +60,7 @@ const uiConfig: firebaseui.auth.Config = {
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
   const data = useLoaderData<IndexData>();
-  const { userId, backlog } = data;
+  const { userId } = data;
 
   React.useEffect(() => {
     const unregisterAuthObserver = firebase
@@ -109,25 +83,7 @@ export default function Index() {
   }, []);
 
   return userId ? (
-    <div className="remix__page">
-      <div className="backlog_timeline">
-        <div>{userId}</div>
-        <EpisodeTimeline.Component
-          title={"未視聴"}
-          episodes={backlog.map((program) => ({
-            id: program.id.toString(),
-            iconUrl: program.episode.work.imageUrl,
-            title: program.episode.work.title,
-            count: program.episode.count.toString(),
-            episodeTitle: program.episode.title,
-            channel: program.channel.name,
-            startAt: format(parseISO(program.releasedAt), "MM/dd HH:mm"),
-          }))}
-        />
-      </div>
-      <div className="graph"></div>
-      <div className="watched_timeline"></div>
-    </div>
+    <div className="remix__page">logged in</div>
   ) : (
     <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
   );

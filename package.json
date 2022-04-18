@@ -1,24 +1,65 @@
 {
-  "name": "watch-duty-manager",
-  "version": "0.1.0",
   "private": true,
+  "name": "remix-app-template",
+  "description": "",
+  "license": "",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build": "npm run build:css && remix build",
+    "build:css": "tailwindcss -o ./app/tailwind.css",
+    "commit": "cz",
+    "dev": "concurrently \"npm run dev:css\" \"node -r dotenv/config node_modules/.bin/remix dev\"",
+    "dev:css": "tailwindcss -o ./app/tailwind.css --watch",
+    "format": "prettier --write \"./**/*.{ts,tsx,js,json}\"",
+    "lint": "eslint \"app/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
+    "postinstall": "remix setup node",
+    "start": "remix-serve build"
   },
   "dependencies": {
-    "next": "12.1.5",
-    "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "@prisma/client": "^3.6.0",
+    "@remix-run/react": "^1.0.6",
+    "@remix-run/serve": "^1.0.6",
+    "date-fns": "^2.27.0",
+    "dotenv": "^10.0.0",
+    "firebase": "^9.6.2",
+    "firebase-admin": "^10.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-firebaseui": "^6.0.0",
+    "remix": "^1.0.6",
+    "@remix-run/dev": "^1.0.6"
   },
   "devDependencies": {
-    "@types/node": "17.0.24",
-    "@types/react": "18.0.5",
-    "@types/react-dom": "18.0.1",
-    "eslint": "8.13.0",
-    "eslint-config-next": "12.1.5",
-    "typescript": "4.6.3"
-  }
+    "@types/react": "^17.0.24",
+    "@types/react-dom": "^17.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "concurrently": "^6.4.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "esbuild-register": "^3.2.0",
+    "eslint": "^8.4.0",
+    "eslint-config-prettier": "^8.3.0",
+    "lint-staged": "^12.1.2",
+    "prettier": "2.5.1",
+    "prisma": "^3.6.0",
+    "prisma-dbml-generator": "^0.8.3",
+    "simple-git-hooks": "^2.7.0",
+    "tailwindcss": "^3.0.1",
+    "typescript": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "prisma": {
+    "seed": "node --require esbuild-register prisma/seed.ts"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "sideEffects": false
 }

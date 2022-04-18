@@ -1,7 +1,9 @@
-Dockerfile
-.dockerignore
 node_modules
-npm-debug.log
-README.md
-.next
-.git
+
+/.cache
+/build
+/public/build
+/prisma/dbml
+
+.env
+app/tailwind.css

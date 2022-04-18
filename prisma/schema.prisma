@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+// アニメ作品
+model Work {
+  id              Int       @id @default(autoincrement())
+  episodes        Episode[]
+  title           String?
+  officialSiteUrl String?
+  twitterId       String?
+  hashtag         String?
+  users           SubscribedWorksOnUser[]
+}
+
+// アニメの単話
+model Episode {
+  id     Int  @id @default(autoincrement())
+  work   Work @relation(fields: [workId], references: [id])
+  workId Int
+  count  Int
+  WatchedEpisodesOnUser WatchedEpisodesOnUser[]
+}
+
+model User {
+  id                 Int                        @id @default(autoincrement())
+  uid                String
+  subscribedWorks    SubscribedWorksOnUser[]
+  watchedEpisodes    WatchedEpisodesOnUser[]
+}
+
+model SubscribedWorksOnUser {
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  work   Work @relation(fields: [workId], references: [id])
+  workId Int
+
+  @@id([userId, workId])
+}
+model WatchedEpisodesOnUser {
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  episode   Episode @relation(fields: [episodeId], references: [id])
+  episodeId Int
+
+  @@id([userId, episodeId])
+}

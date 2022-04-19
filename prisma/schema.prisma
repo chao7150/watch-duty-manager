@@ -16,9 +16,9 @@ generator dbml {
 
 // アニメ作品
 model Work {
-  id              Int       @id @default(autoincrement())
+  id              Int                     @id @default(autoincrement())
   episodes        Episode[]
-  title           String?
+  title           String                  @unique
   officialSiteUrl String?
   twitterId       String?
   hashtag         String?
@@ -27,18 +27,18 @@ model Work {
 
 // アニメの単話
 model Episode {
-  id     Int  @id @default(autoincrement())
-  work   Work @relation(fields: [workId], references: [id])
-  workId Int
-  count  Int
+  id                    Int                     @id @default(autoincrement())
+  work                  Work                    @relation(fields: [workId], references: [id])
+  workId                Int
+  count                 Int
   WatchedEpisodesOnUser WatchedEpisodesOnUser[]
 }
 
 model User {
-  id                 Int                        @id @default(autoincrement())
-  uid                String
-  subscribedWorks    SubscribedWorksOnUser[]
-  watchedEpisodes    WatchedEpisodesOnUser[]
+  id              Int                     @id @default(autoincrement())
+  uid             String
+  subscribedWorks SubscribedWorksOnUser[]
+  watchedEpisodes WatchedEpisodesOnUser[]
 }
 
 model SubscribedWorksOnUser {
@@ -49,6 +49,7 @@ model SubscribedWorksOnUser {
 
   @@id([userId, workId])
 }
+
 model WatchedEpisodesOnUser {
   user      User    @relation(fields: [userId], references: [id])
   userId    Int

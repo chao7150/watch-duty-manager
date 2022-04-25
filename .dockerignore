@@ -6,4 +6,3 @@ node_modules
 /prisma/dbml
 
 .env
-app/tailwind.css

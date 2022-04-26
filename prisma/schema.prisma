@@ -19,6 +19,7 @@ model Work {
   id              Int                     @id @default(autoincrement())
   episodes        Episode[]
   title           String                  @unique
+  publishedAt     DateTime
   officialSiteUrl String?
   twitterId       String?
   hashtag         String?

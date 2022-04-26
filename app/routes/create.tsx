@@ -3,6 +3,7 @@ import { db } from "~/utils/db.server";
 
 const errorCode = {
   EMPTY_TITLE: "EmptyTitle",
+  EMPTY_PUBLISHED_AT: "EmptyPublishedAt",
   WORK_ALREADY_EXISTS: "WorkAlreadyExists",
 };
 
@@ -14,6 +15,16 @@ export const action: ActionFunction = async ({ request }) => {
       {
         errorCode: errorCode.EMPTY_TITLE,
         errorMessage: "title must not be empty",
+      },
+      { status: 400 }
+    );
+  }
+  const publishedAt = formData.get("publishedAt");
+  if (typeof publishedAt !== "string" || publishedAt === "") {
+    return json(
+      {
+        errorCode: errorCode.EMPTY_PUBLISHED_AT,
+        errorMessage: "publishedAt must not be empty",
       },
       { status: 400 }
     );
@@ -30,10 +41,15 @@ export const action: ActionFunction = async ({ request }) => {
   }, {} as { officialSiteUrl?: string; twitterId?: string; hashtag?: string });
   try {
     const work = await db.work.create({
-      data: { title, ...optionalWorkCreateInput },
+      data: {
+        title,
+        publishedAt: new Date(publishedAt),
+        ...optionalWorkCreateInput,
+      },
     });
     return json(work, { status: 200 });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return json(
       {
         errorCode: errorCode.WORK_ALREADY_EXISTS,
@@ -67,6 +83,15 @@ export default function Create() {
                   *
                 </abbr>
                 <input type="text" name="title" />
+              </label>
+            </li>
+            <li>
+              <label>
+                放送開始時期
+                <abbr title="required" aria-label="required">
+                  *
+                </abbr>
+                <input type="month" name="publishedAt" />
               </label>
             </li>
             <li>

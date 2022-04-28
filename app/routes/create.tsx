@@ -1,6 +1,8 @@
 import { ActionFunction, Form, json, useActionData } from "remix";
 import { db } from "~/utils/db.server";
 
+import * as WorkCreateForm from "../components/WorkCreateForm";
+
 const errorCode = {
   EMPTY_TITLE: "EmptyTitle",
   EMPTY_PUBLISHED_AT: "EmptyPublishedAt",
@@ -71,52 +73,7 @@ export default function Create() {
             `${actionData.title} was successfully submitted.`)}
       </p>
       <div>
-        <Form method="post">
-          <p>
-            Required fields are followed by <abbr title="required">*</abbr>.
-          </p>
-          <ul>
-            <li>
-              <label>
-                title
-                <abbr title="required" aria-label="required">
-                  *
-                </abbr>
-                <input type="text" name="title" />
-              </label>
-            </li>
-            <li>
-              <label>
-                放送開始時期
-                <abbr title="required" aria-label="required">
-                  *
-                </abbr>
-                <input type="month" name="publishedAt" />
-              </label>
-            </li>
-            <li>
-              <label>
-                officialSiteUrl
-                <input type="text" name="officialSiteUrl" />
-              </label>
-            </li>
-            <li>
-              <label>
-                twitterId
-                <input type="text" name="twitterId" />
-              </label>
-            </li>
-            <li>
-              <label>
-                hashtag
-                <input type="text" name="hashtag" />
-              </label>
-            </li>
-            <li>
-              <button type="submit">submit</button>
-            </li>
-          </ul>
-        </Form>
+        <WorkCreateForm.Component />
       </div>
     </>
   );

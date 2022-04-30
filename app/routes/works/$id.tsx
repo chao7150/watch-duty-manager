@@ -1,4 +1,4 @@
-import { Work } from "@prisma/client";
+import { Prisma, Work } from "@prisma/client";
 import { useCallback, useState } from "react";
 import {
   ActionFunction,
@@ -21,49 +21,31 @@ export const loader: LoaderFunction = async ({ params }) => {
   return work;
 };
 
-const errorCode = {
-  EMPTY_TITLE: "EmptyTitle",
-  WORK_ALREADY_EXISTS: "WorkAlreadyExists",
-};
-
 export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
-  const title = formData.get("title");
-  if (typeof title !== "string" || title === "") {
-    return json(
-      {
-        errorCode: errorCode.EMPTY_TITLE,
-        errorMessage: "title must not be empty",
-      },
-      { status: 400 }
-    );
-  }
-  const optionalWorkCreateInput = [
-    "officialSiteUrl",
-    "twitterId",
-    "hashtag",
-  ].reduce((acc, key) => {
-    const formDataEntryValue = formData.get(key);
-    const value =
-      typeof formDataEntryValue === "string" ? formDataEntryValue : undefined;
-    return { ...acc, [key]: value };
-  }, {} as { officialSiteUrl?: string; twitterId?: string; hashtag?: string });
+  let work: Prisma.WorkCreateInput;
   try {
-    const id = params.id;
-    if (id === undefined) {
-      // TODO エラー
-      return null;
-    }
-    const work = await db.work.update({
+    work = WorkCreateForm.serverValidator(formData);
+  } catch (errorMessage) {
+    return json({ errorMessage }, { status: 400 });
+  }
+
+  const id = params.id;
+  if (id === undefined) {
+    // TODO エラー
+    return null;
+  }
+
+  try {
+    const returnedWork = await db.work.update({
       where: { id: parseInt(id, 10) },
-      data: { title, ...optionalWorkCreateInput },
+      data: work,
     });
-    return json(work, { status: 200 });
+    return json(returnedWork, { status: 200 });
   } catch {
     return json(
       {
-        errorCode: errorCode.WORK_ALREADY_EXISTS,
-        errorMessage: `${title} already exists`,
+        errorMessage: `work already exists`,
       },
       { status: 409 }
     );

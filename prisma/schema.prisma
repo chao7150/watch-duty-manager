@@ -35,27 +35,18 @@ model Episode {
   WatchedEpisodesOnUser WatchedEpisodesOnUser[]
 }
 
-model User {
-  id              Int                     @id @default(autoincrement())
-  uid             String
-  subscribedWorks SubscribedWorksOnUser[]
-  watchedEpisodes WatchedEpisodesOnUser[]
-}
-
 model SubscribedWorksOnUser {
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-  work   Work @relation(fields: [workId], references: [id])
+  userId String
+  work   Work   @relation(fields: [workId], references: [id])
   workId Int
 
-  @@id([userId, workId])
+  @@id(fields: [userId, workId])
 }
 
 model WatchedEpisodesOnUser {
-  user      User    @relation(fields: [userId], references: [id])
-  userId    Int
+  userId    String
   episode   Episode @relation(fields: [episodeId], references: [id])
   episodeId Int
 
-  @@id([userId, episodeId])
+  @@id(fields: [userId, episodeId])
 }

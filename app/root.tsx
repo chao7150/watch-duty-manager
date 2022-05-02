@@ -1,17 +1,21 @@
 import {
+  Form,
   Link,
   Links,
   LiveReload,
+  LoaderFunction,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
   useCatch,
+  useLoaderData,
 } from "remix";
 import type { LinksFunction } from "remix";
 
 import globalStylesUrl from "~/styles/global.css";
 import darkStylesUrl from "~/styles/dark.css";
+import { getUserId } from "./utils/session.server";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
@@ -119,7 +123,14 @@ function Document({
   );
 }
 
+export const loader: LoaderFunction = ({ request }) => {
+  const userId = getUserId(request);
+  return userId;
+};
+
 function Layout({ children }: { children: React.ReactNode }) {
+  const userId = useLoaderData();
+
   return (
     <div className="remix-app">
       <header className="remix-app__header">
@@ -138,6 +149,23 @@ function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <Link to="/create">Create</Link>
               </li>
+
+              {userId ? (
+                <>
+                  <li>
+                    <Link to="/my">My</Link>
+                  </li>
+                  <li>
+                    <Form action="/logout" method="post">
+                      <button type="submit">Logout</button>
+                    </Form>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <Link to="/login">Login</Link>
+                </li>
+              )}
             </ul>
           </nav>
         </div>

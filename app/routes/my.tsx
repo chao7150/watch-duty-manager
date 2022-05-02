@@ -1,13 +1,28 @@
+import { Work } from "@prisma/client";
+import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { LoaderFunction, useLoaderData } from "remix";
+import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 
-export const loader: LoaderFunction = async ({ request, params }) => {
-  const userId = requireUserId(request);
-  return userId;
+type LoaderData = { subscribedWorks: Work[] };
+export const loader = async ({
+  request,
+}: DataFunctionArgs): Promise<LoaderData> => {
+  const userId = await requireUserId(request);
+  const subscribedWorks = await db.work.findMany({
+    where: { users: { some: { userId } } },
+  });
+  return { subscribedWorks };
 };
 
 export default function My() {
-  const userId = useLoaderData();
+  const { subscribedWorks } = useLoaderData<LoaderData>();
 
-  return <div>{userId}</div>;
+  return (
+    <ul>
+      {subscribedWorks.map((work) => (
+        <li key={work.id}>{work.title}</li>
+      ))}
+    </ul>
+  );
 }

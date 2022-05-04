@@ -2,13 +2,12 @@ import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { Form, MetaFunction } from "remix";
 import { useLoaderData } from "remix";
 import "firebase/compat/auth";
-import { getSession } from "~/session";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
 import { Episode } from "@prisma/client";
 
 type IndexData = {
-  userId: string | undefined;
+  userId: string | null;
   tickets?: (Episode & { work: { title: string } })[];
 };
 
@@ -16,7 +15,7 @@ export const loader = async ({
   request,
 }: DataFunctionArgs): Promise<IndexData> => {
   const userId = await getUserId(request);
-  if (userId === undefined) {
+  if (userId === null) {
     return {
       userId,
     };

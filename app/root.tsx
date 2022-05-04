@@ -124,7 +124,7 @@ function Document({
 }
 
 export const loader: LoaderFunction = ({ request }) => {
-  const userId = getUserId(request);
+  const userId = getUserId(request) ;
   return userId;
 };
 

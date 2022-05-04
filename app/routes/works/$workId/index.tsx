@@ -39,7 +39,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const workId = params.id;
+  const workId = params.workId;
   if (typeof workId !== "string") {
     return;
   }

@@ -1,4 +1,4 @@
-import { applicationDefault, initializeApp } from "firebase-admin/app";
+import { applicationDefault } from "firebase-admin/app";
 import * as admin from "firebase-admin";
 
 export function getAdmin(): admin.app.App {

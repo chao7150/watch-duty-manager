@@ -7,14 +7,12 @@ import {
   Link,
   LoaderFunction,
   redirect,
-  useActionData,
   useLoaderData,
 } from "remix";
 import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../../components/WorkCreateForm";
-import { getSession } from "~/session";
-import { getUserId } from "~/utils/session.server";
+import { getUserId, requireUserId } from "~/utils/session.server";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = (await getUserId(request)) ?? undefined;
@@ -46,14 +44,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   const formData = await request.formData();
   if (formData.get("_action") === "unsubscribe") {
-    const session = await getSession(request.headers.get("Cookie"));
-    if (!session.has("uid")) {
-      return redirect("/");
-    }
-    const userId = session.get("uid");
-    if (typeof userId !== "string") {
-      return redirect("/");
-    }
+    const userId = await requireUserId(request);
     await db.subscribedWorksOnUser.delete({
       where: { userId_workId: { userId, workId: parseInt(workId, 10) } },
     });

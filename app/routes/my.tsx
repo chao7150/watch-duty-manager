@@ -1,6 +1,6 @@
 import { Work } from "@prisma/client";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { LoaderFunction, useLoaderData } from "remix";
+import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 

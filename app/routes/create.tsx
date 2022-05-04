@@ -28,7 +28,7 @@ export const action: ActionFunction = async ({ request }) => {
         ),
       };
     });
-    const episodes = await db.episode.createMany({
+    await db.episode.createMany({
       data,
     });
     return json(returnedWork, { status: 200 });

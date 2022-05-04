@@ -1,7 +1,7 @@
-import { ActionFunction, DataFunctionArgs } from "@remix-run/server-runtime";
+import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
-import { getUserId, requireUserId } from "~/utils/session.server";
+import { requireUserId } from "~/utils/session.server";
 
 type LoaderData = {
   workId: number;
@@ -36,7 +36,7 @@ export const loader = async ({
   return { ...episode, publishedAt: episode?.publishedAt.toISOString() };
 };
 
-type ActionData = any;
+type ActionData = null;
 export const action = async ({
   request,
   params,

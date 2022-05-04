@@ -1,6 +1,7 @@
-import { DataFunctionArgs } from "@remix-run/server-runtime";
+import { ActionFunction, DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
+import { getUserId, requireUserId } from "~/utils/session.server";
 
 type LoaderData = {
   workId: number;
@@ -33,6 +34,33 @@ export const loader = async ({
     return null;
   }
   return { ...episode, publishedAt: episode?.publishedAt.toISOString() };
+};
+
+type ActionData = any;
+export const action = async ({
+  request,
+  params,
+}: DataFunctionArgs): Promise<ActionData> => {
+  const userId = await requireUserId(request);
+  const workId = params.workId;
+  if (workId === undefined) {
+    // TODO エラー
+    return null;
+  }
+  const count = params.count;
+  if (count === undefined) {
+    return null;
+  }
+  await db.episode.update({
+    where: {
+      workId_count: {
+        workId: parseInt(workId, 10),
+        count: parseInt(count, 10),
+      },
+    },
+    data: { WatchedEpisodesOnUser: { create: { userId } } },
+  });
+  return null;
 };
 
 export default function Episode() {

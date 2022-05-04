@@ -1,5 +1,5 @@
 import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { Form, MetaFunction } from "remix";
+import { Form, MetaFunction, useFetcher } from "remix";
 import { useLoaderData } from "remix";
 import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
@@ -43,6 +43,8 @@ export const meta: MetaFunction = () => {
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
   const { userId, tickets } = useLoaderData<IndexData>();
+  const fetcher = useFetcher();
+  console.log(fetcher.data);
 
   return userId ? (
     <div className="remix__page">
@@ -52,9 +54,18 @@ export default function Index() {
             <ul key={`${ticket.workId}-${ticket.count}`}>
               <p>{ticket.work.title}</p>
               <p>#{ticket.count}</p>
-              <Form method="post">
-                <button name="_action" value={"watch "}></button>
-              </Form>
+              <fetcher.Form
+                method="post"
+                action={`/works/${ticket.workId}/${ticket.count}?index`}
+              >
+                <button
+                  type="submit"
+                  name="_action"
+                  value={`watch`}
+                >
+                  watch
+                </button>
+              </fetcher.Form>
             </ul>
           );
         })}

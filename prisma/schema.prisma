@@ -28,11 +28,13 @@ model Work {
 
 // アニメの単話
 model Episode {
-  id                    Int                     @id @default(autoincrement())
   work                  Work                    @relation(fields: [workId], references: [id])
   workId                Int
   count                 Int
+  publishedAt           DateTime
   WatchedEpisodesOnUser WatchedEpisodesOnUser[]
+
+  @@id(fields: [workId, count])
 }
 
 model SubscribedWorksOnUser {
@@ -44,9 +46,10 @@ model SubscribedWorksOnUser {
 }
 
 model WatchedEpisodesOnUser {
-  userId    String
-  episode   Episode @relation(fields: [episodeId], references: [id])
-  episodeId Int
+  userId  String
+  episode Episode @relation(fields: [workId, count], references: [workId, count])
+  workId  Int
+  count   Int
 
-  @@id(fields: [userId, episodeId])
+  @@id(fields: [userId, workId, count])
 }

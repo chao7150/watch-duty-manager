@@ -3,7 +3,9 @@ import { Form } from "remix";
 
 import * as TextInput from "../components/TextInput";
 
-export const serverValidator = (formData: FormData): Prisma.WorkCreateInput => {
+export const serverValidator = (
+  formData: FormData
+): Prisma.WorkCreateInput & { episodeCount: number } => {
   const title = formData.get("title");
   if (typeof title !== "string" || title === "") {
     throw "title must not be empty";
@@ -12,6 +14,11 @@ export const serverValidator = (formData: FormData): Prisma.WorkCreateInput => {
   const publishedAt = formData.get("publishedAt");
   if (typeof publishedAt !== "string" || publishedAt === "") {
     throw "publishedAt must not be empty";
+  }
+
+  const episodeCount = formData.get("episodeCount");
+  if (typeof episodeCount !== "string" || episodeCount === "") {
+    throw "episodeCount must not be empty";
   }
 
   const optionalWorkCreateInput = [
@@ -29,6 +36,7 @@ export const serverValidator = (formData: FormData): Prisma.WorkCreateInput => {
     title,
     publishedAt: new Date(publishedAt),
     ...optionalWorkCreateInput,
+    episodeCount: parseInt(episodeCount, 10),
   };
 };
 
@@ -63,11 +71,22 @@ export const Component: React.VFC<Props> = ({
         </li>
         <li>
           <label>
-            放送開始時期
+            第1話放送日時
             <abbr title="required" aria-label="required">
               *
             </abbr>
-            <input type="month" name="publishedAt" {...publishedAt} />
+            <input type="datetime-local" name="publishedAt" {...publishedAt} />
+          </label>
+        </li>
+        <li>
+          <label>
+            話数（予想でも可）
+            <input
+              type="number"
+              name="episodeCount"
+              min={1}
+              defaultValue={13}
+            ></input>
           </label>
         </li>
         <li>

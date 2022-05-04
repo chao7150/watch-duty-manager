@@ -1,9 +1,10 @@
-import { Prisma, Work } from "@prisma/client";
+import { Episode, Prisma, SubscribedWorksOnUser, Work } from "@prisma/client";
 import { useCallback, useState } from "react";
 import {
   ActionFunction,
   Form,
   json,
+  Link,
   LoaderFunction,
   redirect,
   useActionData,
@@ -11,20 +12,23 @@ import {
 } from "remix";
 import { db } from "~/utils/db.server";
 
-import * as WorkCreateForm from "../../components/WorkCreateForm";
+import * as WorkCreateForm from "../../../components/WorkCreateForm";
 import { getSession } from "~/session";
 import { getUserId } from "~/utils/session.server";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = (await getUserId(request)) ?? undefined;
-  const workId = params.id;
+  const workId = params.workId;
   if (workId === undefined) {
     // TODO エラー
     return null;
   }
   const work = await db.work.findUnique({
     where: { id: parseInt(workId, 10) },
-    include: { users: { where: { userId } } },
+    include: {
+      users: { where: { userId } },
+      episodes: { orderBy: { count: "asc" } },
+    },
   });
   return {
     ...work,
@@ -106,6 +110,8 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 type ClientWork = Omit<Work, "publishedAt"> & {
+  users: SubscribedWorksOnUser[];
+  episodes: Episode[];
   publishedAt: string;
   subscribed: boolean;
   loggedIn: boolean;
@@ -135,6 +141,19 @@ export default function Work() {
         <WorkCreateForm.Component {...defaultValueMap} />
       ) : (
         <>
+          {loggedIn && (
+            <Form method="post">
+              {work.subscribed ? (
+                <button name="_action" value="unsubscribe">
+                  unsubscribe
+                </button>
+              ) : (
+                <button name="_action" value="subscribe">
+                  subscribe
+                </button>
+              )}
+            </Form>
+          )}
           <dl>
             <dt>公式サイト</dt>
             <dd>
@@ -151,19 +170,31 @@ export default function Work() {
             <dt>ハッシュタグ</dt>
             <dd>#{work.hashtag}</dd>
           </dl>
-          {loggedIn && (
-            <Form method="post">
-              {work.subscribed ? (
-                <button name="_action" value="unsubscribe">
-                  unsubscribe
-                </button>
-              ) : (
-                <button name="_action" value="subscribe">
-                  subscribe
-                </button>
-              )}
-            </Form>
-          )}
+          <section>
+            <h3>登録済みの話数</h3>
+            <table>
+              <tr>
+                <th>話数</th>
+                <th>公開日</th>
+                <th>公開時刻</th>
+              </tr>
+              {work.episodes.map((episode) => {
+                return (
+                  <tr key={`${episode.workId}-${episode.count}`}>
+                    <td>
+                      <Link to={`${episode.count}`}>{episode.count}</Link>
+                    </td>
+                    <td>
+                      {new Date(episode.publishedAt).toLocaleDateString()}
+                    </td>
+                    <td>
+                      {new Date(episode.publishedAt).toLocaleTimeString()}
+                    </td>
+                  </tr>
+                );
+              })}
+            </table>
+          </section>
         </>
       )}
     </div>

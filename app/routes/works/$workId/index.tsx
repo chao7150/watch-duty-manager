@@ -12,7 +12,7 @@ import {
 import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../../components/WorkCreateForm";
-import { getSession, getUserId, requireUserId } from "~/utils/session.server";
+import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams } from "~/utils/type";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -34,30 +34,25 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const { workId } = extractParams(params, ["workId"]);
+  const { workId: _workId } = extractParams(params, ["workId"]);
+  const workId = parseInt(_workId, 10);
 
   const formData = await request.formData();
   if (formData.get("_action") === "unsubscribe") {
     const userId = await requireUserId(request);
     await db.subscribedWorksOnUser.delete({
-      where: { userId_workId: { userId, workId: parseInt(workId, 10) } },
+      where: { userId_workId: { userId, workId } },
     });
     return json({}, { status: 200 });
   }
   if (formData.get("_action") === "subscribe") {
-    const session = await getSession(request.headers.get("Cookie"));
-    if (!session.has("uid")) {
-      return redirect("/");
-    }
-    const userId = session.get("uid");
-    if (typeof userId !== "string") {
-      return redirect("/");
-    }
+    const userId = await requireUserId(request);
+
     try {
       const rel = await db.subscribedWorksOnUser.create({
         data: {
           userId,
-          workId: parseInt(workId, 10),
+          workId,
         },
       });
       return json(rel, { status: 200 });
@@ -72,15 +67,9 @@ export const action: ActionFunction = async ({ request, params }) => {
     return json({ errorMessage }, { status: 400 });
   }
 
-  const id = params.id;
-  if (id === undefined) {
-    // TODO エラー
-    return null;
-  }
-
   try {
     const returnedWork = await db.work.update({
-      where: { id: parseInt(id, 10) },
+      where: { id: workId },
       data: work,
     });
     return json(returnedWork, { status: 200 });

@@ -58,11 +58,11 @@ export default function Index() {
                 method="post"
                 action={`/works/${ticket.workId}/${ticket.count}?index`}
               >
-                <button
-                  type="submit"
-                  name="_action"
-                  value={`watch`}
-                >
+                <label>
+                  コメント
+                  <textarea name="comment"></textarea>
+                </label>
+                <button type="submit" name="_action" value={`watch`}>
                   watch
                 </button>
               </fetcher.Form>

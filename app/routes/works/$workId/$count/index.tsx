@@ -9,6 +9,7 @@ type LoaderData = {
   count: number;
   publishedAt: string;
   work: { title: string };
+  WatchedEpisodesOnUser: { comment: string | null }[];
 } | null;
 export const loader = async ({
   params,
@@ -21,12 +22,18 @@ export const loader = async ({
         count: parseInt(count, 10),
       },
     },
-    include: { work: { select: { title: true } } },
+    include: {
+      work: { select: { title: true } },
+      WatchedEpisodesOnUser: { select: { comment: true } },
+    },
   });
   if (episode === null) {
     return null;
   }
-  return { ...episode, publishedAt: episode?.publishedAt.toISOString() };
+  return {
+    ...episode,
+    publishedAt: episode?.publishedAt.toISOString(),
+  };
 };
 
 type ActionData = null;
@@ -35,15 +42,24 @@ export const action = async ({
   params,
 }: DataFunctionArgs): Promise<ActionData> => {
   const userId = await requireUserId(request);
-  const { workId, count } = extractParams(params, ["workId", "count"]);
+  const { workId: _workId, count: _count } = extractParams(params, [
+    "workId",
+    "count",
+  ]);
+  const workId = parseInt(_workId, 10);
+  const count = parseInt(_count, 10);
+
+  const formData = Object.fromEntries(await request.formData());
+  const { comment } = extractParams(formData, ["comment"]);
+
   await db.episode.update({
     where: {
       workId_count: {
-        workId: parseInt(workId, 10),
-        count: parseInt(count, 10),
+        workId,
+        count,
       },
     },
-    data: { WatchedEpisodesOnUser: { create: { userId } } },
+    data: { WatchedEpisodesOnUser: { create: { userId, comment } } },
   });
   return null;
 };
@@ -55,13 +71,24 @@ export default function Episode() {
   }
 
   return (
-    <dl>
-      <dt>作品名</dt>
-      <dd>{episode.work.title}</dd>
-      <dt>話数</dt>
-      <dd>{episode.count}</dd>
-      <dt>放送日時</dt>
-      <dd>{new Date(episode.publishedAt).toLocaleString()}</dd>
-    </dl>
+    <>
+      <dl>
+        <dt>作品名</dt>
+        <dd>{episode.work.title}</dd>
+        <dt>話数</dt>
+        <dd>{episode.count}</dd>
+        <dt>放送日時</dt>
+        <dd>{new Date(episode.publishedAt).toLocaleString()}</dd>
+      </dl>
+      <ul>
+        {episode.WatchedEpisodesOnUser.map((w) => {
+          return (
+            <li key={w.comment}>
+              <p>{w.comment}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }

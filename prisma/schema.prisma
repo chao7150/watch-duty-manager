@@ -50,6 +50,7 @@ model WatchedEpisodesOnUser {
   episode Episode @relation(fields: [workId, count], references: [workId, count])
   workId  Int
   count   Int
+  comment String? @db.Text
 
   @@id(fields: [userId, workId, count])
 }

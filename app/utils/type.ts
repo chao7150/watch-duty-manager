@@ -1,7 +1,7 @@
 import { Params } from "react-router";
 
 export const extractParams = <Keys extends string>(
-  params: Params,
+  params: { [key in string]: unknown },
   keys: Array<Keys>
 ): { [Key in Keys]: string } => {
   if (checkParamsType(params, keys)) {
@@ -11,7 +11,7 @@ export const extractParams = <Keys extends string>(
 };
 
 const checkParamsType = <Keys extends string>(
-  params: Params,
+  params: { [key in string]: unknown },
   keys: Array<Keys>
 ): params is { [Key in Keys]: string } => {
   for (const k of keys) {

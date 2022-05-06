@@ -25,6 +25,11 @@ export const loader = async ({
       AND: [
         { work: { users: { some: { userId } } } },
         { WatchedEpisodesOnUser: { none: { userId } } },
+        {
+          publishedAt: {
+            lte: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
+          },
+        },
       ],
     },
     include: { work: { select: { title: true } } },
@@ -44,7 +49,6 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const { userId, tickets } = useLoaderData<IndexData>();
   const fetcher = useFetcher();
-  console.log(fetcher.data);
 
   return userId ? (
     <div className="remix__page">

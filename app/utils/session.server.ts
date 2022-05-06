@@ -2,7 +2,7 @@ import { createCookieSessionStorage, redirect } from "remix";
 
 const ONE_WEEK_SEC = 60 * 60 * 24 * 7;
 
-const { getSession, commitSession, destroySession } =
+export const { getSession, commitSession, destroySession } =
   createCookieSessionStorage({
     // a Cookie from `createCookie` or the CookieOptions to create one
     cookie: {

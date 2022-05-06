@@ -3,7 +3,7 @@ import "firebase/compat/auth";
 import { useEffect } from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
 import { ActionFunction, LoaderFunction, redirect } from "remix";
-import { commitSession, getSession } from "~/session";
+import { commitSession, getSession } from "~/utils/session.server";
 import { getAdmin } from "~/utils/firebase.server";
 import { getUserId } from "~/utils/session.server";
 

@@ -2,6 +2,7 @@ import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
+import { extractParams } from "~/utils/type";
 
 type LoaderData = {
   workId: number;
@@ -12,15 +13,7 @@ type LoaderData = {
 export const loader = async ({
   params,
 }: DataFunctionArgs): Promise<LoaderData> => {
-  const workId = params.workId;
-  if (workId === undefined) {
-    // TODO エラー
-    return null;
-  }
-  const count = params.count;
-  if (count === undefined) {
-    return null;
-  }
+  const { workId, count } = extractParams(params, ["workId", "count"]);
   const episode = await db.episode.findUnique({
     where: {
       workId_count: {
@@ -42,15 +35,7 @@ export const action = async ({
   params,
 }: DataFunctionArgs): Promise<ActionData> => {
   const userId = await requireUserId(request);
-  const workId = params.workId;
-  if (workId === undefined) {
-    // TODO エラー
-    return null;
-  }
-  const count = params.count;
-  if (count === undefined) {
-    return null;
-  }
+  const { workId, count } = extractParams(params, ["workId", "count"]);
   await db.episode.update({
     where: {
       workId_count: {

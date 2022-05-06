@@ -12,15 +12,12 @@ import {
 import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../../components/WorkCreateForm";
-import { getUserId, requireUserId } from "~/utils/session.server";
+import { getSession, getUserId, requireUserId } from "~/utils/session.server";
+import { extractParams } from "~/utils/type";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = (await getUserId(request)) ?? undefined;
-  const workId = params.workId;
-  if (workId === undefined) {
-    // TODO エラー
-    return null;
-  }
+  const { workId } = extractParams(params, ["workId"]);
   const work = await db.work.findUnique({
     where: { id: parseInt(workId, 10) },
     include: {
@@ -37,10 +34,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const workId = params.workId;
-  if (typeof workId !== "string") {
-    return;
-  }
+  const { workId } = extractParams(params, ["workId"]);
 
   const formData = await request.formData();
   if (formData.get("_action") === "unsubscribe") {

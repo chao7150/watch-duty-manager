@@ -46,11 +46,12 @@ model SubscribedWorksOnUser {
 }
 
 model WatchedEpisodesOnUser {
-  userId  String
-  episode Episode @relation(fields: [workId, count], references: [workId, count])
-  workId  Int
-  count   Int
-  comment String? @db.Text
+  userId    String
+  episode   Episode  @relation(fields: [workId, count], references: [workId, count])
+  workId    Int
+  count     Int
+  createdAt DateTime
+  comment   String?  @db.Text
 
   @@id(fields: [userId, workId, count])
 }

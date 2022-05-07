@@ -66,7 +66,7 @@ export default function Index() {
                   コメント
                   <textarea name="comment"></textarea>
                 </label>
-                <button type="submit" name="_action" value={`watch`}>
+                <button type="submit" name="_action" value="watch">
                   watch
                 </button>
               </fetcher.Form>

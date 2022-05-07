@@ -50,6 +50,14 @@ export const action = async ({
   const count = parseInt(_count, 10);
 
   const formData = Object.fromEntries(await request.formData());
+
+  if (formData._action === "unwatch") {
+    await db.watchedEpisodesOnUser.delete({
+      where: { userId_workId_count: { userId, workId, count } },
+    });
+    return null;
+  }
+
   const { comment } = extractParams(formData, ["comment"]);
 
   await db.episode.update({
@@ -59,7 +67,11 @@ export const action = async ({
         count,
       },
     },
-    data: { WatchedEpisodesOnUser: { create: { userId, comment } } },
+    data: {
+      WatchedEpisodesOnUser: {
+        create: { userId, comment, createdAt: new Date() },
+      },
+    },
   });
   return null;
 };

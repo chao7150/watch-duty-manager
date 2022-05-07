@@ -1,11 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { db } from "~/utils/db.server";
-// const db = new PrismaClient();
+const db = new PrismaClient();
 
 async function seed() {
   await db.work.createMany({
     data: [
       {
+        id: 0,
         title: "test1",
         publishedAt: new Date("2022-04-01"),
         officialSiteUrl: "https://example.com",
@@ -21,6 +21,22 @@ async function seed() {
         hashtag: "ドライブマイカー ",
       },
     ],
+  });
+  await db.episode.createMany({
+    data: Array.from({ length: 13 }).map((_, index) => {
+      return { count: index, workId: 1, publishedAt: new Date() };
+    }),
+  });
+  await db.subscribedWorksOnUser.create({
+    data: { userId: "AXQXX7qY1FdjqqNXLjWJypwSVqZ2", workId: 1 },
+  });
+  await db.watchedEpisodesOnUser.create({
+    data: {
+      userId: "AXQXX7qY1FdjqqNXLjWJypwSVqZ2",
+      workId: 1,
+      count: 1,
+      createdAt: new Date(),
+    },
   });
 }
 

@@ -1,5 +1,3 @@
-import { Params } from "react-router";
-
 export const extractParams = <Keys extends string>(
   params: { [key in string]: unknown },
   keys: Array<Keys>
@@ -21,4 +19,18 @@ const checkParamsType = <Keys extends string>(
     }
   }
   return true;
+};
+
+export const extractAsNonEmptyStringOrUndefined = (
+  obj: Record<string, unknown>,
+  key: string
+): string | undefined => {
+  const value = obj[key];
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  if (value === "") {
+    return undefined;
+  }
+  return value;
 };

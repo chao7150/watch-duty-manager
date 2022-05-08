@@ -1,8 +1,9 @@
 import { WatchedEpisodesOnUser, Work } from "@prisma/client";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { Form, useFetcher, useLoaderData } from "remix";
+import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
+import * as Episode from "../components/Episode";
 
 type LoaderData = {
   subscribedWorks: Work[];
@@ -33,7 +34,6 @@ export const loader = async ({
 };
 
 export default function My() {
-  const fetcher = useFetcher();
   const { subscribedWorks, recentWatchedEpisodes } =
     useLoaderData<LoaderData>();
 
@@ -52,17 +52,13 @@ export default function My() {
         <ul>
           {recentWatchedEpisodes.map((e) => (
             <li key={`${e.workId}-${e.count}`}>
-              <p>{e.episode.work.title}</p>
-              <p>{e.count}</p>
-              <p>{new Date(e.createdAt).toLocaleString()}</p>
-              <fetcher.Form
-                action={`/works/${e.workId}/${e.count}?index`}
-                method="post"
-              >
-                <button type="submit" name="_action" value="unwatch">
-                  unwatch
-                </button>
-              </fetcher.Form>
+              <Episode.Component.Watched
+                workId={e.workId}
+                title={e.episode.work.title}
+                count={e.count}
+                publishedAt={e.createdAt}
+                comment={e.comment ?? undefined}
+              />
             </li>
           ))}
         </ul>

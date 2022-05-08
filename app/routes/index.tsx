@@ -4,11 +4,15 @@ import { useLoaderData } from "remix";
 import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
-import { Episode } from "@prisma/client";
+import { Episode as EpisodeType } from "@prisma/client";
+import * as Episode from "../components/Episode";
 
 type IndexData = {
   userId: string | null;
-  tickets?: (Episode & { work: { title: string } })[];
+  tickets?: (Omit<EpisodeType, "publishedAt"> & {
+    publishedAt: string;
+    work: { title: string };
+  })[];
 };
 
 export const loader = async ({
@@ -33,8 +37,15 @@ export const loader = async ({
       ],
     },
     include: { work: { select: { title: true } } },
+    orderBy: { publishedAt: "desc" },
   });
-  return { userId, tickets };
+  return {
+    userId,
+    tickets: tickets.map((t) => ({
+      ...t,
+      publishedAt: t.publishedAt.toISOString(),
+    })),
+  };
 };
 
 // https://remix.run/api/conventions#meta
@@ -52,28 +63,23 @@ export default function Index() {
 
   return userId ? (
     <div className="remix__page">
-      <ul>
-        {tickets?.map((ticket) => {
-          return (
-            <ul key={`${ticket.workId}-${ticket.count}`}>
-              <p>{ticket.work.title}</p>
-              <p>#{ticket.count}</p>
-              <fetcher.Form
-                method="post"
-                action={`/works/${ticket.workId}/${ticket.count}?index`}
-              >
-                <label>
-                  コメント
-                  <textarea name="comment"></textarea>
-                </label>
-                <button type="submit" name="_action" value="watch">
-                  watch
-                </button>
-              </fetcher.Form>
-            </ul>
-          );
-        })}
-      </ul>
+      <section>
+        <h2>未視聴のエピソード</h2>
+        <ul>
+          {tickets?.map((ticket) => {
+            return (
+              <li key={`${ticket.workId}-${ticket.count}`}>
+                <Episode.Component.New
+                  workId={ticket.workId}
+                  title={ticket.work.title}
+                  count={ticket.count}
+                  publishedAt={ticket.publishedAt}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </section>
     </div>
   ) : (
     <div>not logged in</div>

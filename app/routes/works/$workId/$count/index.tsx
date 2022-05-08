@@ -2,7 +2,10 @@ import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
-import { extractParams } from "~/utils/type";
+import {
+  extractAsNonEmptyStringOrUndefined,
+  extractParams,
+} from "~/utils/type";
 
 type LoaderData = {
   workId: number;
@@ -58,7 +61,7 @@ export const action = async ({
     return null;
   }
 
-  const { comment } = extractParams(formData, ["comment"]);
+  const comment = extractAsNonEmptyStringOrUndefined(formData, "comment");
 
   await db.episode.update({
     where: {

@@ -4,7 +4,7 @@
   "description": "",
   "license": "",
   "scripts": {
-    "build": "npm run build:css && remix build",
+    "build": "remix build",
     "commit": "cz",
     "dev": "node -r dotenv/config node_modules/.bin/remix dev",
     "format": "prettier --write \"./**/*.{ts,tsx,js,json}\"",

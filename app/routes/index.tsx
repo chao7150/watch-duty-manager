@@ -6,22 +6,23 @@ import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
 import { Episode as EpisodeType } from "@prisma/client";
 import * as Episode from "../components/Episode";
+import { Serialized } from "~/utils/type";
 
-type IndexData = {
+type LoaderData = {
   userId: string | null;
-  tickets?: (Omit<EpisodeType, "publishedAt"> & {
-    publishedAt: string;
+  tickets: (EpisodeType & {
     work: { title: string };
   })[];
 };
 
 export const loader = async ({
   request,
-}: DataFunctionArgs): Promise<IndexData> => {
+}: DataFunctionArgs): Promise<LoaderData> => {
   const userId = await getUserId(request);
   if (userId === null) {
     return {
       userId,
+      tickets: [],
     };
   }
   const tickets = await db.episode.findMany({
@@ -41,10 +42,7 @@ export const loader = async ({
   });
   return {
     userId,
-    tickets: tickets.map((t) => ({
-      ...t,
-      publishedAt: t.publishedAt.toISOString(),
-    })),
+    tickets,
   };
 };
 
@@ -58,7 +56,7 @@ export const meta: MetaFunction = () => {
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
-  const { userId, tickets } = useLoaderData<IndexData>();
+  const { userId, tickets } = useLoaderData<Serialized<LoaderData>>();
   const fetcher = useFetcher();
 
   return userId ? (
@@ -66,7 +64,7 @@ export default function Index() {
       <section>
         <h2>未視聴のエピソード</h2>
         <ul>
-          {tickets?.map((ticket) => {
+          {tickets.map((ticket) => {
             return (
               <li key={`${ticket.workId}-${ticket.count}`}>
                 <Episode.Component.New

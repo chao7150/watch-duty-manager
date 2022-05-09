@@ -34,3 +34,18 @@ export const extractAsNonEmptyStringOrUndefined = (
   }
   return value;
 };
+
+/**
+ * オブジェクトや配列の中のDateを再帰的にstringに変換する
+ */
+export type Serialized<T> = {
+  [Key in keyof T]: T[Key] extends Date
+    ? string
+    : T[Key] extends string | number | boolean
+    ? T[Key]
+    : T[Key] extends Record<string, unknown>
+    ? Serialized<T[Key]>
+    : T[Key] extends Array<infer S>
+    ? Array<Serialized<S>>
+    : T[Key];
+};

@@ -1,3 +1,4 @@
+import { Episode } from "@prisma/client";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
@@ -5,15 +6,15 @@ import { requireUserId } from "~/utils/session.server";
 import {
   extractAsNonEmptyStringOrUndefined,
   extractParams,
+  Serialized,
 } from "~/utils/type";
 
 type LoaderData = {
-  workId: number;
-  count: number;
-  publishedAt: string;
-  work: { title: string };
-  WatchedEpisodesOnUser: { comment: string | null }[];
-} | null;
+  episode: Episode & {
+    work: { title: string };
+    WatchedEpisodesOnUser: { comment: string | null }[];
+  };
+};
 export const loader = async ({
   params,
 }: DataFunctionArgs): Promise<LoaderData> => {
@@ -31,11 +32,10 @@ export const loader = async ({
     },
   });
   if (episode === null) {
-    return null;
+    throw Error("episode not found");
   }
   return {
-    ...episode,
-    publishedAt: episode?.publishedAt.toISOString(),
+    episode,
   };
 };
 
@@ -80,10 +80,7 @@ export const action = async ({
 };
 
 export default function Episode() {
-  const episode = useLoaderData<LoaderData>();
-  if (episode === null) {
-    return <p>no data</p>;
-  }
+  const { episode } = useLoaderData<Serialized<LoaderData>>();
 
   return (
     <>

@@ -3,12 +3,12 @@ import { DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
+import { Serialized } from "~/utils/type";
 import * as Episode from "../components/Episode";
 
 type LoaderData = {
   subscribedWorks: Work[];
-  recentWatchedEpisodes: (Omit<WatchedEpisodesOnUser, "createdAt"> & {
-    createdAt: string;
+  recentWatchedEpisodes: (WatchedEpisodesOnUser & {
     episode: { work: { title: string } };
   })[];
 };
@@ -27,15 +27,13 @@ export const loader = async ({
   });
   return {
     subscribedWorks,
-    recentWatchedEpisodes: recentWatchedEpisodes.map((e) => {
-      return { ...e, createdAt: e.createdAt.toISOString() };
-    }),
+    recentWatchedEpisodes,
   };
 };
 
 export default function My() {
   const { subscribedWorks, recentWatchedEpisodes } =
-    useLoaderData<LoaderData>();
+    useLoaderData<Serialized<LoaderData>>();
 
   return (
     <>

@@ -13,9 +13,18 @@ import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../../components/WorkCreateForm";
 import { getUserId, requireUserId } from "~/utils/session.server";
-import { extractParams } from "~/utils/type";
+import { extractParams, Serialized } from "~/utils/type";
+import { DataFunctionArgs } from "@remix-run/server-runtime";
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+type LoaderData = {
+  work: Work & { users: SubscribedWorksOnUser[]; episodes: Episode[] };
+  subscribed: boolean;
+  loggedIn: boolean;
+};
+export const loader = async ({
+  request,
+  params,
+}: DataFunctionArgs): Promise<LoaderData> => {
   const userId = (await getUserId(request)) ?? undefined;
   const { workId } = extractParams(params, ["workId"]);
   const work = await db.work.findUnique({
@@ -25,9 +34,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       episodes: { orderBy: { count: "asc" } },
     },
   });
+  if (work === null) {
+    throw Error("work not found");
+  }
   return {
-    ...work,
-    userId: undefined,
+    work,
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
   };
@@ -83,18 +94,11 @@ export const action: ActionFunction = async ({ request, params }) => {
   }
 };
 
-type ClientWork = Omit<Work, "publishedAt"> & {
-  users: SubscribedWorksOnUser[];
-  episodes: Episode[];
-  publishedAt: string;
-  subscribed: boolean;
-  loggedIn: boolean;
-};
-
 export default function Work() {
   const [editMode, setEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, ...work } = useLoaderData<ClientWork>();
+  const { loggedIn, work, subscribed } =
+    useLoaderData<Serialized<LoaderData>>();
   const defaultValueMap: WorkCreateForm.Props = {
     title: { defaultValue: work.title ?? "" },
     publishedAt: {
@@ -117,7 +121,7 @@ export default function Work() {
         <>
           {loggedIn && (
             <Form method="post">
-              {work.subscribed ? (
+              {subscribed ? (
                 <button name="_action" value="unsubscribe">
                   unsubscribe
                 </button>

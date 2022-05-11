@@ -2,13 +2,7 @@ import { Outlet } from "remix";
 
 import { Episode, Prisma, SubscribedWorksOnUser, Work } from "@prisma/client";
 import { useCallback, useState } from "react";
-import {
-  ActionFunction,
-  Form,
-  json,
-  Link,
-  useLoaderData,
-} from "remix";
+import { ActionFunction, Form, json, Link, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../components/WorkCreateForm";
@@ -49,6 +43,17 @@ export const action: ActionFunction = async ({ request, params }) => {
   const workId = parseInt(_workId, 10);
 
   const formData = await request.formData();
+  if (formData.get("_action") === "delete") {
+    const { count: _count } = extractParams(Object.fromEntries(formData), [
+      "count",
+    ]);
+    const count = parseInt(_count, 10);
+    await db.episode.delete({ where: { workId_count: { workId, count } } });
+    await db.episode.updateMany({
+      where: { count: { gt: count } },
+      data: { count: { decrement: 1 } },
+    });
+  }
   if (formData.get("_action") === "addEpisodes") {
     const {
       startDate,
@@ -190,7 +195,18 @@ export default function Work() {
                       <td>
                         {new Date(episode.publishedAt).toLocaleDateString()}
                       </td>
-                      <td>hoge</td>
+                      <td>
+                        <Form method="post">
+                          <input
+                            type="hidden"
+                            name="count"
+                            value={episode.count}
+                          />
+                          <button type="submit" name="_action" value="delete">
+                            削除
+                          </button>
+                        </Form>
+                      </td>
                     </tr>
                   );
                 })}

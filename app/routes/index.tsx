@@ -5,7 +5,7 @@ import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
 import { Episode as EpisodeType } from "@prisma/client";
-import * as Episode from "../components/Episode";
+import * as Episode from "../components/Episode/Episode";
 import { Serialized } from "~/utils/type";
 
 type LoaderData = {

@@ -1,17 +1,27 @@
 import { Outlet } from "remix";
 
-import { Episode, Prisma, SubscribedWorksOnUser, Work } from "@prisma/client";
+import {
+  Episode,
+  Prisma,
+  SubscribedWorksOnUser,
+  WatchedEpisodesOnUser,
+  Work,
+} from "@prisma/client";
 import { useCallback, useState } from "react";
 import { ActionFunction, Form, json, Link, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../components/WorkCreateForm";
+import * as EpisodeWatchOrUnwatchForm from "../../components/Episode/EpisodeWatchOrUnwatchForm";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
 
 type LoaderData = {
-  work: Work & { users: SubscribedWorksOnUser[]; episodes: Episode[] };
+  work: Work & {
+    users: SubscribedWorksOnUser[];
+    episodes: (Episode & { WatchedEpisodesOnUser: { createdAt: Date }[] })[];
+  };
   subscribed: boolean;
   loggedIn: boolean;
 };
@@ -25,7 +35,15 @@ export const loader = async ({
     where: { id: parseInt(workId, 10) },
     include: {
       users: { where: { userId } },
-      episodes: { orderBy: { count: "asc" } },
+      episodes: {
+        orderBy: { count: "asc" },
+        include: {
+          WatchedEpisodesOnUser: {
+            where: { userId },
+            select: { createdAt: true },
+          },
+        },
+      },
     },
   });
   if (work === null) {
@@ -194,6 +212,16 @@ export default function Work() {
                       </td>
                       <td>
                         {new Date(episode.publishedAt).toLocaleDateString()}
+                      </td>
+                      <td>
+                        <EpisodeWatchOrUnwatchForm.Component
+                          workId={episode.workId}
+                          count={episode.count}
+                          watched={
+                            episode.WatchedEpisodesOnUser[0] !== undefined
+                          }
+                          withComment={false}
+                        />
                       </td>
                       <td>
                         <Form method="post">

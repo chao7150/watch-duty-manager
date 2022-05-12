@@ -4,7 +4,7 @@ import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { Serialized } from "~/utils/type";
-import * as Episode from "../components/Episode";
+import * as Episode from "../components/Episode/Episode";
 
 type LoaderData = {
   subscribedWorks: Work[];

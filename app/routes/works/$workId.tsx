@@ -194,7 +194,11 @@ export default function Work() {
                 </a>
               </dd>
               <dt>ハッシュタグ</dt>
-              <dd>#{work.hashtag}</dd>
+              <dd>
+                <a href={`https://twitter.com/hashtag/${work.hashtag}`}>
+                  #{work.hashtag}
+                </a>
+              </dd>
             </dl>
             <section>
               <h3>登録済みの話数</h3>

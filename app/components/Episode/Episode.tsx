@@ -1,5 +1,7 @@
 import { Link, useFetcher } from "remix";
 
+import * as EpisodeActoinMenu from "./EpisodeActionMenu";
+
 type InformationProps = {
   workId: number;
   title: string;
@@ -38,18 +40,13 @@ const New: React.VFC<NewProps> = ({ workId, title, count, publishedAt }) => {
         count={count}
         publishedAt={publishedAt}
       />
-      <fetcher.Form method="post" action={`/works/${workId}/${count}?index`}>
-        <details>
-          <summary></summary>
-          <label>
-            コメント
-            <textarea name="comment"></textarea>
-          </label>
-        </details>
-        <button type="submit" name="_action" value="watch">
-          watch
-        </button>
-      </fetcher.Form>
+      <EpisodeActoinMenu.Component
+        {...{
+          workId,
+          count,
+          watched: false,
+        }}
+      />
     </div>
   );
 };

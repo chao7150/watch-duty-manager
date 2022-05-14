@@ -70,6 +70,29 @@ export const action: ActionFunction = async ({ request, params }) => {
   const workId = parseInt(_workId, 10);
 
   const formData = await request.formData();
+  if (formData.get("_action") === "watchUpTo") {
+    const userId = await requireUserId(request);
+    const { upToCount: _upToCount } = extractParams(
+      Object.fromEntries(formData),
+      ["upToCount"]
+    );
+    const upToCount = parseInt(_upToCount, 10);
+    const alreadyWatchedCounts = (
+      await db.watchedEpisodesOnUser.findMany({
+        where: { workId, userId },
+        select: { count: true },
+      })
+    ).map((w) => w.count);
+    await db.watchedEpisodesOnUser.createMany({
+      data: Array.from({ length: upToCount })
+        .map((_, index) => index + 1)
+        .filter((count) => !alreadyWatchedCounts.includes(count))
+        .map((count) => {
+          return { workId, count, createdAt: new Date(), userId };
+        }),
+    });
+    return null;
+  }
   if (formData.get("_action") === "delete") {
     const { count: _count } = extractParams(Object.fromEntries(formData), [
       "count",
@@ -262,7 +285,6 @@ export default function Work() {
                           watched={
                             episode.WatchedEpisodesOnUser[0] !== undefined
                           }
-                          withComment={false}
                         />
                       </td>
                       <td>

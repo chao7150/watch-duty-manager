@@ -1,4 +1,4 @@
-import { Form, useFetcher } from "remix";
+import { useFetcher } from "remix";
 import * as EpisodeWatchOrUnwatchForm from "./EpisodeWatchOrUnwatchForm";
 
 export type Props = {
@@ -10,7 +10,7 @@ export type Props = {
 export const Component: React.VFC<Props> = (props) => {
   const fetcher = useFetcher();
   return (
-    <div>
+    <div className="episode-action-menu">
       <EpisodeWatchOrUnwatchForm.Component {...props} />
       <details>
         <summary>
@@ -42,7 +42,6 @@ export const Component: React.VFC<Props> = (props) => {
               action={`/works/${props.workId}/${props.count}?index`}
             >
               <label>
-                コメント
                 <textarea name="comment"></textarea>
               </label>
               <button type="submit" name="_action" value="watch">

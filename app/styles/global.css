@@ -211,3 +211,11 @@ input:where([type="search"]) {
   margin-top: 0;
   margin-bottom: 0;
 }
+
+.episode-action-menu {
+  display: flex;
+}
+
+.episode-action-menu summary { 
+  list-style-type: none; 
+}

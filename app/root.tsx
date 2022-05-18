@@ -14,6 +14,7 @@ import {
 import type { LinksFunction } from "remix";
 
 import globalStylesUrl from "~/styles/global.css";
+import sharedStylesUrl from "~/styles/shared.css";
 import darkStylesUrl from "~/styles/dark.css";
 import { getUserId } from "./utils/session.server";
 
@@ -21,6 +22,7 @@ import { getUserId } from "./utils/session.server";
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: globalStylesUrl },
+    { rel: "stylesheet", href: sharedStylesUrl },
     {
       rel: "stylesheet",
       href: darkStylesUrl,
@@ -124,7 +126,7 @@ function Document({
 }
 
 export const loader: LoaderFunction = ({ request }) => {
-  const userId = getUserId(request) ;
+  const userId = getUserId(request);
   return userId;
 };
 

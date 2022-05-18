@@ -76,18 +76,6 @@ input:where([type="search"]) {
   color: var(--color-foreground);
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
 .container {
   --gutter: 16px;
   width: 1024px;
@@ -196,26 +184,4 @@ input:where([type="search"]) {
 
 .remix__page > aside > :last-child {
   margin-bottom: 0;
-}
-
-.remix__form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-}
-
-.remix__form > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.episode-action-menu {
-  display: flex;
-}
-
-.episode-action-menu summary { 
-  list-style-type: none; 
 }

@@ -21,6 +21,15 @@ const checkParamsType = <Keys extends string>(
   return true;
 };
 
+export const nonEmptyStringOrUndefined = <Keys extends string>(
+  params: { [key in string]: unknown },
+  keys: Array<Keys>
+): { [Key in Keys]: string | undefined } => {
+  return keys.reduce((acc, key) => {
+    return { ...acc, [key]: extractAsNonEmptyStringOrUndefined(params, key) };
+  }, {} as { [Key in Keys]: string | undefined });
+};
+
 export const extractAsNonEmptyStringOrUndefined = (
   obj: Record<string, unknown>,
   key: string

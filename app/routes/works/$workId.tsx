@@ -13,9 +13,12 @@ import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../../components/WorkCreateForm";
 import * as EpisodeWatchOrUnwatchForm from "../../components/Episode/EpisodeWatchOrUnwatchForm";
+import * as WorkEditForm from "~/components/WorkEditForm";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
 import { DataFunctionArgs, LinksFunction } from "@remix-run/server-runtime";
+import { match } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/function";
 
 export const links: LinksFunction = () => {
   return [
@@ -65,7 +68,12 @@ export const loader = async ({
   };
 };
 
-export const action: ActionFunction = async ({ request, params }) => {
+type ActionData = Response | null;
+
+export const action = async ({
+  request,
+  params,
+}: DataFunctionArgs): Promise<ActionData> => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 
@@ -149,27 +157,13 @@ export const action: ActionFunction = async ({ request, params }) => {
       return json({ errorMessage: "db error" }, { status: 400 });
     }
   }
-  let work: Prisma.WorkCreateInput;
-  try {
-    work = WorkCreateForm.serverValidator(formData);
-  } catch (errorMessage) {
-    return json({ errorMessage }, { status: 400 });
-  }
-
-  try {
-    const returnedWork = await db.work.update({
-      where: { id: workId },
-      data: work,
-    });
-    return json(returnedWork, { status: 200 });
-  } catch {
-    return json(
-      {
-        errorMessage: `work already exists`,
-      },
-      { status: 409 }
-    );
-  }
+  return pipe(
+    await WorkEditForm.serverAction(workId, formData),
+    match(
+      ({ errorMessage, status }) => json({ errorMessage }, { status }),
+      ({ successMessage, status }) => json({ successMessage }, { status })
+    )
+  );
 };
 
 export default function Work() {
@@ -178,11 +172,9 @@ export default function Work() {
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
   const { loggedIn, work, subscribed } =
     useLoaderData<Serialized<LoaderData>>();
-  const defaultValueMap: WorkCreateForm.Props = {
+  const defaultValueMap: WorkEditForm.Props = {
+    workId: work.id,
     title: { defaultValue: work.title ?? "" },
-    publishedAt: {
-      defaultValue: work.publishedAt.slice(0, 7),
-    },
     officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
     twitterId: { defaultValue: work.twitterId ?? "" },
     hashTag: { defaultValue: work.hashtag ?? "" },
@@ -196,7 +188,7 @@ export default function Work() {
         </button>
         <h2>{work.title}</h2>
         {editMode ? (
-          <WorkCreateForm.Component {...defaultValueMap} />
+          <WorkEditForm.Component {...defaultValueMap} />
         ) : (
           <>
             {loggedIn && (

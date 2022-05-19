@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { Form } from "remix";
+import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 import * as TextInput from "../components/TextInput";
 
@@ -21,16 +22,10 @@ export const serverValidator = (
     throw "episodeCount must not be empty";
   }
 
-  const optionalWorkCreateInput = [
-    "officialSiteUrl",
-    "twitterId",
-    "hashtag",
-  ].reduce((acc, key) => {
-    const formDataEntryValue = formData.get(key);
-    const value =
-      typeof formDataEntryValue === "string" ? formDataEntryValue : undefined;
-    return { ...acc, [key]: value };
-  }, {} as { officialSiteUrl?: string; twitterId?: string; hashtag?: string });
+  const optionalWorkCreateInput = nonEmptyStringOrUndefined(
+    Object.fromEntries(formData),
+    ["officialSiteUrl", "twitterid", "hashtag"]
+  );
 
   return {
     title,

@@ -108,7 +108,7 @@ export const action = async ({
     const count = parseInt(_count, 10);
     await db.episode.delete({ where: { workId_count: { workId, count } } });
     await db.episode.updateMany({
-      where: { count: { gt: count } },
+      where: { workId, count: { gt: count } },
       data: { count: { decrement: 1 } },
     });
   }

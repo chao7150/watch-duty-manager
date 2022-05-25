@@ -271,13 +271,15 @@ export default function Work() {
                         {new Date(episode.publishedAt).toLocaleDateString()}
                       </td>
                       <td>
-                        <EpisodeWatchOrUnwatchForm.Component
-                          workId={episode.workId}
-                          count={episode.count}
-                          watched={
-                            episode.WatchedEpisodesOnUser[0] !== undefined
-                          }
-                        />
+                        {new Date(episode.publishedAt) < new Date() && (
+                          <EpisodeWatchOrUnwatchForm.Component
+                            workId={episode.workId}
+                            count={episode.count}
+                            watched={
+                              episode.WatchedEpisodesOnUser[0] !== undefined
+                            }
+                          />
+                        )}
                       </td>
                       <td>
                         <Form method="post">

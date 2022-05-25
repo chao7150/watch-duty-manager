@@ -31,7 +31,6 @@ const Information: React.VFC<InformationProps> = ({
 
 export type NewProps = InformationProps;
 const New: React.VFC<NewProps> = ({ workId, title, count, publishedAt }) => {
-  const fetcher = useFetcher();
   return (
     <div>
       <Information

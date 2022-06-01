@@ -8,6 +8,7 @@ services:
     env_file: ../.env
     environment:
       DATABASE_URL: mysql://masaki:tsuji@db:3306/watch-duty-manager?schema=public
+      TZ: Asia/Tokyo
     ports:
       - "3000:3000"
     depends_on:

@@ -2,16 +2,13 @@ import { Outlet } from "remix";
 
 import {
   Episode,
-  Prisma,
   SubscribedWorksOnUser,
-  WatchedEpisodesOnUser,
   Work,
 } from "@prisma/client";
 import { useCallback, useState } from "react";
-import { ActionFunction, Form, json, Link, useLoaderData } from "remix";
+import { Form, json, Link, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 
-import * as WorkCreateForm from "../../components/WorkCreateForm";
 import * as EpisodeWatchOrUnwatchForm from "../../components/Episode/EpisodeWatchOrUnwatchForm";
 import * as WorkEditForm from "~/components/WorkEditForm";
 import { getUserId, requireUserId } from "~/utils/session.server";
@@ -106,11 +103,15 @@ export const action = async ({
       "count",
     ]);
     const count = parseInt(_count, 10);
-    await db.episode.delete({ where: { workId_count: { workId, count } } });
-    await db.episode.updateMany({
-      where: { workId, count: { gt: count } },
-      data: { count: { decrement: 1 } },
-    });
+    await db.$transaction([
+      db.episode.delete({
+        where: { workId_count: { workId, count } },
+      }),
+      db.episode.updateMany({
+        where: { workId, count: { gt: count } },
+        data: { count: { decrement: 1 } },
+      }),
+    ]);
   }
   if (formData.get("_action") === "addEpisodes") {
     const {

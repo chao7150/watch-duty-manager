@@ -83,7 +83,7 @@ export default function Episode() {
   const { episode } = useLoaderData<Serialized<LoaderData>>();
 
   return (
-    <>
+    <div>
       <dl>
         <dt>作品名</dt>
         <dd>{episode.work.title}</dd>
@@ -101,6 +101,6 @@ export default function Episode() {
           );
         })}
       </ul>
-    </>
+    </div>
   );
 }

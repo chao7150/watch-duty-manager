@@ -1,10 +1,6 @@
 import { Outlet } from "remix";
 
-import {
-  Episode,
-  SubscribedWorksOnUser,
-  Work,
-} from "@prisma/client";
+import { Episode, SubscribedWorksOnUser, Work } from "@prisma/client";
 import { useCallback, useState } from "react";
 import { Form, json, Link, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
@@ -308,26 +304,25 @@ export default function Work() {
           <Form method="post">
             <ul>
               <li>
-                <input
-                  type="hidden"
-                  name="publishedAtOffset"
-                  value={work.episodes[work.episodes.length - 1].publishedAt}
-                />
                 <label>
                   開始日時
                   <input
                     type="datetime-local"
                     name="startDate"
-                    defaultValue={new Date(
-                      Math.max(
-                        ...work.episodes.map((e) =>
-                          new Date(e.publishedAt).getTime()
-                        )
-                      ) +
-                        1000 * 60 * 60 * (24 * 7 + 9)
-                    )
-                      .toISOString()
-                      .slice(0, -8)}
+                    defaultValue={
+                      work.episodes.length !== 0
+                        ? new Date(
+                            Math.max(
+                              ...work.episodes.map((e) =>
+                                new Date(e.publishedAt).getTime()
+                              )
+                            ) +
+                              1000 * 60 * 60 * (24 * 7 + 9)
+                          )
+                            .toISOString()
+                            .slice(0, -8)
+                        : undefined
+                    }
                   />
                 </label>
               </li>

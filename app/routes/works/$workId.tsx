@@ -25,7 +25,7 @@ export const links: LinksFunction = () => {
 type LoaderData = {
   work: Work & {
     users: SubscribedWorksOnUser[];
-    episodes: (Episode & { WatchedEpisodesOnUser: { createdAt: Date }[] })[];
+    episodes: (Episode & { WatchedEpisodesOnUser?: { createdAt: Date }[] })[];
   };
   subscribed: boolean;
   loggedIn: boolean;
@@ -42,12 +42,16 @@ export const loader = async ({
       users: { where: { userId } },
       episodes: {
         orderBy: { count: "asc" },
-        include: {
-          WatchedEpisodesOnUser: {
-            where: { userId },
-            select: { createdAt: true },
-          },
-        },
+        ...(userId
+          ? {
+              include: {
+                WatchedEpisodesOnUser: {
+                  where: { userId },
+                  select: { createdAt: true },
+                },
+              },
+            }
+          : {}),
       },
     },
   });
@@ -273,7 +277,9 @@ export default function Work() {
                             workId={episode.workId}
                             count={episode.count}
                             watched={
-                              episode.WatchedEpisodesOnUser[0] !== undefined
+                              episode.WatchedEpisodesOnUser
+                                ? episode.WatchedEpisodesOnUser.length >= 1
+                                : false
                             }
                           />
                         )}

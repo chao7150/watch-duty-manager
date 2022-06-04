@@ -79,7 +79,7 @@ export const Component: React.VFC<Props> = ({
         </li>
         <li>
           <TextInput.Component
-            labelText="ハッシュタグ"
+            labelText="ハッシュタグ（#は不要）"
             name="hashtag"
             {...hashTag}
           />

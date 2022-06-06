@@ -1,5 +1,5 @@
 import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { MetaFunction, useFetcher } from "remix";
+import { MetaFunction } from "remix";
 import { useLoaderData } from "remix";
 import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
@@ -9,9 +9,11 @@ import * as Episode from "../components/Episode/Episode";
 import { Serialized } from "~/utils/type";
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -22,6 +24,7 @@ type LoaderData = {
     work: { title: string };
   })[];
   watchAchievements: { [K: number]: number };
+  dutyAccumulation: { [K: number]: number };
 };
 
 export const loader = async ({
@@ -33,6 +36,7 @@ export const loader = async ({
       userId,
       tickets: [],
       watchAchievements: [],
+      dutyAccumulation: [],
     };
   }
   const tickets = await db.episode.findMany({
@@ -55,7 +59,7 @@ export const loader = async ({
       where: {
         userId,
         createdAt: {
-          gt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
+          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
         },
       },
       orderBy: { createdAt: "desc" },
@@ -73,10 +77,36 @@ export const loader = async ({
     }
     return acc.set(index, 1);
   }, new Map<number, number>());
+  const dutyAccumulation = (
+    await db.episode.findMany({
+      where: {
+        work: {
+          users: { some: { userId } },
+        },
+        publishedAt: {
+          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
+          lte: new Date(),
+        },
+      },
+    })
+  ).reduce((acc, val) => {
+    const JPUnixToday = Math.floor(
+      (new Date().getTime() + 32400000) / 86400000
+    );
+    const JPUnixDate = Math.floor(
+      (val.publishedAt.getTime() + 32400000) / 86400000
+    );
+    const index = JPUnixDate - JPUnixToday; // -7 ~ 0
+    if (acc.has(index)) {
+      return acc.set(index, acc.get(index)! + 1);
+    }
+    return acc.set(index, 1);
+  }, new Map<number, number>());
   return {
     userId,
     tickets,
     watchAchievements: Object.fromEntries(watchAchievements),
+    dutyAccumulation: Object.fromEntries(dutyAccumulation),
   };
 };
 
@@ -90,7 +120,7 @@ export const meta: MetaFunction = () => {
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
-  const { userId, tickets, watchAchievements } =
+  const { userId, tickets, watchAchievements, dutyAccumulation } =
     useLoaderData<Serialized<LoaderData>>();
 
   return userId ? (
@@ -116,14 +146,20 @@ export default function Index() {
         <ResponsiveContainer height={300}>
           <LineChart
             data={Array.from({ length: 8 }).map((_, index) => ({
-              date: index - 7,
-              watchAchievement: watchAchievements[index - 7],
+              date: new Date(
+                Date.now() + 86400000 * (index - 7)
+              ).toLocaleDateString(),
+              watchAchievement: watchAchievements[index - 7] ?? 0,
+              dutyAccumulation: dutyAccumulation[index - 7] ?? 0,
             }))}
           >
             <CartesianGrid />
             <XAxis dataKey="date" />
-            <YAxis />
+            <YAxis tickCount={3} />
+            <Tooltip />
+            <Legend />
             <Line type="monotone" dataKey="watchAchievement" />
+            <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
           </LineChart>
         </ResponsiveContainer>
       </section>

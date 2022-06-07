@@ -27,6 +27,15 @@ type LoaderData = {
   dutyAccumulation: { [K: number]: number };
 };
 
+/**
+ * targetMsが日本標準時の日付で表すと現在から何日前かを返す
+ */
+export const getNormalizedDate = (nowMs: number, targetMs: number) => {
+  const JPUnixToday = Math.floor((nowMs + 32400000) / 86400000);
+  const JPUnixDate = Math.floor((targetMs + 32400000) / 86400000);
+  return JPUnixDate - JPUnixToday;
+};
+
 export const loader = async ({
   request,
 }: DataFunctionArgs): Promise<LoaderData> => {
@@ -65,13 +74,7 @@ export const loader = async ({
       orderBy: { createdAt: "desc" },
     })
   ).reduce((acc, val) => {
-    const JPUnixToday = Math.floor(
-      (new Date().getTime() + 32400000) / 86400000
-    );
-    const JPUnixDate = Math.floor(
-      (val.createdAt.getTime() + 32400000) / 86400000
-    );
-    const index = JPUnixDate - JPUnixToday; // -7 ~ 0
+    const index = getNormalizedDate(Date.now(), val.createdAt.getTime()); // -8 ~ 0
     if (acc.has(index)) {
       return acc.set(index, acc.get(index)! + 1);
     }
@@ -90,13 +93,7 @@ export const loader = async ({
       },
     })
   ).reduce((acc, val) => {
-    const JPUnixToday = Math.floor(
-      (new Date().getTime() + 32400000) / 86400000
-    );
-    const JPUnixDate = Math.floor(
-      (val.publishedAt.getTime() + 32400000) / 86400000
-    );
-    const index = JPUnixDate - JPUnixToday; // -7 ~ 0
+    const index = getNormalizedDate(Date.now(), val.publishedAt.getTime());
     if (acc.has(index)) {
       return acc.set(index, acc.get(index)! + 1);
     }

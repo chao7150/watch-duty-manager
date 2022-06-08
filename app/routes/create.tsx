@@ -1,4 +1,6 @@
 import { Prisma } from "@prisma/client";
+import { isLeft } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import { ActionFunction, json, useActionData } from "remix";
 import { db } from "~/utils/db.server";
 
@@ -6,15 +8,11 @@ import * as WorkCreateForm from "../components/WorkCreateForm";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
-  let work: Prisma.WorkCreateInput;
-  let episodeCount: number;
-  try {
-    const { episodeCount: ec, ...w } = WorkCreateForm.serverValidator(formData);
-    work = w;
-    episodeCount = ec;
-  } catch (errorMessage) {
-    return json({ errorMessage }, { status: 400 });
+  const e = pipe(formData, WorkCreateForm.serverValidator);
+  if (isLeft(e)) {
+    return e.left;
   }
+  const { episodeCount, ...work } = e.right;
   try {
     const returnedWork = await db.work.create({
       data: work,

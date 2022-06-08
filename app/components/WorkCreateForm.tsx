@@ -1,38 +1,58 @@
-import { Prisma } from "@prisma/client";
-import { Form } from "remix";
+import { pipe } from "fp-ts/lib/function";
+import { Either, left, right, chain, bimap } from "fp-ts/Either";
+import { Form, json } from "remix";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 import * as TextInput from "../components/TextInput";
+import { isNonEmptyString } from "~/utils/validator";
 
 export const serverValidator = (
   formData: FormData
-): Prisma.WorkCreateInput & { episodeCount: number } => {
-  const title = formData.get("title");
-  if (typeof title !== "string" || title === "") {
-    throw "title must not be empty";
+): Either<
+  Response,
+  {
+    title: string;
+    publishedAt: Date;
+    episodeCount: number;
+    officialSiteUrl?: string;
+    twitterId?: string;
+    hashtag?: string;
   }
-
-  const publishedAt = formData.get("publishedAt");
-  if (typeof publishedAt !== "string" || publishedAt === "") {
-    throw "publishedAt must not be empty";
-  }
-
-  const episodeCount = formData.get("episodeCount");
-  if (typeof episodeCount !== "string" || episodeCount === "") {
-    throw "episodeCount must not be empty";
-  }
-
-  const optionalWorkCreateInput = nonEmptyStringOrUndefined(
-    Object.fromEntries(formData),
-    ["officialSiteUrl", "twitterid", "hashtag"]
+> => {
+  return pipe(
+    formData,
+    (formData) => {
+      const title = formData.get("title");
+      return isNonEmptyString(title)
+        ? right({ formData, title })
+        : left("title must not be empty");
+    },
+    chain(({ formData, ...rest }) => {
+      const publishedAt = formData.get("publishedAt");
+      return isNonEmptyString(publishedAt)
+        ? right({ formData, publishedAt, ...rest })
+        : left("publishedAt must not be empty");
+    }),
+    chain(({ formData, ...rest }) => {
+      const episodeCount = formData.get("episodeCount");
+      return isNonEmptyString(episodeCount)
+        ? right({ formData, episodeCount, ...rest })
+        : left("episodeCount must not be empty");
+    }),
+    bimap(
+      (l) => json({ errorMessage: l }, { status: 400 }),
+      ({ title, publishedAt, episodeCount, formData }) => ({
+        title,
+        publishedAt: new Date(publishedAt),
+        episodeCount: Number(episodeCount),
+        ...nonEmptyStringOrUndefined(Object.fromEntries(formData), [
+          "officialSiteUrl",
+          "twitterId",
+          "hashtag",
+        ]),
+      })
+    )
   );
-
-  return {
-    title,
-    publishedAt: new Date(publishedAt),
-    ...optionalWorkCreateInput,
-    episodeCount: parseInt(episodeCount, 10),
-  };
 };
 
 export type Props = {

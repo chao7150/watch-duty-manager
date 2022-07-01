@@ -5,3 +5,7 @@
 .episode-action-menu summary { 
   list-style-type: none; 
 }
+
+.work-item-row {
+  display: flex;
+}

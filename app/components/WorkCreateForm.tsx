@@ -55,21 +55,9 @@ export const serverValidator = (
   );
 };
 
-export type Props = {
-  title?: Partial<TextInput.Props>;
-  publishedAt?: { defaultValue: string };
-  officialSiteUrl?: Partial<TextInput.Props>;
-  twitterId?: Partial<TextInput.Props>;
-  hashTag?: Partial<TextInput.Props>;
-};
+export type Props = {};
 
-export const Component: React.VFC<Props> = ({
-  title,
-  publishedAt,
-  officialSiteUrl,
-  twitterId,
-  hashTag,
-}) => {
+export const Component: React.VFC<Props> = () => {
   return (
     <Form method="post">
       <p>
@@ -81,7 +69,6 @@ export const Component: React.VFC<Props> = ({
             labelText="タイトル"
             name="title"
             isRequired={true}
-            {...title}
           />
         </li>
         <li>
@@ -90,7 +77,7 @@ export const Component: React.VFC<Props> = ({
             <abbr title="required" aria-label="required">
               *
             </abbr>
-            <input type="datetime-local" name="publishedAt" {...publishedAt} />
+            <input type="datetime-local" name="publishedAt" />
           </label>
         </li>
         <li>
@@ -108,21 +95,15 @@ export const Component: React.VFC<Props> = ({
           <TextInput.Component
             labelText="公式サイトURL"
             name="officialSiteUrl"
-            {...officialSiteUrl}
           />
         </li>
         <li>
-          <TextInput.Component
-            labelText="ツイッターID"
-            name="twitterId"
-            {...twitterId}
-          />
+          <TextInput.Component labelText="ツイッターID" name="twitterId" />
         </li>
         <li>
           <TextInput.Component
             labelText="ハッシュタグ（#は不要）"
             name="hashtag"
-            {...hashTag}
           />
         </li>
         <li>

@@ -5,14 +5,90 @@ import { json, useActionData } from "remix";
 import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../components/WorkCreateForm";
+import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { DataFunctionArgs } from "@remix-run/server-runtime";
 
-type ActionData = { title: string } | Response;
+type ActionData =
+  | { title: string }
+  | Response
+  | { action: "bulkCreate"; count: number };
 
 export const action = async ({
   request,
 }: DataFunctionArgs): Promise<ActionData> => {
   const formData = await request.formData();
+  if (formData.get("_action") === "bulkCreate") {
+    console.log("hoge");
+    return await pipe(
+      formData,
+      WorkBulkCreateForm.serverValidator,
+      TE.fromEither,
+      TE.chain((works) => {
+        return TE.tryCatch(
+          async () => {
+            await db.work.createMany({
+              data: works.map(({ episodeCount, ...rest }) => rest),
+            });
+            return works;
+          },
+          (e) => {
+            console.log(e);
+            return json(
+              { errorMessage: "works create error" },
+              { status: 500 }
+            );
+          }
+        );
+      }),
+      TE.chain((works) => {
+        return TE.tryCatch(
+          async () => {
+            return {
+              works,
+              returnedWorks: await db.work.findMany({
+                where: { title: { in: works.map((work) => work.title) } },
+              }),
+            };
+          },
+          (e) => json({ errorMessage: "works obtain error" }, { status: 500 })
+        );
+      }),
+      TE.chain(({ works, returnedWorks }) => {
+        return TE.tryCatch(
+          async () => {
+            return await db.episode.createMany({
+              data: works
+                .map((work) => ({
+                  ...work,
+                  id: returnedWorks.find(
+                    (returnedWork) => returnedWork.title === work.title
+                  )!.id,
+                }))
+                .flatMap((combinedWork) =>
+                  Array.from({ length: combinedWork.episodeCount }).map(
+                    (_, index) => {
+                      return {
+                        workId: combinedWork.id,
+                        count: index + 1,
+                        publishedAt: new Date(
+                          combinedWork.publishedAt.getTime() +
+                            1000 * 60 * 60 * 24 * 7 * index
+                        ),
+                      };
+                    }
+                  )
+                ),
+            });
+          },
+          (e) => json({ errorMessage: "episode create error" }, { status: 500 })
+        );
+      }),
+      TE.foldW(
+        (e) => T.of(e),
+        (v) => T.of({ action: "bulkCreate" as const, count: v.count })
+      )
+    )();
+  }
   return await pipe(
     formData,
     WorkCreateForm.serverValidator,
@@ -49,14 +125,14 @@ export const action = async ({
     }),
     TE.foldW(
       (e) => T.of(e),
-      (v) => T.of({ ...v })
+      (v) => T.of(v)
     )
   )();
 };
 
 export default function Create() {
   // HACK: 型付けろ
-  const actionData = useActionData();
+  const actionData = useActionData<ActionData>();
 
   return (
     <>
@@ -66,6 +142,7 @@ export default function Create() {
             `${actionData.title} was successfully submitted.`)}
       </p>
       <div>
+        <WorkBulkCreateForm.Component />
         <WorkCreateForm.Component />
       </div>
     </>

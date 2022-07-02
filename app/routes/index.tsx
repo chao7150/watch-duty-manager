@@ -1,6 +1,5 @@
-import { DataFunctionArgs } from "@remix-run/server-runtime";
-import { MetaFunction } from "remix";
-import { useLoaderData } from "remix";
+import { type DataFunctionArgs } from "@remix-run/server-runtime";
+import { type MetaFunction, useLoaderData } from "remix";
 import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";

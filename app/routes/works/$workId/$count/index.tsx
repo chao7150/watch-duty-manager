@@ -1,5 +1,5 @@
 import { Episode } from "@prisma/client";
-import { DataFunctionArgs } from "@remix-run/server-runtime";
+import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";

@@ -1,4 +1,4 @@
-import { DataFunctionArgs } from "@remix-run/server-runtime";
+import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { redirect } from "remix";

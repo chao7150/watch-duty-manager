@@ -1,5 +1,5 @@
 import { WatchedEpisodesOnUser, Work } from "@prisma/client";
-import { DataFunctionArgs, json } from "@remix-run/server-runtime";
+import { type DataFunctionArgs, json } from "@remix-run/server-runtime";
 import { pipe } from "fp-ts/lib/function";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
@@ -31,7 +31,7 @@ export const loader = async (
             await db.work.findMany({
               where: { users: { some: { userId } } },
             }),
-          (e) =>
+          () =>
             json({ errorMessage: "subscribed works db error" }, { status: 500 })
         ),
         TE.tryCatch(
@@ -44,7 +44,7 @@ export const loader = async (
                 episode: { include: { work: { select: { title: true } } } },
               },
             }),
-          (e) =>
+          () =>
             json(
               { errorMessage: "recently watched episodes db error" },
               { status: 500 }

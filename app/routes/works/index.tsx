@@ -1,5 +1,5 @@
 import { Work, SubscribedWorksOnUser } from "@prisma/client";
-import { DataFunctionArgs } from "@remix-run/server-runtime";
+import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { pipe } from "fp-ts/lib/function";
 import { Link, useLoaderData } from "remix";
 import * as TE from "fp-ts/TaskEither";
@@ -15,7 +15,6 @@ type LoaderData = {
 
 export const loader = async ({
   request,
-  params,
 }: DataFunctionArgs): Promise<LoaderData> => {
   const url = new URL(request.url);
   const releasedDateBegin = url.searchParams.get("releasedDateBegin");
@@ -34,7 +33,7 @@ export const loader = async ({
           });
           return { works, loggedIn: userId !== undefined };
         },
-        (e) => "db error"
+        () => "db error"
       ),
     TE.chain((v) =>
       TE.of({

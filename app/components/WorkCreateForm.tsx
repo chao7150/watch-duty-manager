@@ -1,5 +1,5 @@
 import { pipe } from "fp-ts/lib/function";
-import { Either, left, right, chain, bimap } from "fp-ts/Either";
+import { either } from "fp-ts";
 import { Form, json } from "remix";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
@@ -8,7 +8,7 @@ import { isNonEmptyString } from "~/utils/validator";
 
 export const serverValidator = (
   formData: FormData
-): Either<
+): either.Either<
   Response,
   {
     title: string;
@@ -24,22 +24,22 @@ export const serverValidator = (
     (formData) => {
       const title = formData.get("title");
       return isNonEmptyString(title)
-        ? right({ formData, title })
-        : left("title must not be empty");
+        ? either.right({ formData, title })
+        : either.left("title must not be empty");
     },
-    chain(({ formData, ...rest }) => {
+    either.chain(({ formData, ...rest }) => {
       const publishedAt = formData.get("publishedAt");
       return isNonEmptyString(publishedAt)
-        ? right({ formData, publishedAt, ...rest })
-        : left("publishedAt must not be empty");
+        ? either.right({ formData, publishedAt, ...rest })
+        : either.left("publishedAt must not be empty");
     }),
-    chain(({ formData, ...rest }) => {
+    either.chain(({ formData, ...rest }) => {
       const episodeCount = formData.get("episodeCount");
       return isNonEmptyString(episodeCount)
-        ? right({ formData, episodeCount, ...rest })
-        : left("episodeCount must not be empty");
+        ? either.right({ formData, episodeCount, ...rest })
+        : either.left("episodeCount must not be empty");
     }),
-    bimap(
+    either.bimap(
       (l) => json({ errorMessage: l }, { status: 400 }),
       ({ title, publishedAt, episodeCount, formData }) => ({
         title,
@@ -55,7 +55,7 @@ export const serverValidator = (
   );
 };
 
-export type Props = {};
+export type Props = Record<string, never>;
 
 export const Component: React.VFC<Props> = () => {
   return (

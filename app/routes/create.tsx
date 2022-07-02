@@ -6,7 +6,7 @@ import { db } from "~/utils/db.server";
 
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
-import { DataFunctionArgs } from "@remix-run/server-runtime";
+import { type DataFunctionArgs } from "@remix-run/server-runtime";
 
 type ActionData =
   | { title: string }
@@ -50,7 +50,7 @@ export const action = async ({
               }),
             };
           },
-          (e) => json({ errorMessage: "works obtain error" }, { status: 500 })
+          () => json({ errorMessage: "works obtain error" }, { status: 500 })
         );
       }),
       TE.chain(({ works, returnedWorks }) => {
@@ -80,7 +80,7 @@ export const action = async ({
                 ),
             });
           },
-          (e) => json({ errorMessage: "episode create error" }, { status: 500 })
+          () => json({ errorMessage: "episode create error" }, { status: 500 })
         );
       }),
       TE.foldW(
@@ -99,7 +99,7 @@ export const action = async ({
           returnedWork: await db.work.create({ data: work }),
           episodeCount,
         }),
-        (e) => json({ errorMessage: "work already exists" }, { status: 409 })
+        () => json({ errorMessage: "work already exists" }, { status: 409 })
       );
     }),
     TE.chain(({ returnedWork, episodeCount }) => {
@@ -119,7 +119,7 @@ export const action = async ({
           });
           return returnedWork;
         },
-        (e) =>
+        () =>
           json({ errorMessage: "episode creation failed" }, { status: 500 })
       );
     }),

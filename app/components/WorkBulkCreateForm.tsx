@@ -41,7 +41,7 @@ export const serverValidator = (
   );
 };
 
-export type Props = {};
+export type Props = Record<string, never>;
 
 export const Component: React.VFC<Props> = () => {
   return (

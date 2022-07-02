@@ -3,7 +3,7 @@ import {
   Link,
   Links,
   LiveReload,
-  LoaderFunction,
+  type LoaderFunction,
   Meta,
   Outlet,
   Scripts,

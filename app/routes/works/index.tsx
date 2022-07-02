@@ -15,17 +15,50 @@ type LoaderData = {
 
 export const loader = async ({
   request,
+  params,
 }: DataFunctionArgs): Promise<LoaderData> => {
-  const result = await pipe((await getUserId(request)) ?? undefined, (userId) =>
-    TE.tryCatch(
-      async () => {
-        const works = await db.work.findMany({
-          include: { users: { where: { userId } } },
-          orderBy: { id: "asc" },
-        });
-        return { works, loggedIn: userId !== undefined };
-      },
-      (e) => "db error"
+  const url = new URL(request.url);
+  const releasedDateBegin = url.searchParams.get("releasedDateBegin");
+  const releasedDateEnd = url.searchParams.get("releasedDateEnd");
+  const result = await pipe(
+    (await getUserId(request)) ?? undefined,
+    (userId) =>
+      TE.tryCatch(
+        async () => {
+          const works = await db.work.findMany({
+            include: {
+              users: { where: { userId } },
+              episodes: { where: { count: 1 } },
+            },
+            orderBy: { id: "asc" },
+          });
+          return { works, loggedIn: userId !== undefined };
+        },
+        (e) => "db error"
+      ),
+    TE.chain((v) =>
+      TE.of({
+        ...v,
+        works: v.works.filter((work) => {
+          const firstEpisode = work.episodes[0];
+          if (firstEpisode === undefined) {
+            return false;
+          }
+          const publishedAt = firstEpisode.publishedAt;
+          const beginConditionFullfilled =
+            releasedDateBegin === null ||
+            new Date(
+              new Date(releasedDateBegin).getTime() - 1000 * 60 * 60 * 9
+            ) < publishedAt;
+          const endConditionFullfilled =
+            releasedDateEnd === null ||
+            publishedAt <
+              new Date(
+                new Date(releasedDateEnd).getTime() - 1000 * 60 * 60 * 9
+              );
+          return beginConditionFullfilled && endConditionFullfilled;
+        }),
+      })
     )
   )();
   if (E.isLeft(result)) {

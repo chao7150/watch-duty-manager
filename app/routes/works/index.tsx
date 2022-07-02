@@ -70,22 +70,44 @@ export default function Works() {
   const loaderData = useLoaderData<LoaderData>();
   const { works, loggedIn } = loaderData;
   return (
-    <ul>
-      {works.map((work) => {
-        return (
-          <li key={work.id}>
-            <div className="work-item-row">
-              {loggedIn && (
-                <WorkSubscribeForm.Component
-                  id={work.id.toString()}
-                  subscribing={work.users.length === 1}
-                />
-              )}
-              <Link to={`/works/${work.id}`}>{work.title}</Link>
-            </div>
+    <div>
+      <h2>作品リスト</h2>
+      <section>
+        <ul>
+          <li>
+            <Link to="/works">全て</Link>
           </li>
-        );
-      })}
-    </ul>
+          <li>
+            <Link to="/works?releasedDateBegin=2022-07-01&releasedDateEnd=2022-10-01">
+              2022夏
+            </Link>
+          </li>
+          <li>
+            <Link to="/works?releasedDateBegin=2022-04-01&releasedDateEnd=2022-07-01">
+              2022春
+            </Link>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <ul>
+          {works.map((work) => {
+            return (
+              <li key={work.id}>
+                <div className="work-item-row">
+                  {loggedIn && (
+                    <WorkSubscribeForm.Component
+                      id={work.id.toString()}
+                      subscribing={work.users.length === 1}
+                    />
+                  )}
+                  <Link to={`/works/${work.id}`}>{work.title}</Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </div>
   );
 }

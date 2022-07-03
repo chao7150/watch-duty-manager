@@ -1,4 +1,4 @@
-import { Outlet , Form, json, Link, useLoaderData } from "remix";
+import { Outlet, Form, json, Link, useLoaderData } from "remix";
 
 import { Episode, SubscribedWorksOnUser, Work } from "@prisma/client";
 import { useCallback, useState } from "react";
@@ -6,9 +6,13 @@ import { db } from "~/utils/db.server";
 
 import * as EpisodeWatchOrUnwatchForm from "../../components/Episode/EpisodeWatchOrUnwatchForm";
 import * as WorkEditForm from "~/components/WorkEditForm";
+import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
-import type { DataFunctionArgs, LinksFunction } from "@remix-run/server-runtime";
+import type {
+  DataFunctionArgs,
+  LinksFunction,
+} from "@remix-run/server-runtime";
 import { match } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/function";
 
@@ -192,17 +196,10 @@ export default function Work() {
         ) : (
           <>
             {loggedIn && (
-              <Form method="post">
-                {subscribed ? (
-                  <button name="_action" value="unsubscribe">
-                    unsubscribe
-                  </button>
-                ) : (
-                  <button name="_action" value="subscribe">
-                    subscribe
-                  </button>
-                )}
-              </Form>
+              <WorkSubscribeForm.Component
+                id={work.id.toString()}
+                subscribing={subscribed}
+              />
             )}
             <dl>
               <dt>公式サイト</dt>

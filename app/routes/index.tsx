@@ -20,7 +20,7 @@ import {
 type LoaderData = {
   userId: string | null;
   tickets: (EpisodeType & {
-    work: { title: string };
+    work: { title: string; hashtag: string | null };
   })[];
   watchAchievements: { [K: number]: number };
   dutyAccumulation: { [K: number]: number };
@@ -59,7 +59,7 @@ export const loader = async ({
         },
       ],
     },
-    include: { work: { select: { title: true } } },
+    include: { work: { select: { title: true, hashtag: true } } },
     orderBy: { publishedAt: "desc" },
   });
   const watchAchievements = (
@@ -132,6 +132,7 @@ export default function Index() {
                   title={ticket.work.title}
                   count={ticket.count}
                   publishedAt={ticket.publishedAt}
+                  hashtag={ticket.work.hashtag ?? undefined}
                 />
               </li>
             );

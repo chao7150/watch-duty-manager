@@ -1,6 +1,7 @@
 import { Link, useFetcher } from "remix";
 
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
+import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
 
 type InformationProps = {
   workId: number;
@@ -10,6 +11,7 @@ type InformationProps = {
    * ISO8601
    */
   publishedAt: string;
+  hashtag?: string;
 };
 
 const Information: React.VFC<InformationProps> = ({
@@ -17,6 +19,7 @@ const Information: React.VFC<InformationProps> = ({
   title,
   count,
   publishedAt,
+  hashtag,
 }) => {
   return (
     <>
@@ -24,13 +27,24 @@ const Information: React.VFC<InformationProps> = ({
         <Link to={`/works/${workId}`}>{title}</Link>{" "}
         <Link to={`/works/${workId}/${count}`}>#{count}</Link>
       </h3>
-      <p>{new Date(publishedAt).toLocaleString()}</p>
+      <div className="episode-information-additional-area">
+        <span>{new Date(publishedAt).toLocaleString()}</span>
+        {hashtag !== undefined && hashtag !== "" && (
+          <WorkHashtagCopyButton.Component hashtag={hashtag} />
+        )}
+      </div>
     </>
   );
 };
 
 export type NewProps = InformationProps;
-const New: React.VFC<NewProps> = ({ workId, title, count, publishedAt }) => {
+const New: React.VFC<NewProps> = ({
+  workId,
+  title,
+  count,
+  publishedAt,
+  hashtag,
+}) => {
   return (
     <div>
       <Information
@@ -38,6 +52,7 @@ const New: React.VFC<NewProps> = ({ workId, title, count, publishedAt }) => {
         title={title}
         count={count}
         publishedAt={publishedAt}
+        hashtag={hashtag}
       />
       <EpisodeActoinMenu.Component
         {...{
@@ -57,6 +72,7 @@ const Watched: React.VFC<WatchedProps> = ({
   title,
   count,
   publishedAt,
+  hashtag,
   comment,
 }) => {
   const fetcher = useFetcher();
@@ -67,6 +83,7 @@ const Watched: React.VFC<WatchedProps> = ({
         title={title}
         count={count}
         publishedAt={publishedAt}
+        hashtag={hashtag}
       />
       <fetcher.Form method="post" action={`/works/${workId}/${count}?index`}>
         {comment && (

@@ -9,3 +9,9 @@
 .work-item-row {
   display: flex;
 }
+
+.episode-information-additional-area {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}

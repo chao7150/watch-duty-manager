@@ -4,15 +4,15 @@ import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import {
-  extractAsNonEmptyStringOrUndefined,
   extractParams,
+  nonEmptyStringOrUndefined,
   Serialized,
 } from "~/utils/type";
 
 type LoaderData = {
   episode: Episode & {
     work: { title: string };
-    WatchedEpisodesOnUser: { comment: string | null }[];
+    WatchedEpisodesOnUser: { comment: string | null; rating: number | null }[];
   };
 };
 export const loader = async ({
@@ -28,7 +28,7 @@ export const loader = async ({
     },
     include: {
       work: { select: { title: true } },
-      WatchedEpisodesOnUser: { select: { comment: true } },
+      WatchedEpisodesOnUser: { select: { comment: true, rating: true } },
     },
   });
   if (episode === null) {
@@ -61,7 +61,14 @@ export const action = async ({
     return null;
   }
 
-  const comment = extractAsNonEmptyStringOrUndefined(formData, "comment");
+  const { comment, rating: _rating } = nonEmptyStringOrUndefined(formData, [
+    "comment",
+    "rating",
+  ]);
+  const rating = Number(_rating);
+  if (![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(rating)) {
+    throw new Response("invalid rating", { status: 400 });
+  }
 
   await db.episode.update({
     where: {
@@ -72,7 +79,12 @@ export const action = async ({
     },
     data: {
       WatchedEpisodesOnUser: {
-        create: { userId, comment, createdAt: new Date() },
+        create: {
+          userId,
+          comment,
+          rating: _rating === undefined ? undefined : rating,
+          createdAt: new Date(),
+        },
       },
     },
   });
@@ -96,6 +108,7 @@ export default function Episode() {
         {episode.WatchedEpisodesOnUser.map((w) => {
           return (
             <li key={w.comment}>
+              <p>{w.rating}点</p>
               <p>{w.comment}</p>
             </li>
           );

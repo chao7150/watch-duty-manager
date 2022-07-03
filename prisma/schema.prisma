@@ -52,6 +52,7 @@ model WatchedEpisodesOnUser {
   count     Int
   createdAt DateTime
   comment   String?  @db.Text
+  rating    Int?
 
   @@id(fields: [userId, workId, count])
 }

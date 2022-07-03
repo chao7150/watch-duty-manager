@@ -42,6 +42,30 @@ export const Component: React.VFC<Props> = (props) => {
               action={`/works/${props.workId}/${props.count}?index`}
             >
               <label>
+                rating
+                <input
+                  name="rating"
+                  type="range"
+                  min="0"
+                  max="10"
+                  list="tickmarks"
+                  defaultValue={5}
+                />
+                <datalist id="tickmarks">
+                  <option value="0"></option>
+                  <option value="1"></option>
+                  <option value="2"></option>
+                  <option value="3"></option>
+                  <option value="4"></option>
+                  <option value="5"></option>
+                  <option value="6"></option>
+                  <option value="7"></option>
+                  <option value="8"></option>
+                  <option value="9"></option>
+                  <option value="10"></option>
+                </datalist>
+              </label>
+              <label>
                 <textarea name="comment"></textarea>
               </label>
               <button type="submit" name="_action" value="watch">

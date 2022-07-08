@@ -122,7 +122,9 @@ export default function Index() {
   return userId ? (
     <div className="remix__page">
       <section>
-        <h2>未視聴のエピソード<span>({tickets.length})</span></h2>
+        <h2>
+          未視聴のエピソード<span>({tickets.length})</span>
+        </h2>
         <ul>
           {tickets.map((ticket) => {
             return (
@@ -145,7 +147,7 @@ export default function Index() {
           <LineChart
             data={Array.from({ length: 8 }).map((_, index) => ({
               date: new Date(
-                Date.now() + 86400000 * (index - 7)
+                Date.now() + 86400000 * (index - 7) - 1000 * 3600 * 4  // 4時~28時
               ).toLocaleDateString(),
               watchAchievement: watchAchievements[index - 7] ?? 0,
               dutyAccumulation: dutyAccumulation[index - 7] ?? 0,

@@ -30,8 +30,8 @@ type LoaderData = {
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
  */
 export const getNormalizedDate = (nowMs: number, targetMs: number) => {
-  const JPUnixToday = Math.floor((nowMs + 32400000) / 86400000);
-  const JPUnixDate = Math.floor((targetMs + 32400000) / 86400000);
+  const JPUnixToday = Math.floor((nowMs + 18000000) / 86400000);
+  const JPUnixDate = Math.floor((targetMs + 18000000) / 86400000);
   return JPUnixDate - JPUnixToday;
 };
 
@@ -122,7 +122,7 @@ export default function Index() {
   return userId ? (
     <div className="remix__page">
       <section>
-        <h2>未視聴のエピソード</h2>
+        <h2>未視聴のエピソード<span>({tickets.length})</span></h2>
         <ul>
           {tickets.map((ticket) => {
             return (
@@ -140,6 +140,7 @@ export default function Index() {
         </ul>
       </section>
       <section>
+        <h2>最近のアニメ放送数と視聴数の推移</h2>
         <ResponsiveContainer height={300}>
           <LineChart
             data={Array.from({ length: 8 }).map((_, index) => ({

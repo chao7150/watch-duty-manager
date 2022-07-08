@@ -66,7 +66,10 @@ export const action = async ({
     "rating",
   ]);
   const rating = Number(_rating);
-  if (![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(rating)) {
+  if (
+    _rating !== undefined &&
+    ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(rating)
+  ) {
     throw new Response("invalid rating", { status: 400 });
   }
 

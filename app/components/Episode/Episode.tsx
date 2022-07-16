@@ -1,4 +1,5 @@
 import { Link, useFetcher } from "remix";
+import { get4OriginDate } from "../../utils/date";
 
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
@@ -37,6 +38,19 @@ const Information: React.VFC<InformationProps> = ({
   );
 };
 
+const getStatus = (
+  publishedAt: Date,
+  now: Date
+): "published" | "today" | "tomorrow" => {
+  if (publishedAt < now) {
+    return "published";
+  }
+  if (get4OriginDate(publishedAt) === get4OriginDate(now)) {
+    return "today";
+  }
+  return "tomorrow";
+};
+
 export type NewProps = InformationProps;
 const New: React.VFC<NewProps> = ({
   workId,
@@ -45,8 +59,9 @@ const New: React.VFC<NewProps> = ({
   publishedAt,
   hashtag,
 }) => {
+  const status = getStatus(new Date(publishedAt), new Date());
   return (
-    <div>
+    <div className="episode" data-status={status}>
       <Information
         workId={workId}
         title={title}
@@ -54,13 +69,15 @@ const New: React.VFC<NewProps> = ({
         publishedAt={publishedAt}
         hashtag={hashtag}
       />
-      <EpisodeActoinMenu.Component
-        {...{
-          workId,
-          count,
-          watched: false,
-        }}
-      />
+      {status === "published" && (
+        <EpisodeActoinMenu.Component
+          {...{
+            workId,
+            count,
+            watched: false,
+          }}
+        />
+      )}
     </div>
   );
 };

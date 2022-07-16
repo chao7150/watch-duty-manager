@@ -15,3 +15,21 @@
   gap: 4px;
   align-items: center;
 }
+
+/* https://www.schemecolor.com/various-hues.php */
+
+.episode[data-status="tomorrow"] {
+  background-color: rgba(190, 173, 201, 0.4);
+}
+
+.episode[data-status="today"] {
+  background-color: rgba(250, 214, 214, 0.4);
+}
+
+.episode[data-status="published"] {
+  background-color: rgba(242, 240, 217, 0.4);
+}
+
+.episode-list {
+  list-style: none;
+}

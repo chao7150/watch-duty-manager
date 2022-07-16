@@ -16,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { get4OriginDate } from "~/utils/date";
 
 type LoaderData = {
   userId: string | null;
@@ -123,12 +124,24 @@ export default function Index() {
     <div className="remix__page">
       <section>
         <h2>
-          未視聴のエピソード<span>({tickets.length})</span>
+          未視聴のエピソード
+          <span>
+            (
+            {
+              tickets.filter((ticket) => {
+                return new Date(ticket.publishedAt) < new Date();
+              }).length
+            }
+            )
+          </span>
         </h2>
         <ul>
           {tickets.map((ticket) => {
             return (
-              <li key={`${ticket.workId}-${ticket.count}`}>
+              <li
+                className="episode-list"
+                key={`${ticket.workId}-${ticket.count}`}
+              >
                 <Episode.Component.New
                   workId={ticket.workId}
                   title={ticket.work.title}
@@ -147,7 +160,7 @@ export default function Index() {
           <LineChart
             data={Array.from({ length: 8 }).map((_, index) => ({
               date: new Date(
-                Date.now() + 86400000 * (index - 7) - 1000 * 3600 * 4  // 4時~28時
+                Date.now() + 86400000 * (index - 7) - 1000 * 3600 * 4 // 4時~28時
               ).toLocaleDateString(),
               watchAchievement: watchAchievements[index - 7] ?? 0,
               dutyAccumulation: dutyAccumulation[index - 7] ?? 0,

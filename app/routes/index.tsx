@@ -16,7 +16,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { get4OriginDate } from "~/utils/date";
+import { useUpdate } from "react-use";
+import { useEffect } from "react";
 
 type LoaderData = {
   userId: string | null;
@@ -117,6 +118,11 @@ export const meta: MetaFunction = () => {
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
+  const update = useUpdate();
+  useEffect(() => {
+    const timerId = setInterval(update, 1000 * 60 * 5);
+    return () => clearInterval(timerId);
+  });
   const { userId, tickets, watchAchievements, dutyAccumulation } =
     useLoaderData<Serialized<LoaderData>>();
 

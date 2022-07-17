@@ -9,6 +9,7 @@ import * as Episode from "../components/Episode/Episode";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import { sequenceT } from "fp-ts/lib/Apply";
+import * as WorkUI from "~/components/Work/Work";
 
 type LoaderData = {
   subscribedWorks: Work[];
@@ -27,9 +28,15 @@ export const loader = async (
     TE.chain(({ userId }: { userId: string }) =>
       sequenceT(TE.ApplyPar)(
         TE.tryCatch(
+          // subscribe中
+          // かつ
+          // 未放送のepisodeが1つ以上存在する作品
           async () =>
             await db.work.findMany({
-              where: { users: { some: { userId } } },
+              where: {
+                users: { some: { userId } },
+                episodes: { some: { publishedAt: { lte: new Date() } } },
+              },
             }),
           () =>
             json({ errorMessage: "subscribed works db error" }, { status: 500 })
@@ -64,12 +71,21 @@ export default function My() {
     useLoaderData<Serialized<LoaderData>>();
 
   return (
-    <>
+    <div className="remix__page">
       <section>
-        <h2>視聴中のアニメ</h2>
+        <h2>
+          放送中で視聴中のアニメ<span>({subscribedWorks.length})</span>
+        </h2>
         <ul>
           {subscribedWorks.map((work) => (
-            <li key={work.id}>{work.title}</li>
+            <li key={work.id}>
+              <WorkUI.Component
+                loggedIn={true}
+                id={work.id.toString()}
+                title={work.title}
+                subscribed={true}
+              />
+            </li>
           ))}
         </ul>
       </section>
@@ -89,6 +105,6 @@ export default function My() {
           ))}
         </ul>
       </section>
-    </>
+    </div>
   );
 }

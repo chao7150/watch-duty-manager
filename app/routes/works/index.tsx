@@ -1,4 +1,4 @@
-import { Work, SubscribedWorksOnUser } from "@prisma/client";
+import { Work as WorkModel, SubscribedWorksOnUser } from "@prisma/client";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { pipe } from "fp-ts/lib/function";
 import { Link, useLoaderData } from "remix";
@@ -6,10 +6,10 @@ import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
-import * as WorkSubscribeForm from "../../components/Work/WorkSubscribeForm";
+import * as WorkUI from "~/components/Work/Work";
 
 type LoaderData = {
-  works: (Work & { users: SubscribedWorksOnUser[] })[];
+  works: (WorkModel & { users: SubscribedWorksOnUser[] })[];
   loggedIn: boolean;
 };
 
@@ -90,19 +90,16 @@ export default function Works() {
         </ul>
       </section>
       <section>
-        <ul>
+        <ul className="work-list">
           {works.map((work) => {
             return (
               <li key={work.id}>
-                <div className="work-item-row">
-                  {loggedIn && (
-                    <WorkSubscribeForm.Component
-                      id={work.id.toString()}
-                      subscribing={work.users.length === 1}
-                    />
-                  )}
-                  <Link to={`/works/${work.id}`}>{work.title}</Link>
-                </div>
+                <WorkUI.Component
+                  loggedIn={loggedIn}
+                  id={work.id.toString()}
+                  title={work.title}
+                  subscribed={work.users.length === 1}
+                />
               </li>
             );
           })}

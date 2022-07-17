@@ -1,3 +1,28 @@
+.icon-button {
+  padding: 2px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  cursor: pointer;
+  background-color: white;
+}
+
+.subscribe-button {
+  background-color: rgba(250, 214, 214, 0.4);
+}
+
+.subscribe-button:hover {
+  background-color: rgba(146, 197, 186);
+}
+
+.unsubscribe-button {
+  background-color: rgba(146, 197, 186, 0.4);
+}
+
+.unsubscribe-button:hover {
+  background-color: rgba(250, 214, 214);
+}
+
 .episode-action-menu {
   display: flex;
 }
@@ -6,8 +31,19 @@
   list-style-type: none; 
 }
 
-.work-item-row {
+.work {
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.work-list {
+  list-style: none;
+}
+
+.work-list > li:not(:first-child) {
+  margin-top: 4px;
 }
 
 .episode-information-additional-area {

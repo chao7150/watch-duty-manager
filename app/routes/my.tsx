@@ -35,7 +35,7 @@ export const loader = async (
             await db.work.findMany({
               where: {
                 users: { some: { userId } },
-                episodes: { some: { publishedAt: { lte: new Date() } } },
+                episodes: { some: { publishedAt: { gte: new Date() } } },
               },
             }),
           () =>

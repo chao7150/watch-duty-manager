@@ -6,12 +6,12 @@
     {
       "label": "docker compose up",
       "type": "shell",
-      "command": "sudo docker-compose -f docker/docker-compose.local.yml up --build"
+      "command": "sudo docker compose -f docker/docker-compose.local.yml up --build"
     },
     {
       "label": "docker start db",
       "type": "shell",
-      "command": "sudo docker-compose -f docker/docker-compose.local.yml up -d db"
+      "command": "sudo docker compose -f docker/docker-compose.local.yml up -d db"
     }
   ]
 }

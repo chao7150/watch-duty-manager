@@ -116,6 +116,22 @@ export const meta: MetaFunction = () => {
   };
 };
 
+export const setOldestOfWork = <T extends { workId: number }>(
+  tickets: T[]
+): Array<T & { watchReady: boolean }> => {
+  const s = new Set<number>();
+  return tickets
+    .reverse()
+    .map((t) => {
+      if (s.has(t.workId)) {
+        return { ...t, watchReady: false };
+      }
+      s.add(t.workId);
+      return { ...t, watchReady: true };
+    })
+    .reverse();
+};
+
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
   const update = useUpdate();
@@ -142,7 +158,7 @@ export default function Index() {
           </span>
         </h2>
         <ul>
-          {tickets.map((ticket) => {
+          {setOldestOfWork(tickets).map((ticket) => {
             return (
               <li
                 className="episode-list"
@@ -154,6 +170,7 @@ export default function Index() {
                   count={ticket.count}
                   publishedAt={ticket.publishedAt}
                   hashtag={ticket.work.hashtag ?? undefined}
+                  watchReady={ticket.watchReady}
                 />
               </li>
             );

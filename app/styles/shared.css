@@ -23,6 +23,21 @@
   background-color: rgba(250, 214, 214);
 }
 
+.icon {
+  width: 24px;
+  height: 24px;
+  border: none;
+}
+
+.episode-heading {
+  display: flex;
+  align-items: center;
+}
+
+.episode-heading > * + * {
+  margin-left: 0.25em;
+}
+
 .episode-action-menu {
   display: flex;
 }

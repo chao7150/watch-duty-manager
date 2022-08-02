@@ -3,6 +3,7 @@ import { get4OriginDate } from "../../utils/date";
 
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
+import * as EpisodeWatchNotReadyIcon from "./EpisodeWatchNotReadyIcon";
 
 type InformationProps = {
   workId: number;
@@ -13,6 +14,7 @@ type InformationProps = {
    */
   publishedAt: string;
   hashtag?: string;
+  watchReady?: boolean;
 };
 
 const Information: React.VFC<InformationProps> = ({
@@ -21,12 +23,22 @@ const Information: React.VFC<InformationProps> = ({
   count,
   publishedAt,
   hashtag,
+  watchReady,
 }) => {
   return (
-    <>
-      <h3>
-        <Link to={`/works/${workId}`}>{title}</Link>{" "}
-        <Link to={`/works/${workId}/${count}`}>#{count}</Link>
+    <div className="episode">
+      <h3 className="episode-heading">
+        <div>
+          <Link to={`/works/${workId}`}>{title}</Link>
+        </div>
+        <div>
+          <Link to={`/works/${workId}/${count}`}>#{count}</Link>
+        </div>
+        {watchReady === false && (
+          <div className="icon" title="まだ前の話数を見ていません">
+            <EpisodeWatchNotReadyIcon.Component />
+          </div>
+        )}
       </h3>
       <div className="episode-information-additional-area">
         <span>{new Date(publishedAt).toLocaleString()}</span>
@@ -34,7 +46,7 @@ const Information: React.VFC<InformationProps> = ({
           <WorkHashtagCopyButton.Component hashtag={hashtag} />
         )}
       </div>
-    </>
+    </div>
   );
 };
 
@@ -58,6 +70,7 @@ const New: React.VFC<NewProps> = ({
   count,
   publishedAt,
   hashtag,
+  watchReady,
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
@@ -68,6 +81,7 @@ const New: React.VFC<NewProps> = ({
         count={count}
         publishedAt={publishedAt}
         hashtag={hashtag}
+        watchReady={watchReady}
       />
       {status === "published" && (
         <EpisodeActoinMenu.Component

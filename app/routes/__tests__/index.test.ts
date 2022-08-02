@@ -1,5 +1,5 @@
-import { expect, test } from "vitest";
-import { getNormalizedDate } from "..";
+import { describe, expect, it, test } from "vitest";
+import { getNormalizedDate, setOldestOfWork } from "..";
 
 const possibleOldest = new Date("2022-06-01T22:00:00+0900"); // 入力の最小値
 const yesterday4Am = new Date("2022-06-08T04:00:00+0900");
@@ -23,4 +23,16 @@ test("", () => {
   expect(
     getNormalizedDate(today4Am.getTime() - 1, yesterday4Am.getTime())
   ).toBe(0);
+});
+
+describe("setLatestOfWork", () => {
+  it("ticketのうち同一のworkIdを持つものの中で一番若い話数ではない話数にはlatestOfWorkがtrue", () => {
+    expect(
+      setOldestOfWork([{ workId: 1 }, { workId: 2 }, { workId: 1 }])
+    ).toStrictEqual([
+      { workId: 1, watchReady: false },
+      { workId: 2, watchReady: true },
+      { workId: 1, watchReady: true },
+    ]);
+  });
 });

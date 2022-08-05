@@ -16,7 +16,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useUpdate } from "react-use";
 import { useEffect } from "react";
 
 type LoaderData = {
@@ -134,9 +133,10 @@ export const setOldestOfWork = <T extends { workId: number }>(
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
-  const update = useUpdate();
   useEffect(() => {
-    const timerId = setInterval(update, 1000 * 60 * 5);
+    const timerId = setInterval(() => {
+      window.location.reload();
+    }, 1000 * 60 * 5);
     return () => clearInterval(timerId);
   });
   const { userId, tickets, watchAchievements, dutyAccumulation } =

@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import { useEffect } from "react";
+import { startOfQuarter } from "date-fns";
 
 type LoaderData = {
   userId: string | null;
@@ -25,6 +26,7 @@ type LoaderData = {
   })[];
   watchAchievements: { [K: number]: number };
   dutyAccumulation: { [K: number]: number };
+  quarter: { [K: string]: { duty: number; watch: number } };
 };
 
 /**
@@ -46,19 +48,16 @@ export const loader = async ({
       tickets: [],
       watchAchievements: [],
       dutyAccumulation: [],
+      quarter: {},
     };
   }
   const tickets = await db.episode.findMany({
     where: {
-      AND: [
-        { work: { users: { some: { userId } } } },
-        { WatchedEpisodesOnUser: { none: { userId } } },
-        {
-          publishedAt: {
-            lte: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
-          },
-        },
-      ],
+      work: { users: { some: { userId } } },
+      WatchedEpisodesOnUser: { none: { userId } },
+      publishedAt: {
+        lte: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
+      },
     },
     include: { work: { select: { title: true, hashtag: true } } },
     orderBy: { publishedAt: "desc" },
@@ -99,11 +98,71 @@ export const loader = async ({
     }
     return acc.set(index, 1);
   }, new Map<number, number>());
+  const quarterDuties = await db.episode.findMany({
+    where: {
+      work: {
+        users: { some: { userId } },
+      },
+      publishedAt: {
+        gte: new Date(
+          startOfQuarter(new Date()).getTime() + 1000 * 60 * 60 * 4
+        ),
+        lte: new Date(),
+      },
+    },
+  });
+  const _quarterWatchAchievements = await db.watchedEpisodesOnUser.findMany({
+    where: {
+      episode: {
+        publishedAt: {
+          gte: new Date(
+            startOfQuarter(new Date()).getTime() + 1000 * 60 * 60 * 4
+          ),
+          lte: new Date(),
+        },
+        work: { users: { some: { userId } } },
+      },
+      userId,
+    },
+  });
+  const quarterWatchAchievements = _quarterWatchAchievements.reduce(
+    (acc, val) => {
+      const index = new Date(
+        val.createdAt.getTime() - 1000 * 60 * 60 * 4
+      ).toLocaleDateString();
+      if (acc.has(index)) {
+        return acc.set(index, acc.get(index)! + 1);
+      }
+      return acc.set(index, 1);
+    },
+    new Map<string, number>()
+  );
+  const quarterDutyAccumulation = quarterDuties.reduce((acc, val) => {
+    const index = new Date(
+      val.publishedAt.getTime() - 1000 * 60 * 60 * 4
+    ).toLocaleDateString();
+    if (acc.has(index)) {
+      return acc.set(index, acc.get(index)! + 1);
+    }
+    return acc.set(index, 1);
+  }, new Map<string, number>());
+  const quarter = new Map<string, { duty: number; watch: number }>();
+  quarterDutyAccumulation.forEach((v, k) => {
+    quarter.set(k, { duty: v, watch: 0 });
+  });
+  quarterWatchAchievements.forEach((v, k) => {
+    if (quarter.has(k)) {
+      quarter.set(k, { duty: quarter.get(k)!.duty, watch: v });
+    } else {
+      quarter.set(k, { duty: 0, watch: v });
+    }
+  });
   return {
     userId,
     tickets,
     watchAchievements: Object.fromEntries(watchAchievements),
     dutyAccumulation: Object.fromEntries(dutyAccumulation),
+    quarter: Object.fromEntries(quarter),
   };
 };
 
@@ -139,8 +198,25 @@ export default function Index() {
     }, 1000 * 60 * 5);
     return () => clearInterval(timerId);
   });
-  const { userId, tickets, watchAchievements, dutyAccumulation } =
+  const { userId, tickets, watchAchievements, dutyAccumulation, quarter } =
     useLoaderData<Serialized<LoaderData>>();
+
+  const q = Object.entries(quarter)
+    .map(([v, k]) => ({ ...k, date: v }))
+    .sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  const currentSum = { duty: 0, watch: 0 };
+  const qq: Array<{ date: string; duty: number; watch: number }> = [];
+  q.forEach((c) => {
+    qq.push({
+      date: c.date,
+      duty: c.duty + currentSum.duty,
+      watch: c.watch + currentSum.watch,
+    });
+    currentSum.duty = c.duty + currentSum.duty;
+    currentSum.watch = c.watch + currentSum.watch;
+  });
 
   return userId ? (
     <div className="remix__page">
@@ -196,6 +272,17 @@ export default function Index() {
             <Legend />
             <Line type="monotone" dataKey="watchAchievement" />
             <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
+          </LineChart>
+        </ResponsiveContainer>
+        <ResponsiveContainer height={300}>
+          <LineChart data={qq}>
+            <CartesianGrid />
+            <XAxis dataKey="date" />
+            <YAxis tickCount={5} />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="watch" />
+            <Line type="monotone" stroke="red" dataKey="duty" />
           </LineChart>
         </ResponsiveContainer>
       </section>

@@ -3,7 +3,7 @@ import { type MetaFunction, useLoaderData } from "remix";
 import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
-import { Episode as EpisodeType } from "@prisma/client";
+import { Episode as EpisodeType, Prisma, PrismaClient } from "@prisma/client";
 import * as Episode from "../components/Episode/Episode";
 import { Serialized } from "~/utils/type";
 import {
@@ -17,7 +17,10 @@ import {
   YAxis,
 } from "recharts";
 import { useEffect } from "react";
-import { startOfQuarter } from "date-fns";
+import { getHours, setHours, startOfQuarter, subDays } from "date-fns";
+import { taskEither as TE, task as T, string } from "fp-ts";
+import { sequenceS } from "fp-ts/lib/Apply";
+import { startOf4OriginDay } from "~/utils/date";
 
 type LoaderData = {
   userId: string | null;
@@ -38,6 +41,139 @@ export const getNormalizedDate = (nowMs: number, targetMs: number) => {
   return JPUnixDate - JPUnixToday;
 };
 
+export const countOccurrence = (items: Array<string>): Map<string, number> => {
+  return items.reduce((acc, val) => {
+    const v = acc.get(val);
+    if (v === undefined) {
+      return acc.set(val, 1);
+    }
+    return acc.set(val, v + 1);
+  }, new Map<string, number>());
+};
+
+const getTickets = ({
+  db,
+  userId,
+  publishedUntilDate,
+}: {
+  db: PrismaClient;
+  userId: string;
+  publishedUntilDate: Date;
+}) =>
+  TE.tryCatch(
+    async () => {
+      return await db.episode.findMany({
+        where: {
+          work: { users: { some: { userId } } },
+          WatchedEpisodesOnUser: { none: { userId } },
+          publishedAt: {
+            lte: publishedUntilDate,
+          },
+        },
+        include: { work: { select: { title: true, hashtag: true } } },
+        orderBy: { publishedAt: "desc" },
+      });
+    },
+    (e) => {
+      return { errorMessage: "tickets db error" };
+    }
+  );
+
+const getweekWatchAchievements = ({
+  db,
+  userId,
+  now,
+}: {
+  db: PrismaClient;
+  userId: string;
+  now: Date;
+}) =>
+  TE.tryCatch(
+    async () => {
+      const occurrence = (
+        await db.watchedEpisodesOnUser.findMany({
+          select: { createdAt: true },
+          where: {
+            userId,
+            createdAt: {
+              gte:
+                getHours(now) < 4
+                  ? setHours(subDays(now, 1), 4)
+                  : setHours(now, 4),
+            },
+          },
+        })
+      ).map((w) => startOf4OriginDay(w.createdAt).toLocaleDateString());
+      return countOccurrence(occurrence);
+    },
+    (e) => {
+      return { errorMessage: "week achievements db error" };
+    }
+  );
+
+const getWeekDutyAccumulation = ({
+  db,
+  userId,
+  now,
+}: {
+  db: PrismaClient;
+  userId: string;
+  now: Date;
+}) =>
+  TE.tryCatch(
+    async () => {
+      const occurrence = (
+        await db.episode.findMany({
+          select: { publishedAt: true },
+          where: {
+            work: {
+              users: { some: { userId } },
+            },
+            publishedAt: {
+              gte: subDays(startOf4OriginDay(now), 7),
+              lte: now,
+            },
+          },
+        })
+      ).map((d) => startOf4OriginDay(d.publishedAt).toLocaleDateString());
+      return countOccurrence(occurrence);
+    },
+    (e) => {
+      return { errorMessage: "week duty accumulation db error" };
+    }
+  );
+
+const getQuarterWatchAchievements = ({
+  db,
+  userId,
+  now,
+}: {
+  db: PrismaClient;
+  userId: string;
+  now: Date;
+}) =>
+  TE.tryCatch(
+    async () => {
+      return await db.episode.findMany({
+        select: { publishedAt: true },
+        where: {
+          work: {
+            users: { some: { userId } },
+          },
+          publishedAt: {
+            gte: startOfQuarter(startOf4OriginDay(now)),
+            lte: new Date(),
+          },
+        },
+      });
+    },
+    (e) => {
+      return {
+        errorMessage: "quarter watch achievements db error",
+      };
+    }
+  );
+
 export const loader = async ({
   request,
 }: DataFunctionArgs): Promise<LoaderData> => {
@@ -51,53 +187,18 @@ export const loader = async ({
       quarter: {},
     };
   }
-  const tickets = await db.episode.findMany({
-    where: {
-      work: { users: { some: { userId } } },
-      WatchedEpisodesOnUser: { none: { userId } },
-      publishedAt: {
-        lte: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
-      },
-    },
-    include: { work: { select: { title: true, hashtag: true } } },
-    orderBy: { publishedAt: "desc" },
-  });
-  const watchAchievements = (
-    await db.watchedEpisodesOnUser.findMany({
-      where: {
-        userId,
-        createdAt: {
-          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    })
-  ).reduce((acc, val) => {
-    const index = getNormalizedDate(Date.now(), val.createdAt.getTime()); // -8 ~ 0
-    if (acc.has(index)) {
-      return acc.set(index, acc.get(index)! + 1);
-    }
-    return acc.set(index, 1);
-  }, new Map<number, number>());
-  const dutyAccumulation = (
-    await db.episode.findMany({
-      where: {
-        work: {
-          users: { some: { userId } },
-        },
-        publishedAt: {
-          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
-          lte: new Date(),
-        },
-      },
-    })
-  ).reduce((acc, val) => {
-    const index = getNormalizedDate(Date.now(), val.publishedAt.getTime());
-    if (acc.has(index)) {
-      return acc.set(index, acc.get(index)! + 1);
-    }
-    return acc.set(index, 1);
-  }, new Map<number, number>());
+  const now = new Date();
+
+  const ret = await sequenceS(T.ApplyPar)({
+    tickets: getTickets({
+      db,
+      userId,
+      publishedUntilDate: new Date(now.getTime() + 1000 * 60 * 60 * 24),
+    }),
+    weekWatchAchievements: getweekWatchAchievements({ db, userId, now }),
+    weekDutyAccumulation: getWeekDutyAccumulation({ db, userId, now }),
+    quarterWatchAchievements: getQuarterWatchAchievements({ db, userId, now }),
+  })();
   const quarterDuties = await db.episode.findMany({
     where: {
       work: {

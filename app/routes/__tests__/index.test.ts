@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "vitest";
-import { getNormalizedDate, setOldestOfWork } from "..";
+import { countOccurrence, getNormalizedDate, setOldestOfWork } from "..";
 
 const possibleOldest = new Date("2022-06-01T22:00:00+0900"); // 入力の最小値
 const yesterday4Am = new Date("2022-06-08T04:00:00+0900");
@@ -34,5 +34,16 @@ describe("setLatestOfWork", () => {
       { workId: 2, watchReady: true },
       { workId: 1, watchReady: true },
     ]);
+  });
+});
+
+describe("countOccurrence", () => {
+  it("各要素の出現回数をMapにして返す", () => {
+    expect(countOccurrence(["a", "a", "b"])).toStrictEqual(
+      new Map([
+        ["a", 2],
+        ["b", 1],
+      ])
+    );
   });
 });

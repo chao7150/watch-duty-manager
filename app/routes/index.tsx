@@ -4,7 +4,7 @@ import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
 import { Episode as EpisodeType } from "@prisma/client";
-import * as Episode from "../components/Episode/Episode";
+import * as EpisodeList from "../components/Episode/List";
 import { Serialized } from "~/utils/type";
 import {
   CartesianGrid,
@@ -16,7 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { startOfQuarter } from "date-fns";
 
 type LoaderData = {
@@ -233,25 +233,18 @@ export default function Index() {
             )
           </span>
         </h2>
-        <ul>
-          {setOldestOfWork(tickets).map((ticket) => {
-            return (
-              <li
-                className="episode-list"
-                key={`${ticket.workId}-${ticket.count}`}
-              >
-                <Episode.Component.New
-                  workId={ticket.workId}
-                  title={ticket.work.title}
-                  count={ticket.count}
-                  publishedAt={ticket.publishedAt}
-                  hashtag={ticket.work.hashtag ?? undefined}
-                  watchReady={ticket.watchReady}
-                />
-              </li>
-            );
+        <EpisodeList.Component
+          episodes={setOldestOfWork([...tickets]).map((ticket) => {
+            return {
+              workId: ticket.workId,
+              title: ticket.work.title,
+              count: ticket.count,
+              publishedAt: ticket.publishedAt,
+              hashtag: ticket.work.hashtag ?? undefined,
+              watchReady: ticket.watchReady,
+            };
           })}
-        </ul>
+        />
       </section>
       <section>
         <h2>最近のアニメ放送数と視聴数の推移</h2>

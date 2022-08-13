@@ -4,6 +4,7 @@ import { get4OriginDate } from "../../utils/date";
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
 import * as EpisodeWatchNotReadyIcon from "./EpisodeWatchNotReadyIcon";
+import { useMemo } from "react";
 
 type InformationProps = {
   workId: number;
@@ -64,7 +65,7 @@ const getStatus = (
 };
 
 export type NewProps = InformationProps;
-const New: React.VFC<NewProps> = ({
+const _New: React.VFC<NewProps> = ({
   workId,
   title,
   count,
@@ -95,6 +96,9 @@ const New: React.VFC<NewProps> = ({
     </div>
   );
 };
+
+const New = (props: NewProps) =>
+  useMemo(() => <_New {...props} />, [...Object.values(props)]);
 
 export type WatchedProps = InformationProps & { comment?: string };
 

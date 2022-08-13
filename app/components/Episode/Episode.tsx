@@ -5,6 +5,7 @@ import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
 import * as EpisodeWatchNotReadyIcon from "./EpisodeWatchNotReadyIcon";
 import { useMemo } from "react";
+import { addMinutes } from "date-fns";
 
 type InformationProps = {
   workId: number;
@@ -54,9 +55,12 @@ const Information: React.VFC<InformationProps> = ({
 const getStatus = (
   publishedAt: Date,
   now: Date
-): "published" | "today" | "tomorrow" => {
-  if (publishedAt < now) {
+): "published" | "onair" | "today" | "tomorrow" => {
+  if (addMinutes(publishedAt, 30) < now) {
     return "published";
+  }
+  if (publishedAt < now) {
+    return "onair";
   }
   if (get4OriginDate(publishedAt) === get4OriginDate(now)) {
     return "today";
@@ -84,7 +88,7 @@ const _New: React.VFC<NewProps> = ({
         hashtag={hashtag}
         watchReady={watchReady}
       />
-      {status === "published" && (
+      {["published", "onair"].includes(status) && (
         <EpisodeActoinMenu.Component
           {...{
             workId,

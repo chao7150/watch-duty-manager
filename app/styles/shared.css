@@ -87,6 +87,10 @@
   background-color: rgba(242, 240, 217, 0.4);
 }
 
+.episode[data-status="onair"] {
+  background-color: rgba(250, 214, 214);
+}
+
 .episode-list {
   list-style: none;
 }

@@ -1,12 +1,16 @@
 import { Work as WorkModel, SubscribedWorksOnUser } from "@prisma/client";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { pipe } from "fp-ts/lib/function";
-import { Link, useLoaderData } from "remix";
+import { useLoaderData } from "remix";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import * as WorkUI from "~/components/Work/Work";
+import { interval2CourList } from "~/utils/date";
+import { Serialized } from "~/utils/type";
+import { useState } from "react";
+import { isSameQuarter } from "date-fns";
 
 type LoaderData = {
   works: (WorkModel & { users: SubscribedWorksOnUser[] })[];
@@ -67,31 +71,50 @@ export const loader = async ({
 };
 
 export default function Works() {
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<Serialized<LoaderData>>();
+  const [filterCondition, setFilterCondition] = useState<
+    { label: string; start: Date } | undefined
+  >(undefined);
   const { works, loggedIn } = loaderData;
+  const oldest = Math.min(
+    ...works.map((w) => new Date(w.publishedAt).getTime())
+  );
+  const courList = interval2CourList(new Date(oldest), new Date());
+  const shownWorks = works.filter((w) => {
+    if (filterCondition === undefined) {
+      return true;
+    }
+    return isSameQuarter(new Date(w.publishedAt), filterCondition.start);
+  });
   return (
     <div>
       <h2>作品リスト</h2>
       <section>
-        <ul>
-          <li>
-            <Link to="/works">全て</Link>
-          </li>
-          <li>
-            <Link to="/works?releasedDateBegin=2022-07-01&releasedDateEnd=2022-10-01">
-              2022夏
-            </Link>
-          </li>
-          <li>
-            <Link to="/works?releasedDateBegin=2022-04-01&releasedDateEnd=2022-07-01">
-              2022春
-            </Link>
-          </li>
+        <h3>絞り込み</h3>
+        <button onClick={() => setFilterCondition(undefined)}>
+          絞り込み解除
+        </button>
+        <ul className="works-filter-condition-list">
+          {courList.map(([label, start]) => {
+            return (
+              <li className="works-filter-condition-item" key={label}>
+                <button onClick={() => setFilterCondition({ label, start })}>
+                  {label}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </section>
       <section>
+        <h3>
+          <span>
+            {filterCondition === undefined ? "全て" : filterCondition.label}
+          </span>
+          のアニメ(<span>{shownWorks.length}</span>)
+        </h3>
         <ul className="work-list">
-          {works.map((work) => {
+          {shownWorks.map((work) => {
             return (
               <li key={work.id}>
                 <WorkUI.Component

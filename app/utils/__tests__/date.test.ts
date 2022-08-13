@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { get4OriginDate } from "../date";
+import { get4OriginDate, interval2CourList } from "../date";
 
 test("get4OriginDate", () => {
   expect(get4OriginDate(new Date("2022-06-09T22:00:00+0900"))).toBe(9);
@@ -8,4 +8,19 @@ test("get4OriginDate", () => {
   expect(get4OriginDate(new Date("2022-06-10T04:00:00+0900"))).toBe(10);
   // 1日の場合は前月最終日に戻る
   expect(get4OriginDate(new Date("2022-06-01T03:59:00+0900"))).toBe(31);
+});
+
+test("interval2CourList", () => {
+  expect(
+    interval2CourList(
+      new Date("2022-01-01T00:00:00+0900"),
+      new Date("2022-07-01T03:59:00+0900")
+    ).map(([label, _]) => label)
+  ).toStrictEqual(["2022秋", "2022夏", "2022春", "2022冬", "2021秋"]);
+  expect(
+    interval2CourList(
+      new Date("2022-01-01T04:00:00+0900"),
+      new Date("2022-07-01T04:00:00+0900")
+    ).map(([label, _]) => label)
+  ).toStrictEqual(["2022秋", "2022夏", "2022春", "2022冬"]);
 });

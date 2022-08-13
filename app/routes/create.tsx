@@ -18,7 +18,6 @@ export const action = async ({
 }: DataFunctionArgs): Promise<ActionData> => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
-    console.log("hoge");
     return await pipe(
       formData,
       WorkBulkCreateForm.serverValidator,
@@ -32,7 +31,6 @@ export const action = async ({
             return works;
           },
           (e) => {
-            console.log(e);
             return json(
               { errorMessage: "works create error" },
               { status: 500 }

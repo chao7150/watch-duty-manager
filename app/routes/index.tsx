@@ -17,17 +17,10 @@ import {
   YAxis,
 } from "recharts";
 import { useEffect } from "react";
-import {
-  getHours,
-  setHours,
-  startOfQuarter,
-  subDays,
-  subHours,
-} from "date-fns";
+import { addHours, startOfQuarter, subDays, subHours } from "date-fns";
 import { sequenceT } from "fp-ts/lib/Apply";
-import { task as T, taskEither as TE, either as E } from "fp-ts";
+import { task as T } from "fp-ts";
 import { addDays } from "date-fns";
-import { pipe } from "fp-ts/lib/function";
 import { startOf4OriginDay } from "~/utils/date";
 
 type LoaderData = {
@@ -37,9 +30,15 @@ type LoaderData = {
         work: { title: string; hashtag: string | null };
       })[];
   weekMetrics: {
-    [K: string]: { watchAchievements: number; dutyAccumulation: number };
-  };
-  quarter: { [K: string]: { duty: number; watch: number } };
+    date: string;
+    watchAchievements: number;
+    dutyAccumulation: number;
+  }[];
+  quarterMetrics: {
+    date: string;
+    watchAchievements: number;
+    dutyAccumulation: number;
+  }[];
 };
 
 /**
@@ -125,6 +124,42 @@ const getWeekDutyAccumulation =
     return countOccurrence(occurrence);
   };
 
+const getQuarterDuties =
+  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  async () => {
+    const occurrence = (
+      await db.episode.findMany({
+        select: { publishedAt: true },
+        where: {
+          work: { users: { some: { userId } } },
+          publishedAt: { gte: addHours(startOfQuarter(now), 4), lte: now },
+        },
+      })
+    ).map((e) => subHours(e.publishedAt, 4).toLocaleDateString());
+    return countOccurrence(occurrence);
+  };
+
+const getQuarterWatchAchievements =
+  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  async () => {
+    const occurrence = (
+      await db.watchedEpisodesOnUser.findMany({
+        select: { createdAt: true },
+        where: {
+          episode: {
+            publishedAt: {
+              gte: addHours(startOfQuarter(now), 4),
+              lte: now,
+            },
+            work: { users: { some: { userId } } },
+          },
+          userId,
+        },
+      })
+    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString());
+    return countOccurrence(occurrence);
+  };
+
 export const loader = async ({
   request,
 }: DataFunctionArgs): Promise<LoaderData> => {
@@ -133,17 +168,24 @@ export const loader = async ({
     return {
       userId,
       tickets: [],
-      weekMetrics: {},
-      quarter: {},
+      weekMetrics: [],
+      quarterMetrics: [],
     };
   }
   const now = new Date();
-  const [tickets, weekWatchAchievements, weekDutyAccumulation] =
-    await sequenceT(T.ApplyPar)(
-      getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
-      getWeekWatchAchievements({ db, userId, now }),
-      getWeekDutyAccumulation({ db, userId, now })
-    )();
+  const [
+    tickets,
+    weekWatchAchievements,
+    weekDutyAccumulation,
+    quarterDuties,
+    quarterWatchAchievements,
+  ] = await sequenceT(T.ApplyPar)(
+    getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
+    getWeekWatchAchievements({ db, userId, now }),
+    getWeekDutyAccumulation({ db, userId, now }),
+    getQuarterDuties({ db, userId, now }),
+    getQuarterWatchAchievements({ db, userId, now })
+  )();
   const weekKeys = new Set([
     ...weekDutyAccumulation.keys(),
     ...weekWatchAchievements.keys(),
@@ -158,71 +200,61 @@ export const loader = async ({
       dutyAccumulation: weekDutyAccumulation.get(k) ?? 0,
     });
   });
+  const weekMetrics = Object.entries(Object.fromEntries(mergedWeekMetricsMap))
+    .map(([k, v]) => ({
+      date: k,
+      ...v,
+    }))
+    .sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
 
-  const quarterDuties = await db.episode.findMany({
-    where: {
-      work: {
-        users: { some: { userId } },
-      },
-      publishedAt: {
-        gte: new Date(
-          startOfQuarter(new Date()).getTime() + 1000 * 60 * 60 * 4
-        ),
-        lte: new Date(),
-      },
-    },
+  const quarterKeys = new Set([
+    ...quarterDuties.keys(),
+    ...quarterWatchAchievements.keys(),
+  ]);
+  const mergedQuarterMetricsMap = new Map<
+    string,
+    { watchAchievements: number; dutyAccumulation: number }
+  >();
+  quarterKeys.forEach((k) => {
+    mergedQuarterMetricsMap.set(k, {
+      watchAchievements: quarterWatchAchievements.get(k) ?? 0,
+      dutyAccumulation: quarterDuties.get(k) ?? 0,
+    });
   });
-  const _quarterWatchAchievements = await db.watchedEpisodesOnUser.findMany({
-    where: {
-      episode: {
-        publishedAt: {
-          gte: new Date(
-            startOfQuarter(new Date()).getTime() + 1000 * 60 * 60 * 4
-          ),
-          lte: new Date(),
-        },
-        work: { users: { some: { userId } } },
-      },
-      userId,
-    },
-  });
-  const quarterWatchAchievements = _quarterWatchAchievements.reduce(
-    (acc, val) => {
-      const index = new Date(
-        val.createdAt.getTime() - 1000 * 60 * 60 * 4
-      ).toLocaleDateString();
-      if (acc.has(index)) {
-        return acc.set(index, acc.get(index)! + 1);
+  const quarterMetrics = Object.entries(
+    Object.fromEntries(mergedQuarterMetricsMap)
+  )
+    .sort(([k1, _v1], [k2, _v2]) => {
+      return new Date(k1).getTime() - new Date(k2).getTime();
+    })
+    .map(([k, v]) => {
+      return {
+        date: k,
+        ...v,
+      };
+    })
+    .reduce((acc, val) => {
+      if (acc.length === 0) {
+        return [val];
       }
-      return acc.set(index, 1);
-    },
-    new Map<string, number>()
-  );
-  const quarterDutyAccumulation = quarterDuties.reduce((acc, val) => {
-    const index = new Date(
-      val.publishedAt.getTime() - 1000 * 60 * 60 * 4
-    ).toLocaleDateString();
-    if (acc.has(index)) {
-      return acc.set(index, acc.get(index)! + 1);
-    }
-    return acc.set(index, 1);
-  }, new Map<string, number>());
-  const quarter = new Map<string, { duty: number; watch: number }>();
-  quarterDutyAccumulation.forEach((v, k) => {
-    quarter.set(k, { duty: v, watch: 0 });
-  });
-  quarterWatchAchievements.forEach((v, k) => {
-    if (quarter.has(k)) {
-      quarter.set(k, { duty: quarter.get(k)!.duty, watch: v });
-    } else {
-      quarter.set(k, { duty: 0, watch: v });
-    }
-  });
+      const last = acc[acc.length - 1];
+      return [
+        ...acc,
+        {
+          date: val.date,
+          watchAchievements: last.watchAchievements + val.watchAchievements,
+          dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
+        },
+      ];
+    }, [] as Array<{ date: string; watchAchievements: number; dutyAccumulation: number }>);
+
   return {
     userId,
     tickets,
-    weekMetrics: Object.fromEntries(mergedWeekMetricsMap),
-    quarter: Object.fromEntries(quarter),
+    weekMetrics,
+    quarterMetrics,
   };
 };
 
@@ -258,31 +290,8 @@ export default function Index() {
     }, 1000 * 60 * 5);
     return () => clearInterval(timerId);
   });
-  const { userId, tickets, weekMetrics, quarter } =
+  const { userId, tickets, weekMetrics, quarterMetrics } =
     useLoaderData<Serialized<LoaderData>>();
-
-  const q = Object.entries(quarter)
-    .map(([v, k]) => ({ ...k, date: v }))
-    .sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
-  const currentSum = { duty: 0, watch: 0 };
-  const qq: Array<{ date: string; duty: number; watch: number }> = [];
-  q.forEach((c) => {
-    qq.push({
-      date: c.date,
-      duty: c.duty + currentSum.duty,
-      watch: c.watch + currentSum.watch,
-    });
-    currentSum.duty = c.duty + currentSum.duty;
-    currentSum.watch = c.watch + currentSum.watch;
-  });
-  console.log(
-    Object.entries(weekMetrics).map(([k, v]) => ({
-      date: k,
-      ...v,
-    }))
-  );
 
   return userId ? (
     <div className="remix__page">
@@ -315,16 +324,7 @@ export default function Index() {
       <section>
         <h2>最近のアニメ放送数と視聴数の推移</h2>
         <ResponsiveContainer height={300}>
-          <LineChart
-            data={Object.entries(weekMetrics)
-              .map(([k, v]) => ({
-                date: k,
-                ...v,
-              }))
-              .sort((a, b) => {
-                return new Date(a.date).getTime() - new Date(b.date).getTime();
-              })}
-          >
+          <LineChart data={weekMetrics}>
             <CartesianGrid />
             <XAxis dataKey="date" />
             <YAxis tickCount={3} />
@@ -335,14 +335,14 @@ export default function Index() {
           </LineChart>
         </ResponsiveContainer>
         <ResponsiveContainer height={300}>
-          <LineChart data={qq}>
+          <LineChart data={quarterMetrics}>
             <CartesianGrid />
             <XAxis dataKey="date" />
             <YAxis tickCount={5} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="watch" />
-            <Line type="monotone" stroke="red" dataKey="duty" />
+            <Line type="monotone" dataKey="watchAchievements" />
+            <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
           </LineChart>
         </ResponsiveContainer>
       </section>

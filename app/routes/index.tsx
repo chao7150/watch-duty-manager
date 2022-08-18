@@ -3,7 +3,7 @@ import { type MetaFunction, useLoaderData } from "remix";
 import "firebase/compat/auth";
 import { getUserId } from "~/utils/session.server";
 import { db } from "~/utils/db.server";
-import { Episode as EpisodeType } from "@prisma/client";
+import { Episode as EpisodeType, PrismaClient } from "@prisma/client";
 import * as EpisodeList from "../components/Episode/List";
 import { Serialized } from "~/utils/type";
 import {
@@ -16,16 +16,29 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect, useState } from "react";
-import { startOfQuarter } from "date-fns";
+import { useEffect } from "react";
+import {
+  getHours,
+  setHours,
+  startOfQuarter,
+  subDays,
+  subHours,
+} from "date-fns";
+import { sequenceT } from "fp-ts/lib/Apply";
+import { task as T, taskEither as TE, either as E } from "fp-ts";
+import { addDays } from "date-fns";
+import { pipe } from "fp-ts/lib/function";
+import { startOf4OriginDay } from "~/utils/date";
 
 type LoaderData = {
   userId: string | null;
-  tickets: (EpisodeType & {
-    work: { title: string; hashtag: string | null };
-  })[];
-  watchAchievements: { [K: number]: number };
-  dutyAccumulation: { [K: number]: number };
+  tickets:
+    | (EpisodeType & {
+        work: { title: string; hashtag: string | null };
+      })[];
+  weekMetrics: {
+    [K: string]: { watchAchievements: number; dutyAccumulation: number };
+  };
   quarter: { [K: string]: { duty: number; watch: number } };
 };
 
@@ -38,6 +51,80 @@ export const getNormalizedDate = (nowMs: number, targetMs: number) => {
   return JPUnixDate - JPUnixToday;
 };
 
+export const countOccurrence = (items: Array<string>): Map<string, number> => {
+  return items.reduce((acc, val) => {
+    const v = acc.get(val);
+    if (v === undefined) {
+      return acc.set(val, 1);
+    }
+    return acc.set(val, v + 1);
+  }, new Map<string, number>());
+};
+
+const getTickets =
+  ({
+    db,
+    userId,
+    publishedUntilDate,
+  }: {
+    db: PrismaClient;
+    userId: string;
+    publishedUntilDate: Date;
+  }) =>
+  async () => {
+    try {
+      return await db.episode.findMany({
+        where: {
+          work: { users: { some: { userId } } },
+          WatchedEpisodesOnUser: { none: { userId } },
+          publishedAt: {
+            lte: publishedUntilDate,
+          },
+        },
+        include: { work: { select: { title: true, hashtag: true } } },
+        orderBy: { publishedAt: "desc" },
+      });
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  };
+
+const getWeekWatchAchievements =
+  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  async () => {
+    const occurrence = (
+      await db.watchedEpisodesOnUser.findMany({
+        select: { createdAt: true },
+        where: {
+          userId,
+          createdAt: {
+            gte: subDays(startOf4OriginDay(now), 7),
+          },
+        },
+      })
+    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString());
+    return countOccurrence(occurrence);
+  };
+
+const getWeekDutyAccumulation =
+  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  async () => {
+    const occurrence = (
+      await db.episode.findMany({
+        select: { publishedAt: true },
+        where: {
+          work: { users: { some: { userId } } },
+          publishedAt: {
+            gte: subDays(startOf4OriginDay(now), 7),
+            lte: now,
+          },
+        },
+      })
+    ).map((d) => subHours(d.publishedAt, 4).toLocaleDateString());
+    return countOccurrence(occurrence);
+  };
+
 export const loader = async ({
   request,
 }: DataFunctionArgs): Promise<LoaderData> => {
@@ -46,58 +133,32 @@ export const loader = async ({
     return {
       userId,
       tickets: [],
-      watchAchievements: [],
-      dutyAccumulation: [],
+      weekMetrics: {},
       quarter: {},
     };
   }
-  const tickets = await db.episode.findMany({
-    where: {
-      work: { users: { some: { userId } } },
-      WatchedEpisodesOnUser: { none: { userId } },
-      publishedAt: {
-        lte: new Date(new Date().getTime() + 1000 * 60 * 60 * 24),
-      },
-    },
-    include: { work: { select: { title: true, hashtag: true } } },
-    orderBy: { publishedAt: "desc" },
+  const now = new Date();
+  const [tickets, weekWatchAchievements, weekDutyAccumulation] =
+    await sequenceT(T.ApplyPar)(
+      getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
+      getWeekWatchAchievements({ db, userId, now }),
+      getWeekDutyAccumulation({ db, userId, now })
+    )();
+  const weekKeys = new Set([
+    ...weekDutyAccumulation.keys(),
+    ...weekWatchAchievements.keys(),
+  ]);
+  const mergedWeekMetricsMap = new Map<
+    string,
+    { watchAchievements: number; dutyAccumulation: number }
+  >();
+  weekKeys.forEach((k) => {
+    mergedWeekMetricsMap.set(k, {
+      watchAchievements: weekWatchAchievements.get(k) ?? 0,
+      dutyAccumulation: weekDutyAccumulation.get(k) ?? 0,
+    });
   });
-  const watchAchievements = (
-    await db.watchedEpisodesOnUser.findMany({
-      where: {
-        userId,
-        createdAt: {
-          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    })
-  ).reduce((acc, val) => {
-    const index = getNormalizedDate(Date.now(), val.createdAt.getTime()); // -8 ~ 0
-    if (acc.has(index)) {
-      return acc.set(index, acc.get(index)! + 1);
-    }
-    return acc.set(index, 1);
-  }, new Map<number, number>());
-  const dutyAccumulation = (
-    await db.episode.findMany({
-      where: {
-        work: {
-          users: { some: { userId } },
-        },
-        publishedAt: {
-          gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 8),
-          lte: new Date(),
-        },
-      },
-    })
-  ).reduce((acc, val) => {
-    const index = getNormalizedDate(Date.now(), val.publishedAt.getTime());
-    if (acc.has(index)) {
-      return acc.set(index, acc.get(index)! + 1);
-    }
-    return acc.set(index, 1);
-  }, new Map<number, number>());
+
   const quarterDuties = await db.episode.findMany({
     where: {
       work: {
@@ -160,8 +221,7 @@ export const loader = async ({
   return {
     userId,
     tickets,
-    watchAchievements: Object.fromEntries(watchAchievements),
-    dutyAccumulation: Object.fromEntries(dutyAccumulation),
+    weekMetrics: Object.fromEntries(mergedWeekMetricsMap),
     quarter: Object.fromEntries(quarter),
   };
 };
@@ -198,7 +258,7 @@ export default function Index() {
     }, 1000 * 60 * 5);
     return () => clearInterval(timerId);
   });
-  const { userId, tickets, watchAchievements, dutyAccumulation, quarter } =
+  const { userId, tickets, weekMetrics, quarter } =
     useLoaderData<Serialized<LoaderData>>();
 
   const q = Object.entries(quarter)
@@ -217,6 +277,12 @@ export default function Index() {
     currentSum.duty = c.duty + currentSum.duty;
     currentSum.watch = c.watch + currentSum.watch;
   });
+  console.log(
+    Object.entries(weekMetrics).map(([k, v]) => ({
+      date: k,
+      ...v,
+    }))
+  );
 
   return userId ? (
     <div className="remix__page">
@@ -250,20 +316,21 @@ export default function Index() {
         <h2>最近のアニメ放送数と視聴数の推移</h2>
         <ResponsiveContainer height={300}>
           <LineChart
-            data={Array.from({ length: 8 }).map((_, index) => ({
-              date: new Date(
-                Date.now() + 86400000 * (index - 7) - 1000 * 3600 * 4 // 4時~28時
-              ).toLocaleDateString(),
-              watchAchievement: watchAchievements[index - 7] ?? 0,
-              dutyAccumulation: dutyAccumulation[index - 7] ?? 0,
-            }))}
+            data={Object.entries(weekMetrics)
+              .map(([k, v]) => ({
+                date: k,
+                ...v,
+              }))
+              .sort((a, b) => {
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
+              })}
           >
             <CartesianGrid />
             <XAxis dataKey="date" />
             <YAxis tickCount={3} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="watchAchievement" />
+            <Line type="monotone" dataKey="watchAchievements" />
             <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
           </LineChart>
         </ResponsiveContainer>

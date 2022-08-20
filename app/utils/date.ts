@@ -1,9 +1,11 @@
 import {
+  eachDayOfInterval,
   eachQuarterOfInterval,
   endOfYear,
   getHours,
   setHours,
   startOfHour,
+  startOfQuarter,
   subDays,
   subHours,
 } from "date-fns";
@@ -34,4 +36,18 @@ export const startOf4OriginDay = (date: Date): Date => {
   return getHours(date) < 4
     ? startOfHour(subDays(setHours(date, 4), 1))
     : startOfHour(setHours(date, 4));
+};
+
+export const getPast7DaysLocaleDateString = (now: Date): string[] => {
+  return eachDayOfInterval({
+    start: subDays(subHours(now, 4), 7),
+    end: subHours(now, 4),
+  }).map((d) => d.toLocaleDateString());
+};
+
+export const getQuarterEachLocaleDateString = (now: Date): string[] => {
+  return eachDayOfInterval({
+    start: startOfQuarter(subHours(now, 4)),
+    end: subHours(now, 4),
+  }).map((d) => d.toLocaleDateString());
 };

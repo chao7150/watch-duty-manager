@@ -21,7 +21,11 @@ import { addHours, startOfQuarter, subDays, subHours } from "date-fns";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { task as T } from "fp-ts";
 import { addDays } from "date-fns";
-import { startOf4OriginDay } from "~/utils/date";
+import {
+  getPast7DaysLocaleDateString,
+  getQuarterEachLocaleDateString,
+  startOf4OriginDay,
+} from "~/utils/date";
 
 type LoaderData = {
   userId: string | null;
@@ -186,10 +190,7 @@ export const loader = async ({
     getQuarterDuties({ db, userId, now }),
     getQuarterWatchAchievements({ db, userId, now })
   )();
-  const weekKeys = new Set([
-    ...weekDutyAccumulation.keys(),
-    ...weekWatchAchievements.keys(),
-  ]);
+  const weekKeys = getPast7DaysLocaleDateString(now);
   const mergedWeekMetricsMap = new Map<
     string,
     { watchAchievements: number; dutyAccumulation: number }
@@ -200,19 +201,14 @@ export const loader = async ({
       dutyAccumulation: weekDutyAccumulation.get(k) ?? 0,
     });
   });
-  const weekMetrics = Object.entries(Object.fromEntries(mergedWeekMetricsMap))
-    .map(([k, v]) => ({
-      date: k,
-      ...v,
-    }))
-    .sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
-    });
+  const weekMetrics = Object.entries(
+    Object.fromEntries(mergedWeekMetricsMap)
+  ).map(([k, v]) => ({
+    date: k,
+    ...v,
+  }));
 
-  const quarterKeys = new Set([
-    ...quarterDuties.keys(),
-    ...quarterWatchAchievements.keys(),
-  ]);
+  const quarterKeys = getQuarterEachLocaleDateString(now);
   const mergedQuarterMetricsMap = new Map<
     string,
     { watchAchievements: number; dutyAccumulation: number }
@@ -226,9 +222,6 @@ export const loader = async ({
   const quarterMetrics = Object.entries(
     Object.fromEntries(mergedQuarterMetricsMap)
   )
-    .sort(([k1, _v1], [k2, _v2]) => {
-      return new Date(k1).getTime() - new Date(k2).getTime();
-    })
     .map(([k, v]) => {
       return {
         date: k,

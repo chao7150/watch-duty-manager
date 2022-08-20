@@ -98,3 +98,7 @@
 .episode-list > li[aria-hidden="true"] {
   display: none;
 }
+
+.episode-list-item-container {
+  display: flex;
+}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as Episode from "./Episode";
+import * as EyeIcon from "../Icons/Eye";
 
 export type Props = {
   episodes: Episode.NewProps[];
@@ -21,7 +22,24 @@ export const Component: React.FC<Props> = ({ episodes }) => {
             .includes(filterKeyword.toLowerCase());
           return (
             <li key={`${e.workId}-${e.count}`} aria-hidden={hide}>
-              <Episode.Component.New {...e} />
+              <div className="episode-list-item-container">
+                <button
+                  onClick={() => {
+                    if (filterKeyword === "") {
+                      setFilterKeyword(e.title);
+                    } else {
+                      setFilterKeyword("");
+                    }
+                  }}
+                >
+                  {filterKeyword === "" ? (
+                    <EyeIcon.Component />
+                  ) : (
+                    <EyeIcon.AltComponent />
+                  )}
+                </button>
+                <Episode.Component.New {...e} />
+              </div>
             </li>
           );
         })}

@@ -10,21 +10,9 @@ import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
-import type {
-  DataFunctionArgs,
-  LinksFunction,
-} from "@remix-run/server-runtime";
+import type { DataFunctionArgs } from "@remix-run/server-runtime";
 import { match } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/function";
-
-export const links: LinksFunction = () => {
-  return [
-    {
-      rel: "stylesheet",
-      href: "https://unpkg.com/css.gg/icons/css/clipboard.css",
-    },
-  ];
-};
 
 type LoaderData = {
   work: Work & {

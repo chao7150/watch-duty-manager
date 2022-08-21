@@ -15,14 +15,18 @@ export const Component: React.FC<Props> = ({ episodes }) => {
         onChange={(e) => setFilterKeyword(e.target.value)}
         placeholder="タイトルで絞り込み"
       />
-      <ul className="episode-list">
+      <ul className="flex flex-col gap-4 episode-list">
         {episodes.map((e) => {
           const hide = !e.title
             .toLowerCase()
             .includes(filterKeyword.toLowerCase());
           return (
-            <li key={`${e.workId}-${e.count}`} aria-hidden={hide}>
-              <div className="episode-list-item-container">
+            <li
+              className={hide ? "hidden" : ""}
+              key={`${e.workId}-${e.count}`}
+              aria-hidden={hide}
+            >
+              <div className="flex">
                 <button
                   onClick={() => {
                     if (filterKeyword === "") {

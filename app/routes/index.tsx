@@ -319,8 +319,8 @@ export default function Index() {
         <ResponsiveContainer height={300}>
           <LineChart data={weekMetrics}>
             <CartesianGrid />
-            <XAxis dataKey="date" />
-            <YAxis tickCount={3} />
+            <XAxis dataKey="date" stroke="#bdc1c6" />
+            <YAxis tickCount={3} stroke="#bdc1c6" />
             <Tooltip />
             <Legend />
             <Line type="monotone" dataKey="watchAchievements" />
@@ -330,8 +330,8 @@ export default function Index() {
         <ResponsiveContainer height={300}>
           <LineChart data={quarterMetrics}>
             <CartesianGrid />
-            <XAxis dataKey="date" />
-            <YAxis tickCount={5} />
+            <XAxis dataKey="date" stroke="#bdc1c6" />
+            <YAxis tickCount={5} stroke="#bdc1c6" />
             <Tooltip />
             <Legend />
             <Line type="monotone" dataKey="watchAchievements" />

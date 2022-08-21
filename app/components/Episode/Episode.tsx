@@ -30,10 +30,10 @@ const Information: React.VFC<InformationProps> = ({
   return (
     <div className="episode">
       <h3 className="episode-heading">
-        <div>
+        <div className="hover:text-cadet-blue hover:underline">
           <Link to={`/works/${workId}`}>{title}</Link>
         </div>
-        <div>
+        <div className="hover:text-cadet-blue hover:underline">
           <Link to={`/works/${workId}/${count}`}>#{count}</Link>
         </div>
         {watchReady === false && (
@@ -42,7 +42,7 @@ const Information: React.VFC<InformationProps> = ({
           </div>
         )}
       </h3>
-      <div className="episode-information-additional-area">
+      <div className="episode-information-additional-area text-text-weak">
         <span>{new Date(publishedAt).toLocaleString()}</span>
         {hashtag !== undefined && hashtag !== "" && (
           <WorkHashtagCopyButton.Component hashtag={hashtag} />
@@ -52,7 +52,9 @@ const Information: React.VFC<InformationProps> = ({
   );
 };
 
-const getStatus = (
+type Status = "published" | "onair" | "today" | "tomorrow";
+
+const getStatusStyle = (
   publishedAt: Date,
   now: Date
 ): "published" | "onair" | "today" | "tomorrow" => {
@@ -68,6 +70,13 @@ const getStatus = (
   return "tomorrow";
 };
 
+const statusStyles: { [K in Status]: string } = {
+  published: "",
+  onair: "bg-accent-area",
+  today: "",
+  tomorrow: "",
+};
+
 export type NewProps = InformationProps;
 const _New: React.VFC<NewProps> = ({
   workId,
@@ -77,9 +86,9 @@ const _New: React.VFC<NewProps> = ({
   hashtag,
   watchReady,
 }) => {
-  const status = getStatus(new Date(publishedAt), new Date());
+  const status = getStatusStyle(new Date(publishedAt), new Date());
   return (
-    <div className="episode" data-status={status}>
+    <div className={`w-full grow ${statusStyles[status]}`}>
       <Information
         workId={workId}
         title={title}

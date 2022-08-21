@@ -15,19 +15,15 @@ import type { LinksFunction } from "remix";
 
 import globalStylesUrl from "~/styles/global.css";
 import sharedStylesUrl from "~/styles/shared.css";
-import darkStylesUrl from "~/styles/dark.css";
 import { getUserId } from "./utils/session.server";
+import styles from "./styles/app.css";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: globalStylesUrl },
     { rel: "stylesheet", href: sharedStylesUrl },
-    {
-      rel: "stylesheet",
-      href: darkStylesUrl,
-      media: "(prefers-color-scheme: dark)",
-    },
+    { rel: "stylesheet", href: styles },
   ];
 };
 
@@ -131,12 +127,14 @@ function Layout({ children }: { children: React.ReactNode }) {
   const userId = useLoaderData();
 
   return (
-    <div className="remix-app">
+    <div className="remix-app bg-dark text-text">
       <header className="remix-app__header">
-        <div className="container remix-app__header-content">
-          <Link to="/" title="Remix" className="remix-app__header-home-link">
-            Watch Duty Manager
-          </Link>
+        <div className="remix-app__header-content w-11/12 mx-auto">
+          <h1>
+            <Link to="/" title="Watch Duty Manager">
+              Watch Duty Manager
+            </Link>
+          </h1>
           <nav aria-label="Main navigation" className="remix-app__header-nav">
             <ul>
               <li>
@@ -154,7 +152,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                   <li>
                     <Link to="/my">My</Link>
                   </li>
-                  <li>
+                  <li className="text-link">
                     <Form action="/logout" method="post">
                       <button type="submit">Logout</button>
                     </Form>
@@ -170,10 +168,10 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div className="remix-app__main">
-        <div className="container remix-app__main-content">{children}</div>
+        <div className="w-11/12 mx-auto">{children}</div>
       </div>
       <footer className="remix-app__footer">
-        <div className="container remix-app__footer-content">
+        <div className="remix-app__footer-content">
           <p>&copy; chao7150</p>
         </div>
       </footer>

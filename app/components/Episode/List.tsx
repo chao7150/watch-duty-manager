@@ -15,7 +15,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
         onChange={(e) => setFilterKeyword(e.target.value)}
         placeholder="タイトルで絞り込み"
       />
-      <ul className="flex flex-col gap-4 episode-list">
+      <ul className="flex flex-col gap-4 episode-list mt-4">
         {episodes.map((e) => {
           const hide = !e.title
             .toLowerCase()

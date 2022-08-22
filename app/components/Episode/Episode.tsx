@@ -7,6 +7,8 @@ import * as EpisodeWatchNotReadyIcon from "./EpisodeWatchNotReadyIcon";
 import { useMemo } from "react";
 import { addMinutes } from "date-fns";
 
+type Status = "published" | "onair" | "today" | "tomorrow";
+
 type InformationProps = {
   workId: number;
   title: string;
@@ -17,6 +19,14 @@ type InformationProps = {
   publishedAt: string;
   hashtag?: string;
   watchReady?: boolean;
+  status: Status;
+};
+
+const timeStyles: { [K in Status]: string } = {
+  published: "",
+  onair: "text-red",
+  today: "text-text-strong",
+  tomorrow: "",
 };
 
 const Information: React.VFC<InformationProps> = ({
@@ -26,7 +36,9 @@ const Information: React.VFC<InformationProps> = ({
   publishedAt,
   hashtag,
   watchReady,
+  status,
 }) => {
+  const timeStyle = timeStyles[status];
   return (
     <div className="episode">
       <h3 className="episode-heading">
@@ -43,7 +55,9 @@ const Information: React.VFC<InformationProps> = ({
         )}
       </h3>
       <div className="episode-information-additional-area text-text-weak">
-        <span>{new Date(publishedAt).toLocaleString()}</span>
+        <span className={timeStyle}>
+          {new Date(publishedAt).toLocaleString()}
+        </span>
         {hashtag !== undefined && hashtag !== "" && (
           <WorkHashtagCopyButton.Component hashtag={hashtag} />
         )}
@@ -52,9 +66,7 @@ const Information: React.VFC<InformationProps> = ({
   );
 };
 
-type Status = "published" | "onair" | "today" | "tomorrow";
-
-const getStatusStyle = (
+const getStatus = (
   publishedAt: Date,
   now: Date
 ): "published" | "onair" | "today" | "tomorrow" => {
@@ -72,12 +84,12 @@ const getStatusStyle = (
 
 const statusStyles: { [K in Status]: string } = {
   published: "",
-  onair: "bg-accent-area",
-  today: "",
+  onair: "font-bold",
+  today: "font-bold",
   tomorrow: "",
 };
 
-export type NewProps = InformationProps;
+export type NewProps = Omit<InformationProps, "status">;
 const _New: React.VFC<NewProps> = ({
   workId,
   title,
@@ -86,9 +98,9 @@ const _New: React.VFC<NewProps> = ({
   hashtag,
   watchReady,
 }) => {
-  const status = getStatusStyle(new Date(publishedAt), new Date());
+  const status = getStatus(new Date(publishedAt), new Date());
   return (
-    <div className={`w-full grow ${statusStyles[status]}`}>
+    <div className={`w-full grow ${statusStyles[status]} hover:bg-accent-area`}>
       <Information
         workId={workId}
         title={title}
@@ -96,6 +108,7 @@ const _New: React.VFC<NewProps> = ({
         publishedAt={publishedAt}
         hashtag={hashtag}
         watchReady={watchReady}
+        status={status}
       />
       {["published", "onair"].includes(status) && (
         <EpisodeActoinMenu.Component

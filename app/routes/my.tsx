@@ -12,11 +12,13 @@ import { sequenceT } from "fp-ts/lib/Apply";
 import * as WorkUI from "~/components/Work/Work";
 
 type LoaderData = {
-  subscribedWorks: Work[];
+  subscribedWorks: (Work & { rating: number | undefined })[];
   recentWatchedEpisodes: (WatchedEpisodesOnUser & {
     episode: { work: { title: string } };
   })[];
 };
+
+const isNumber = (val: unknown): val is number => typeof val === "number";
 
 export const loader = async (
   args: DataFunctionArgs
@@ -32,14 +34,47 @@ export const loader = async (
           // かつ
           // 未放送のepisodeが1つ以上存在する作品
           async () =>
-            await db.work.findMany({
-              where: {
-                users: { some: { userId } },
-                episodes: { some: { publishedAt: { gte: new Date() } } },
-              },
+            (
+              await db.work.findMany({
+                where: {
+                  users: { some: { userId } },
+                  episodes: { some: { publishedAt: { gte: new Date() } } },
+                },
+                include: {
+                  episodes: {
+                    include: {
+                      WatchedEpisodesOnUser: {
+                        where: { userId },
+                      },
+                    },
+                  },
+                },
+              })
+            ).map((w) => {
+              const ratings = w.episodes
+                .map((e) => e.WatchedEpisodesOnUser[0]?.rating)
+                .filter(isNumber);
+              if (
+                !(ratings.reduce((acc, val) => acc + val, 0) / ratings.length)
+              ) {
+                console.log(ratings);
+              }
+              return {
+                ...w,
+                rating:
+                  ratings.length === 0
+                    ? undefined
+                    : ratings.reduce((acc, val) => acc + val, 0) /
+                      ratings.length,
+              };
             }),
-          () =>
-            json({ errorMessage: "subscribed works db error" }, { status: 500 })
+          (e) => {
+            console.log(e);
+            return json(
+              { errorMessage: "subscribed works db error" },
+              { status: 500 }
+            );
+          }
         ),
         TE.tryCatch(
           async () =>
@@ -77,16 +112,27 @@ export default function My() {
           放送中で視聴中のアニメ<span>({subscribedWorks.length})</span>
         </h2>
         <ul>
-          {subscribedWorks.map((work) => (
-            <li key={work.id}>
-              <WorkUI.Component
-                loggedIn={true}
-                id={work.id.toString()}
-                title={work.title}
-                subscribed={true}
-              />
-            </li>
-          ))}
+          {subscribedWorks
+            .sort((a, b) => {
+              return (b.rating ?? 0) - (a.rating ?? 0);
+            })
+            .map((work) => (
+              <li className="flex items-center" key={work.id}>
+                <div className="w-4">
+                  {work.rating !== undefined
+                    ? work.rating.toFixed(1)
+                    : undefined}
+                </div>
+                <div className="ml-4">
+                  <WorkUI.Component
+                    loggedIn={true}
+                    id={work.id.toString()}
+                    title={work.title}
+                    subscribed={true}
+                  />
+                </div>
+              </li>
+            ))}
         </ul>
       </section>
       <section>

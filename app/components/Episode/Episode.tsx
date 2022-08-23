@@ -126,7 +126,9 @@ const _New: React.VFC<NewProps> = ({
 const New = (props: NewProps) =>
   useMemo(() => <_New {...props} />, [...Object.values(props)]);
 
-export type WatchedProps = InformationProps & { comment?: string };
+export type WatchedProps = Omit<InformationProps, "status"> & {
+  comment?: string;
+};
 
 const Watched: React.VFC<WatchedProps> = ({
   workId,

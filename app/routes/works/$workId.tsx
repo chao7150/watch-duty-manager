@@ -95,7 +95,7 @@ export const loader = async ({
   return {
     work,
     ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
-      return { count: idx, rating: map.get(idx) ?? null };
+      return { count: idx + 1, rating: map.get(idx + 1) ?? null };
     }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
@@ -375,12 +375,8 @@ export default function Work() {
           <ResponsiveContainer height={300}>
             <LineChart data={ratings}>
               <CartesianGrid />
-              <XAxis dataKey="count" stroke="#bdc1c6" />
-              <YAxis
-                domain={[0, 10]}
-                ticks={[0, 2, 4, 6, 8, 10]}
-                stroke="#bdc1c6"
-              />
+              <XAxis dataKey="count" domain={[1, "dataMax"]} />
+              <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="rating" />

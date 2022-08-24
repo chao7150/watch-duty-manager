@@ -13,7 +13,7 @@ export const Component: React.VFC<Props> = (props) => {
     <div className="episode-action-menu">
       <EpisodeWatchOrUnwatchForm.Component {...props} />
       <details>
-        <summary>
+        <summary className="cursor-pointer">
           <svg
             width="24"
             height="24"
@@ -35,53 +35,50 @@ export const Component: React.VFC<Props> = (props) => {
             />
           </svg>
         </summary>
-        <ul>
-          <li>
-            <fetcher.Form
-              method="post"
-              action={`/works/${props.workId}/${props.count}?index`}
+        <div>
+          <fetcher.Form
+            className="flex flex-col"
+            method="post"
+            action={`/works/${props.workId}/${props.count}?index`}
+          >
+            <label className="ml-auto">
+              <div className="hidden">rating</div>
+              <input
+                name="rating"
+                type="range"
+                min="0"
+                max="10"
+                list="tickmarks"
+                defaultValue={5}
+              />
+              <datalist id="tickmarks">
+                <option value="0"></option>
+                <option value="1"></option>
+                <option value="2"></option>
+                <option value="3"></option>
+                <option value="4"></option>
+                <option value="5"></option>
+                <option value="6"></option>
+                <option value="7"></option>
+                <option value="8"></option>
+                <option value="9"></option>
+                <option value="10"></option>
+              </datalist>
+            </label>
+            <label>
+              <div className="hidden">comment</div>
+              <textarea name="comment"></textarea>
+            </label>
+            <button
+              className="bg-accent-area rounded-full py-1 px-3"
+              type="submit"
+              name="_action"
+              value="watch"
             >
-              <label>
-                rating
-                <input
-                  name="rating"
-                  type="range"
-                  min="0"
-                  max="10"
-                  list="tickmarks"
-                  defaultValue={5}
-                />
-                <datalist id="tickmarks">
-                  <option value="0"></option>
-                  <option value="1"></option>
-                  <option value="2"></option>
-                  <option value="3"></option>
-                  <option value="4"></option>
-                  <option value="5"></option>
-                  <option value="6"></option>
-                  <option value="7"></option>
-                  <option value="8"></option>
-                  <option value="9"></option>
-                  <option value="10"></option>
-                </datalist>
-              </label>
-              <label>
-                <textarea name="comment"></textarea>
-              </label>
-              <button type="submit" name="_action" value="watch">
-                watch with comment
-              </button>
-            </fetcher.Form>
-          </li>
-          <li>
-            <fetcher.Form method="post" action={`/works/${props.workId}`}>
-              <input type="hidden" name="upToCount" value={props.count} />
-              <button type="submit" name="_action" value="watchUpTo">
-                watch up to this episode
-              </button>
-            </fetcher.Form>
-          </li>
-        </ul>
+              watch with comment
+            </button>
+          </fetcher.Form>
+        </div>
       </details>
     </div>
   );

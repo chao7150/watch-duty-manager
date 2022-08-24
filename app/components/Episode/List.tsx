@@ -26,7 +26,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
               key={`${e.workId}-${e.count}`}
               aria-hidden={hide}
             >
-              <div className="flex">
+              <div className="flex" title="タイトルで絞り込み">
                 <button
                   onClick={() => {
                     if (filterKeyword === "") {

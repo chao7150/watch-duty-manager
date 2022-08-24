@@ -576,12 +576,16 @@ a {
   margin-right: auto;
 }
 
-.mt-4 {
-  margin-top: 1rem;
-}
-
 .ml-4 {
   margin-left: 1rem;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+.mt-4 {
+  margin-top: 1rem;
 }
 
 .flex {
@@ -592,10 +596,6 @@ a {
   display: table;
 }
 
-.grid {
-  display: grid;
-}
-
 .hidden {
   display: none;
 }
@@ -604,20 +604,20 @@ a {
   width: 91.666667%;
 }
 
-.w-full {
-  width: 100%;
-}
-
-.w-6 {
-  width: 1.5rem;
-}
-
 .w-4 {
   width: 1rem;
 }
 
+.w-full {
+  width: 100%;
+}
+
 .grow {
   flex-grow: 1;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .flex-col {
@@ -632,9 +632,28 @@ a {
   gap: 1rem;
 }
 
+.rounded-full {
+  border-radius: 9999px;
+}
+
 .bg-dark {
   --tw-bg-opacity: 1;
   background-color: rgb(32 33 36 / var(--tw-bg-opacity));
+}
+
+.bg-accent-area {
+  --tw-bg-opacity: 1;
+  background-color: rgb(48 49 52 / var(--tw-bg-opacity));
+}
+
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
 }
 
 .font-bold {
@@ -668,11 +687,6 @@ a {
 
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
-}
-
-.hover\:bg-accent-area:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(48 49 52 / var(--tw-bg-opacity));
 }
 
 .hover\:underline:hover {

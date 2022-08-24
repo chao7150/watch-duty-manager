@@ -13,12 +13,23 @@ import { extractParams, Serialized } from "~/utils/type";
 import type { DataFunctionArgs } from "@remix-run/server-runtime";
 import { match } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/function";
+import {
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+} from "recharts";
 
 type LoaderData = {
   work: Work & {
     users: SubscribedWorksOnUser[];
     episodes: (Episode & { WatchedEpisodesOnUser?: { createdAt: Date }[] })[];
   };
+  ratings: { count: number; rating: number | null }[];
   subscribed: boolean;
   loggedIn: boolean;
 };
@@ -39,7 +50,7 @@ export const loader = async ({
               include: {
                 WatchedEpisodesOnUser: {
                   where: { userId },
-                  select: { createdAt: true },
+                  select: { createdAt: true, rating: true },
                 },
               },
             }
@@ -50,8 +61,42 @@ export const loader = async ({
   if (work === null) {
     throw Error("work not found");
   }
+  if (userId === undefined) {
+    return {
+      work,
+      ratings: [],
+      subscribed: work?.users.length === 1,
+      loggedIn: userId !== undefined,
+    };
+  }
+  const ratings = await db.watchedEpisodesOnUser.findMany({
+    select: {
+      episode: {
+        select: {
+          count: true,
+        },
+      },
+      rating: true,
+    },
+    where: {
+      workId: parseInt(workId, 10),
+      userId,
+    },
+    orderBy: {
+      episode: {
+        count: "asc",
+      },
+    },
+  });
+  const map = new Map<number, number | null>();
+  ratings.forEach((r) => {
+    map.set(r.episode.count, r.rating);
+  });
   return {
     work,
+    ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
+      return { count: idx, rating: map.get(idx) ?? null };
+    }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
   };
@@ -163,7 +208,7 @@ export default function Work() {
   const [editMode, setEditMode] = useState(false);
   const [appendEpisodesOpened, openAppendEpisodes] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, work, subscribed } =
+  const { loggedIn, work, subscribed, ratings } =
     useLoaderData<Serialized<LoaderData>>();
   const defaultValueMap: WorkEditForm.Props = {
     workId: work.id,
@@ -174,153 +219,175 @@ export default function Work() {
   };
 
   return (
-    <div style={{ display: "flex" }}>
-      <div>
-        <button onClick={turnEditMode}>
-          {editMode ? "end edit" : "start edit"}
-        </button>
-        <h2>{work.title}</h2>
-        {editMode ? (
-          <WorkEditForm.Component {...defaultValueMap} />
-        ) : (
-          <>
-            {loggedIn && (
-              <WorkSubscribeForm.Component
-                id={work.id.toString()}
-                subscribing={subscribed}
+    <div>
+      <h2>
+        <Link to={`/works/${work.id}`}>{work.title}</Link>
+      </h2>
+      <div className="pt-8 flex flex-wrap justify-between gap-4">
+        <div>
+          <button onClick={turnEditMode}>
+            {editMode ? "end edit" : "start edit"}
+          </button>
+          {editMode ? (
+            <WorkEditForm.Component {...defaultValueMap} />
+          ) : (
+            <>
+              {loggedIn && (
+                <WorkSubscribeForm.Component
+                  id={work.id.toString()}
+                  subscribing={subscribed}
+                />
+              )}
+              <dl>
+                <dt>公式サイト</dt>
+                <dd>
+                  <a href={work.officialSiteUrl ?? undefined}>
+                    {work.officialSiteUrl}
+                  </a>
+                </dd>
+                <dt>公式ツイッター</dt>
+                <dd>
+                  <a href={`https://twitter.com/${work.twitterId}`}>
+                    {work.twitterId}
+                  </a>
+                </dd>
+                <dt>ハッシュタグ</dt>
+                <dd>
+                  {work.hashtag !== null && work.hashtag !== "" && (
+                    <div>
+                      <a href={`https://twitter.com/hashtag/${work.hashtag}`}>
+                        <span>#{work.hashtag}</span>
+                      </a>
+                      <WorkHashtagCopyButton.Component hashtag={work.hashtag} />
+                    </div>
+                  )}
+                </dd>
+              </dl>
+            </>
+          )}
+          <button type="button" onClick={() => openAppendEpisodes((c) => !c)}>
+            話数を追加する
+          </button>
+          {appendEpisodesOpened && (
+            <Form method="post">
+              <ul>
+                <li>
+                  <label>
+                    開始日時
+                    <input
+                      type="datetime-local"
+                      name="startDate"
+                      defaultValue={
+                        work.episodes.length !== 0
+                          ? new Date(
+                              Math.max(
+                                ...work.episodes.map((e) =>
+                                  new Date(e.publishedAt).getTime()
+                                )
+                              ) +
+                                1000 * 60 * 60 * (24 * 7 + 9)
+                            )
+                              .toISOString()
+                              .slice(0, -8)
+                          : undefined
+                      }
+                    />
+                  </label>
+                </li>
+                <li>
+                  <label>
+                    追加する最初の話数カウント
+                    <input
+                      type="number"
+                      name="offset"
+                      defaultValue={
+                        Math.max(...work.episodes.map((e) => e.count)) + 1
+                      }
+                    />
+                  </label>
+                </li>
+                <li>
+                  <label>
+                    何話分
+                    <input type="number" name="length" defaultValue={13} />
+                  </label>
+                </li>
+                <li>
+                  <button type="submit" name="_action" value="addEpisodes">
+                    送信
+                  </button>
+                </li>
+              </ul>
+            </Form>
+          )}
+        </div>
+        <section className="flex flex-col">
+          <div>
+            <h3>登録済みの話数</h3>
+            <table>
+              <tr>
+                <th>話数</th>
+                <th>公開日</th>
+                <th></th>
+              </tr>
+              {work.episodes.map((episode) => {
+                return (
+                  <tr key={`${episode.workId}-${episode.count}`}>
+                    <td>
+                      <Link to={`${episode.count}`}>{episode.count}</Link>
+                    </td>
+                    <td>
+                      {new Date(episode.publishedAt).toLocaleDateString()}
+                    </td>
+                    <td>
+                      {new Date(episode.publishedAt) < new Date() && (
+                        <EpisodeWatchOrUnwatchForm.Component
+                          workId={episode.workId}
+                          count={episode.count}
+                          watched={
+                            episode.WatchedEpisodesOnUser
+                              ? episode.WatchedEpisodesOnUser.length >= 1
+                              : false
+                          }
+                        />
+                      )}
+                    </td>
+                    <td>
+                      <Form method="post">
+                        <input
+                          type="hidden"
+                          name="count"
+                          value={episode.count}
+                        />
+                        <button type="submit" name="_action" value="delete">
+                          削除
+                        </button>
+                      </Form>
+                    </td>
+                  </tr>
+                );
+              })}
+            </table>
+          </div>
+          <Outlet />
+        </section>
+        <section className="basis-graph">
+          <ResponsiveContainer height={300}>
+            <LineChart data={ratings}>
+              <CartesianGrid />
+              <XAxis dataKey="count" stroke="#bdc1c6" />
+              <YAxis
+                domain={[0, 10]}
+                ticks={[0, 2, 4, 6, 8, 10]}
+                stroke="#bdc1c6"
               />
-            )}
-            <dl>
-              <dt>公式サイト</dt>
-              <dd>
-                <a href={work.officialSiteUrl ?? undefined}>
-                  {work.officialSiteUrl}
-                </a>
-              </dd>
-              <dt>公式ツイッター</dt>
-              <dd>
-                <a href={`https://twitter.com/${work.twitterId}`}>
-                  {work.twitterId}
-                </a>
-              </dd>
-              <dt>ハッシュタグ</dt>
-              <dd>
-                {work.hashtag !== null && work.hashtag !== "" && (
-                  <div>
-                    <a href={`https://twitter.com/hashtag/${work.hashtag}`}>
-                      <span>#{work.hashtag}</span>
-                    </a>
-                    <WorkHashtagCopyButton.Component hashtag={work.hashtag} />
-                  </div>
-                )}
-              </dd>
-            </dl>
-            <section>
-              <h3>登録済みの話数</h3>
-              <table>
-                <tr>
-                  <th>話数</th>
-                  <th>公開日</th>
-                  <th></th>
-                </tr>
-                {work.episodes.map((episode) => {
-                  return (
-                    <tr key={`${episode.workId}-${episode.count}`}>
-                      <td>
-                        <Link to={`${episode.count}`}>{episode.count}</Link>
-                      </td>
-                      <td>
-                        {new Date(episode.publishedAt).toLocaleDateString()}
-                      </td>
-                      <td>
-                        {new Date(episode.publishedAt) < new Date() && (
-                          <EpisodeWatchOrUnwatchForm.Component
-                            workId={episode.workId}
-                            count={episode.count}
-                            watched={
-                              episode.WatchedEpisodesOnUser
-                                ? episode.WatchedEpisodesOnUser.length >= 1
-                                : false
-                            }
-                          />
-                        )}
-                      </td>
-                      <td>
-                        <Form method="post">
-                          <input
-                            type="hidden"
-                            name="count"
-                            value={episode.count}
-                          />
-                          <button type="submit" name="_action" value="delete">
-                            削除
-                          </button>
-                        </Form>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </table>
-            </section>
-          </>
-        )}
-        <button type="button" onClick={() => openAppendEpisodes((c) => !c)}>
-          話数を追加する
-        </button>
-        {appendEpisodesOpened && (
-          <Form method="post">
-            <ul>
-              <li>
-                <label>
-                  開始日時
-                  <input
-                    type="datetime-local"
-                    name="startDate"
-                    defaultValue={
-                      work.episodes.length !== 0
-                        ? new Date(
-                            Math.max(
-                              ...work.episodes.map((e) =>
-                                new Date(e.publishedAt).getTime()
-                              )
-                            ) +
-                              1000 * 60 * 60 * (24 * 7 + 9)
-                          )
-                            .toISOString()
-                            .slice(0, -8)
-                        : undefined
-                    }
-                  />
-                </label>
-              </li>
-              <li>
-                <label>
-                  追加する最初の話数カウント
-                  <input
-                    type="number"
-                    name="offset"
-                    defaultValue={
-                      Math.max(...work.episodes.map((e) => e.count)) + 1
-                    }
-                  />
-                </label>
-              </li>
-              <li>
-                <label>
-                  何話分
-                  <input type="number" name="length" defaultValue={13} />
-                </label>
-              </li>
-              <li>
-                <button type="submit" name="_action" value="addEpisodes">
-                  送信
-                </button>
-              </li>
-            </ul>
-          </Form>
-        )}
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="rating" />
+            </LineChart>
+          </ResponsiveContainer>
+        </section>
       </div>
-      <Outlet />
     </div>
   );
 }

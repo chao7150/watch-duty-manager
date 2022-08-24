@@ -114,7 +114,6 @@ input:where([type="search"]) {
   display: grid;
   grid-auto-rows: min-content;
   gap: var(--gap);
-  padding-top: var(--space);
   padding-bottom: var(--space);
 }
 

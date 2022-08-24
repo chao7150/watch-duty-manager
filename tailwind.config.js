@@ -18,6 +18,9 @@ module.exports = {
         red: "#f28b82",
         yellow: "#fdd663",
       },
+      flexBasis: {
+        graph: "600px",
+      },
     },
   },
   plugins: [],

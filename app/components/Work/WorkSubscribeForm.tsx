@@ -1,7 +1,7 @@
 import { useFetcher } from "remix";
 
 export type Props = {
-  givenClassName: string;
+  givenClassName?: string;
   id: string;
   subscribing: boolean;
 };

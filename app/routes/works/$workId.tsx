@@ -369,7 +369,9 @@ export default function Work() {
               })}
             </table>
           </div>
-          <Outlet />
+          <section className="mt-4">
+            <Outlet />
+          </section>
         </section>
         <section className="basis-graph">
           <ResponsiveContainer height={300}>

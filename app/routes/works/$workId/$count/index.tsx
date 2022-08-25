@@ -1,8 +1,8 @@
-import { Episode } from "@prisma/client";
+import { Episode, WatchedEpisodesOnUser } from "@prisma/client";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
-import { requireUserId } from "~/utils/session.server";
+import { getUserId, requireUserId } from "~/utils/session.server";
 import {
   extractParams,
   nonEmptyStringOrUndefined,
@@ -10,14 +10,22 @@ import {
 } from "~/utils/type";
 
 type LoaderData = {
+  userId: string | null;
   episode: Episode & {
     work: { title: string };
-    WatchedEpisodesOnUser: { comment: string | null; rating: number | null }[];
   };
+  histories: {
+    userId: string;
+    comment: string | null;
+    rating: number | null;
+    createdAt: number;
+  }[];
 };
 export const loader = async ({
+  request,
   params,
 }: DataFunctionArgs): Promise<LoaderData> => {
+  const userId = await getUserId(request);
   const { workId, count } = extractParams(params, ["workId", "count"]);
   const episode = await db.episode.findUnique({
     where: {
@@ -28,13 +36,23 @@ export const loader = async ({
     },
     include: {
       work: { select: { title: true } },
-      WatchedEpisodesOnUser: { select: { comment: true, rating: true } },
+    },
+  });
+  const histories = await db.watchedEpisodesOnUser.findMany({
+    where: {
+      workId: parseInt(workId, 10),
+      count: parseInt(count, 10),
     },
   });
   if (episode === null) {
     throw Error("episode not found");
   }
   return {
+    userId,
+    histories: histories.map((h) => ({
+      ...h,
+      createdAt: h.createdAt.getTime(),
+    })),
     episode,
   };
 };
@@ -95,28 +113,50 @@ export const action = async ({
 };
 
 export default function Episode() {
-  const { episode } = useLoaderData<Serialized<LoaderData>>();
+  const { userId, histories, episode } =
+    useLoaderData<Serialized<LoaderData>>();
+  const myHistory = userId && histories.find((w) => w.userId === userId);
+  const otherHistories = histories.filter((h) => h.userId !== userId);
 
   return (
     <div>
+      <h3>{episode.count}話</h3>
       <dl>
-        <dt>作品名</dt>
-        <dd>{episode.work.title}</dd>
-        <dt>話数</dt>
-        <dd>{episode.count}</dd>
         <dt>放送日時</dt>
         <dd>{new Date(episode.publishedAt).toLocaleString()}</dd>
+        {myHistory && (
+          <>
+            <dt>視聴日時</dt>
+            <dd>{new Date(myHistory.createdAt).toLocaleString()}</dd>
+          </>
+        )}
       </dl>
-      <ul>
-        {episode.WatchedEpisodesOnUser.map((w) => {
-          return (
-            <li key={w.comment}>
-              <p>{w.rating}点</p>
-              <p>{w.comment}</p>
-            </li>
-          );
-        })}
-      </ul>
+      {myHistory && (
+        <section className="mt-4">
+          <h4>あなたの感想</h4>
+          <div className="flex">
+            <div>{myHistory.rating}点</div>
+            <p className="ml-4">{myHistory.comment}</p>
+          </div>
+        </section>
+      )}
+      {otherHistories.length > 0 && (
+        <section className="mt-4">
+          <h4>他の視聴者の感想</h4>
+          <ul>
+            {otherHistories.map((w) => {
+              return (
+                <li key={w.comment}>
+                  <div className="flex">
+                    <div>{w.rating}点</div>
+                    <p className="ml-4">{w.comment}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

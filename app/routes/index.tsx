@@ -17,10 +17,9 @@ import {
   YAxis,
 } from "recharts";
 import { useEffect } from "react";
-import { addHours, startOfQuarter, subDays, subHours } from "date-fns";
+import { addDays, addHours, startOfQuarter, subDays, subHours } from "date-fns";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { task as T } from "fp-ts";
-import { addDays } from "date-fns";
 import {
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,

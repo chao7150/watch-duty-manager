@@ -1,4 +1,4 @@
-import { Episode, WatchedEpisodesOnUser } from "@prisma/client";
+import { Episode } from "@prisma/client";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";

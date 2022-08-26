@@ -1,4 +1,4 @@
-import { Either, left, right } from "fp-ts/lib/Either";
+import * as E from "fp-ts/Either";
 import { useFetcher } from "remix";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
@@ -9,14 +9,14 @@ export const serverAction = async (
   workId: number,
   formData: FormData
 ): Promise<
-  Either<
+  E.Either<
     { errorMessage: string; status: number },
     { successMessage: string; status: number }
   >
 > => {
   const title = formData.get("title");
   if (typeof title !== "string" || title === "") {
-    return left({ errorMessage: "title must not be empty", status: 400 });
+    return E.left({ errorMessage: "title must not be empty", status: 400 });
   }
   const optionalWorkCreateInput = nonEmptyStringOrUndefined(
     Object.fromEntries(formData),
@@ -27,12 +27,12 @@ export const serverAction = async (
       where: { id: workId },
       data: { title, ...optionalWorkCreateInput },
     });
-    return right({
+    return E.right({
       successMessage: `${work.title} is successfully updated`,
       status: 200,
     });
   } catch {
-    return left({ errorMessage: "internal server error", status: 500 });
+    return E.left({ errorMessage: "internal server error", status: 500 });
   }
 };
 

@@ -11,8 +11,8 @@ import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton"
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
 import type { DataFunctionArgs } from "@remix-run/server-runtime";
-import { match } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/function";
+import * as E from "fp-ts/Either";
+import * as F from "fp-ts/function";
 import {
   ResponsiveContainer,
   LineChart,
@@ -195,9 +195,9 @@ export const action = async ({
       return json({ errorMessage: "db error" }, { status: 400 });
     }
   }
-  return pipe(
+  return F.pipe(
     await WorkEditForm.serverAction(workId, formData),
-    match(
+    E.match(
       ({ errorMessage, status }) => json({ errorMessage }, { status }),
       ({ successMessage, status }) => json({ successMessage }, { status })
     )

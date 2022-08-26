@@ -1,6 +1,6 @@
 import { WatchedEpisodesOnUser, Work } from "@prisma/client";
 import { type DataFunctionArgs, json } from "@remix-run/server-runtime";
-import { pipe } from "fp-ts/lib/function";
+import * as F from "fp-ts/function";
 import { useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { requireUserIdTaskEither } from "~/utils/middlewares";
@@ -8,7 +8,7 @@ import { Serialized } from "~/utils/type";
 import * as Episode from "../components/Episode/Episode";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
-import { sequenceT } from "fp-ts/lib/Apply";
+import * as A from "fp-ts/Apply";
 import * as WorkUI from "~/components/Work/Work";
 
 type LoaderData = {
@@ -23,12 +23,12 @@ const isNumber = (val: unknown): val is number => typeof val === "number";
 export const loader = async (
   args: DataFunctionArgs
 ): Promise<LoaderData | Response> => {
-  return await pipe(
+  return await F.pipe(
     args,
     TE.of,
     requireUserIdTaskEither(undefined),
     TE.chain(({ userId }: { userId: string }) =>
-      sequenceT(TE.ApplyPar)(
+      A.sequenceT(TE.ApplyPar)(
         TE.tryCatch(
           // subscribe中
           // かつ

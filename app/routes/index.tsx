@@ -18,8 +18,8 @@ import {
 } from "recharts";
 import { useEffect } from "react";
 import { addDays, addHours, startOfQuarter, subDays, subHours } from "date-fns";
-import { sequenceT } from "fp-ts/lib/Apply";
-import { task as T } from "fp-ts";
+import * as A from "fp-ts/Apply";
+import * as T from "fp-ts/Task";
 import {
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,
@@ -182,7 +182,7 @@ export const loader = async ({
     weekDutyAccumulation,
     quarterDuties,
     quarterWatchAchievements,
-  ] = await sequenceT(T.ApplyPar)(
+  ] = await A.sequenceT(T.ApplyPar)(
     getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
     getWeekWatchAchievements({ db, userId, now }),
     getWeekDutyAccumulation({ db, userId, now }),

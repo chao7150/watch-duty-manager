@@ -1,6 +1,6 @@
 import { Form, json } from "remix";
 import * as E from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
+import * as F from "fp-ts/function";
 import { isNonEmptyString } from "~/utils/validator";
 
 export const serverValidator = (
@@ -16,7 +16,7 @@ export const serverValidator = (
     hashtag?: string;
   }>
 > => {
-  return pipe(
+  return F.pipe(
     formData,
     (formData) => {
       const works = formData.get("works");

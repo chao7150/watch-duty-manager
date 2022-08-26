@@ -1,6 +1,6 @@
 import { Work as WorkModel, SubscribedWorksOnUser } from "@prisma/client";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
-import { pipe } from "fp-ts/lib/function";
+import * as F from "fp-ts/function";
 import { useLoaderData } from "remix";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
@@ -23,7 +23,7 @@ export const loader = async ({
   const url = new URL(request.url);
   const releasedDateBegin = url.searchParams.get("releasedDateBegin");
   const releasedDateEnd = url.searchParams.get("releasedDateEnd");
-  const result = await pipe(
+  const result = await F.pipe(
     (await getUserId(request)) ?? undefined,
     (userId) =>
       TE.tryCatch(

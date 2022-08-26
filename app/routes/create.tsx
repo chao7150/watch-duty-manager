@@ -1,6 +1,6 @@
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import * as F from "fp-ts/function";
 import { json, useActionData } from "remix";
 import { db } from "~/utils/db.server";
 
@@ -18,7 +18,7 @@ export const action = async ({
 }: DataFunctionArgs): Promise<ActionData> => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
-    return await pipe(
+    return await F.pipe(
       formData,
       WorkBulkCreateForm.serverValidator,
       TE.fromEither,
@@ -87,7 +87,7 @@ export const action = async ({
       )
     )();
   }
-  return await pipe(
+  return await F.pipe(
     formData,
     WorkCreateForm.serverValidator,
     TE.fromEither,

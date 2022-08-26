@@ -1,5 +1,5 @@
-import { pipe } from "fp-ts/lib/function";
-import { either } from "fp-ts";
+import * as E from "fp-ts/Either";
+import * as F from "fp-ts/function";
 import { Form, json } from "remix";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
@@ -8,7 +8,7 @@ import { isNonEmptyString } from "~/utils/validator";
 
 export const serverValidator = (
   formData: FormData
-): either.Either<
+): E.Either<
   Response,
   {
     title: string;
@@ -19,27 +19,27 @@ export const serverValidator = (
     hashtag?: string;
   }
 > => {
-  return pipe(
+  return F.pipe(
     formData,
     (formData) => {
       const title = formData.get("title");
       return isNonEmptyString(title)
-        ? either.right({ formData, title })
-        : either.left("title must not be empty");
+        ? E.right({ formData, title })
+        : E.left("title must not be empty");
     },
-    either.chain(({ formData, ...rest }) => {
+    E.chain(({ formData, ...rest }) => {
       const publishedAt = formData.get("publishedAt");
       return isNonEmptyString(publishedAt)
-        ? either.right({ formData, publishedAt, ...rest })
-        : either.left("publishedAt must not be empty");
+        ? E.right({ formData, publishedAt, ...rest })
+        : E.left("publishedAt must not be empty");
     }),
-    either.chain(({ formData, ...rest }) => {
+    E.chain(({ formData, ...rest }) => {
       const episodeCount = formData.get("episodeCount");
       return isNonEmptyString(episodeCount)
-        ? either.right({ formData, episodeCount, ...rest })
-        : either.left("episodeCount must not be empty");
+        ? E.right({ formData, episodeCount, ...rest })
+        : E.left("episodeCount must not be empty");
     }),
-    either.bimap(
+    E.bimap(
       (l) => json({ errorMessage: l }, { status: 400 }),
       ({ title, publishedAt, episodeCount, formData }) => ({
         title,

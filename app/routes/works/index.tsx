@@ -90,30 +90,38 @@ export default function Works() {
     <div>
       <h2>作品リスト</h2>
       <section>
-        <h3>絞り込み</h3>
-        <button onClick={() => setFilterCondition(undefined)}>
-          絞り込み解除
-        </button>
-        <ul className="works-filter-condition-list">
-          {courList.map(([label, start]) => {
-            return (
-              <li className="works-filter-condition-item" key={label}>
-                <button onClick={() => setFilterCondition({ label, start })}>
-                  {label}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <details>
+          <summary className="list-none">
+            <h3>絞り込み</h3>
+          </summary>
+          <div className="mt-2 w-64">
+            <button onClick={() => setFilterCondition(undefined)}>
+              絞り込み解除
+            </button>
+            <ul className="works-filter-condition-list">
+              {courList.map(([label, start]) => {
+                return (
+                  <li className="works-filter-condition-item" key={label}>
+                    <button
+                      onClick={() => setFilterCondition({ label, start })}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </details>
       </section>
-      <section>
+      <section className="mt-4">
         <h3>
           <span>
             {filterCondition === undefined ? "全て" : filterCondition.label}
           </span>
           のアニメ(<span>{shownWorks.length}</span>)
         </h3>
-        <ul className="work-list">
+        <ul className="grid grid-cols-2">
           {shownWorks.map((work) => {
             return (
               <li key={work.id}>

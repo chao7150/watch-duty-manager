@@ -168,7 +168,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div className="remix-app__main">
-        <div className="w-11/12 mx-auto pt-8">{children}</div>
+        <div className="w-11/12 mx-auto py-8">{children}</div>
       </div>
       <footer className="remix-app__footer">
         <div className="remix-app__footer-content">

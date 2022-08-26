@@ -588,8 +588,8 @@ a {
   margin-top: 1rem;
 }
 
-.mr-auto {
-  margin-right: auto;
+.mt-2 {
+  margin-top: 0.5rem;
 }
 
 .flex {
@@ -598,6 +598,10 @@ a {
 
 .table {
   display: table;
+}
+
+.grid {
+  display: grid;
 }
 
 .hidden {
@@ -616,6 +620,18 @@ a {
   width: 100%;
 }
 
+.w-48 {
+  width: 12rem;
+}
+
+.w-60 {
+  width: 15rem;
+}
+
+.w-64 {
+  width: 16rem;
+}
+
 .grow {
   flex-grow: 1;
 }
@@ -626,6 +642,14 @@ a {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.list-none {
+  list-style-type: none;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .flex-col {
@@ -670,6 +694,11 @@ a {
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
+}
+
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .pt-8 {

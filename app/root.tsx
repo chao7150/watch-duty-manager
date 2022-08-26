@@ -13,10 +13,10 @@ import {
 } from "remix";
 import type { LinksFunction } from "remix";
 
-import globalStylesUrl from "~/styles/global.css";
-import sharedStylesUrl from "~/styles/shared.css";
 import { getUserId } from "./utils/session.server";
 import styles from "./styles/app.css";
+import globalStylesUrl from "~/styles/global.css";
+import sharedStylesUrl from "~/styles/shared.css";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {

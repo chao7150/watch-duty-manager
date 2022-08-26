@@ -1,9 +1,9 @@
 import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
 import { Form, json } from "remix";
+import * as TextInput from "../components/TextInput";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
-import * as TextInput from "../components/TextInput";
 import { isNonEmptyString } from "~/utils/validator";
 
 export const serverValidator = (

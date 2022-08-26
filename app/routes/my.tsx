@@ -2,13 +2,13 @@ import { WatchedEpisodesOnUser, Work } from "@prisma/client";
 import { type DataFunctionArgs, json } from "@remix-run/server-runtime";
 import * as F from "fp-ts/function";
 import { useLoaderData } from "remix";
-import { db } from "~/utils/db.server";
-import { requireUserIdTaskEither } from "~/utils/middlewares";
-import { Serialized } from "~/utils/type";
-import * as Episode from "../components/Episode/Episode";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import * as A from "fp-ts/Apply";
+import * as Episode from "../components/Episode/Episode";
+import { db } from "~/utils/db.server";
+import { requireUserIdTaskEither } from "~/utils/middlewares";
+import { Serialized } from "~/utils/type";
 import * as WorkUI from "~/components/Work/Work";
 
 type LoaderData = {

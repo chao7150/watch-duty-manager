@@ -1,9 +1,9 @@
 import * as E from "fp-ts/Either";
 import { useFetcher } from "remix";
+import * as TextInput from "./TextInput";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
-import * as TextInput from "./TextInput";
 
 export const serverAction = async (
   workId: number,

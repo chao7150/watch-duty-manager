@@ -1,11 +1,7 @@
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { type MetaFunction, useLoaderData } from "remix";
 import "firebase/compat/auth";
-import { getUserId } from "~/utils/session.server";
-import { db } from "~/utils/db.server";
 import { Episode as EpisodeType, PrismaClient } from "@prisma/client";
-import * as EpisodeList from "../components/Episode/List";
-import { Serialized } from "~/utils/type";
 import {
   CartesianGrid,
   Legend,
@@ -20,6 +16,10 @@ import { useEffect } from "react";
 import { addDays, addHours, startOfQuarter, subDays, subHours } from "date-fns";
 import * as A from "fp-ts/Apply";
 import * as T from "fp-ts/Task";
+import * as EpisodeList from "../components/Episode/List";
+import { Serialized } from "~/utils/type";
+import { db } from "~/utils/db.server";
+import { getUserId } from "~/utils/session.server";
 import {
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,

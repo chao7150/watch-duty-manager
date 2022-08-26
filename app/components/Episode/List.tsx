@@ -1,6 +1,6 @@
 import { useState } from "react";
-import * as Episode from "./Episode";
 import * as EyeIcon from "../Icons/Eye";
+import * as Episode from "./Episode";
 
 export type Props = {
   episodes: Episode.NewProps[];

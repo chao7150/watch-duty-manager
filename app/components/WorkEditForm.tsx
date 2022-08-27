@@ -4,7 +4,6 @@ import * as TextInput from "./TextInput";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
-
 export const serverAction = async (
   workId: number,
   formData: FormData
@@ -84,9 +83,14 @@ export const Component: React.VFC<Props> = ({
             {...hashTag}
           />
         </li>
-        <li>
-          <button type="submit" name="_action" value="edit">
-            submit
+        <li className="mt-2 flex">
+          <button
+            className="bg-accent-area rounded-full py-1 px-3 ml-auto"
+            type="submit"
+            name="_action"
+            value="edit"
+          >
+            送信
           </button>
         </li>
       </ul>

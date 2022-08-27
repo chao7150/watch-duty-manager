@@ -592,6 +592,10 @@ a {
   margin-top: 0.5rem;
 }
 
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
 .flex {
   display: flex;
 }
@@ -606,6 +610,14 @@ a {
 
 .hidden {
   display: none;
+}
+
+.h-6 {
+  height: 1.5rem;
+}
+
+.h-px {
+  height: 1px;
 }
 
 .w-11\/12 {
@@ -632,12 +644,38 @@ a {
   width: 16rem;
 }
 
+.w-6 {
+  width: 1.5rem;
+}
+
 .grow {
   flex-grow: 1;
 }
 
 .basis-graph {
   flex-basis: 600px;
+}
+
+.border-spacing-6 {
+  --tw-border-spacing-x: 1.5rem;
+  --tw-border-spacing-y: 1.5rem;
+  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
+}
+
+.border-spacing-y-6 {
+  --tw-border-spacing-y: 1.5rem;
+  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
+}
+
+.border-spacing-x-6 {
+  --tw-border-spacing-x: 1.5rem;
+  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
+}
+
+.border-spacing-2 {
+  --tw-border-spacing-x: 0.5rem;
+  --tw-border-spacing-y: 0.5rem;
+  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
 }
 
 .cursor-pointer {
@@ -650,6 +688,10 @@ a {
 
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {
@@ -703,6 +745,10 @@ a {
 
 .pt-8 {
   padding-top: 2rem;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 .font-bold {

@@ -121,7 +121,7 @@ export default function Works() {
           </span>
           のアニメ(<span>{shownWorks.length}</span>)
         </h3>
-        <ul className="grid grid-cols-2">
+        <ul className="grid grid-cols-2 gap-1">
           {shownWorks.map((work) => {
             return (
               <li key={work.id}>

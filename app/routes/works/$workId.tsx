@@ -225,7 +225,7 @@ export default function Work() {
   return (
     <div>
       <div className="flex">
-        <h2>
+        <h2 className="flex items-center">
           <Link to={`/works/${work.id}`}>{work.title}</Link>
         </h2>
         {loggedIn && (
@@ -439,7 +439,6 @@ export default function Work() {
             </ResponsiveContainer>
           </section>
         </div>
-        <hr className="mt-4 bg-accent-area h-px" />
         <section className="mt-4">
           <Outlet />
         </section>

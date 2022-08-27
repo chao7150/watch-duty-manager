@@ -117,7 +117,7 @@ export default function My() {
               return (b.rating ?? 0) - (a.rating ?? 0);
             })
             .map((work) => (
-              <li className="flex items-center" key={work.id}>
+              <li className="mt-1 flex items-center" key={work.id}>
                 <div className="w-4">
                   {work.rating !== undefined
                     ? work.rating.toFixed(1)

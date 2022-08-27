@@ -1,4 +1,5 @@
 import { useFetcher } from "remix";
+import { useHover } from "react-use";
 
 export type Props = {
   givenClassName?: string;
@@ -23,35 +24,32 @@ export const Component: React.VFC<Props> = ({
   );
 };
 
-export const TextComponent: React.VFC<Props> = ({
-  givenClassName,
-  id,
-  subscribing,
-}) => {
-  const fetcher = useFetcher();
-  return (
-    <fetcher.Form
-      className={`work-subscribe-form ${givenClassName}`}
-      method="post"
-      action={`/works/${id}`}
-    >
-      {subscribing ? "視聴中" : "未視聴"}
-    </fetcher.Form>
-  );
-};
-
 const UnsubscribeButton = () => {
-  return (
-    <button className="" name="_action" value="unsubscribe" title="unsubscribe">
-      見てる
+  const element = (hovered: boolean) => (
+    <button
+      className="w-24 bg-accent-area rounded-full py-1 px-3"
+      name="_action"
+      value="unsubscribe"
+      title="unsubscribe"
+    >
+      {hovered ? "切る？" : "見てる"}
     </button>
   );
+  const [hoverable, hovered] = useHover(element);
+  return hoverable;
 };
 
 const SubscribeButton = () => {
-  return (
-    <button className="" name="_action" value="subscribe" title="subscribe">
-      見てない
+  const element = (hovered: boolean) => (
+    <button
+      className="w-24 bg-accent-area rounded-full py-1 px-3"
+      name="_action"
+      value="subscribe"
+      title="subscribe"
+    >
+      {hovered ? "見る？" : "見てない"}
     </button>
   );
+  const [hoverable, hovered] = useHover(element);
+  return hoverable;
 };

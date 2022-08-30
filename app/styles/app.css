@@ -430,6 +430,23 @@ a {
   color: rgb(138 180 248 / var(--tw-text-opacity));
 }
 
+input[type="text"] {
+  --tw-bg-opacity: 1;
+  background-color: rgb(48 49 52 / var(--tw-bg-opacity));
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+input[type="text"]::-moz-placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(154 160 166 / var(--tw-text-opacity));
+}
+
+input[type="text"]::placeholder {
+  --tw-text-opacity: 1;
+  color: rgb(154 160 166 / var(--tw-text-opacity));
+}
+
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -576,32 +593,28 @@ a {
   margin-right: auto;
 }
 
-.ml-4 {
-  margin-left: 1rem;
+.mt-2 {
+  margin-top: 0.5rem;
 }
 
 .ml-auto {
   margin-left: auto;
 }
 
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
-}
-
-.ml-2 {
-  margin-left: 0.5rem;
-}
-
 .mt-1 {
   margin-top: 0.25rem;
 }
 
-.inline-block {
-  display: inline-block;
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
 }
 
 .flex {
@@ -624,10 +637,6 @@ a {
   height: 1.5rem;
 }
 
-.h-px {
-  height: 1px;
-}
-
 .w-11\/12 {
   width: 91.666667%;
 }
@@ -640,32 +649,16 @@ a {
   width: 100%;
 }
 
-.w-48 {
-  width: 12rem;
-}
-
-.w-60 {
-  width: 15rem;
-}
-
-.w-64 {
-  width: 16rem;
-}
-
 .w-6 {
   width: 1.5rem;
 }
 
-.w-16 {
-  width: 4rem;
-}
-
-.w-20 {
-  width: 5rem;
-}
-
 .w-24 {
   width: 6rem;
+}
+
+.w-64 {
+  width: 16rem;
 }
 
 .grow {
@@ -674,22 +667,6 @@ a {
 
 .basis-graph {
   flex-basis: 600px;
-}
-
-.border-spacing-6 {
-  --tw-border-spacing-x: 1.5rem;
-  --tw-border-spacing-y: 1.5rem;
-  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
-}
-
-.border-spacing-y-6 {
-  --tw-border-spacing-y: 1.5rem;
-  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
-}
-
-.border-spacing-x-6 {
-  --tw-border-spacing-x: 1.5rem;
-  border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
 }
 
 .border-spacing-2 {
@@ -734,10 +711,6 @@ a {
   gap: 1rem;
 }
 
-.gap-2 {
-  gap: 0.5rem;
-}
-
 .gap-1 {
   gap: 0.25rem;
 }
@@ -756,9 +729,9 @@ a {
   background-color: rgb(48 49 52 / var(--tw-bg-opacity));
 }
 
-.bg-dominant {
-  --tw-bg-opacity: 1;
-  background-color: rgb(150 223 54 / var(--tw-bg-opacity));
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .py-1 {
@@ -769,11 +742,6 @@ a {
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
-}
-
-.py-8 {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
 }
 
 .pt-8 {

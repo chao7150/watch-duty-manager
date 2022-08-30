@@ -5,7 +5,7 @@ import { get4OriginDate } from "../../utils/date";
 
 import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
-import * as EpisodeWatchNotReadyIcon from "./EpisodeWatchNotReadyIcon";
+import * as ExclamationCircleIcon from "../../components/Icons/ExclamationCircle";
 
 type Status = "published" | "onair" | "today" | "tomorrow";
 
@@ -50,7 +50,7 @@ const Information: React.VFC<InformationProps> = ({
         </div>
         {watchReady === false && (
           <div className="icon" title="まだ前の話数を見ていません">
-            <EpisodeWatchNotReadyIcon.Component />
+            <ExclamationCircleIcon.Component />
           </div>
         )}
       </h3>

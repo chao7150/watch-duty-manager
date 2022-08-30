@@ -1,5 +1,5 @@
 import { useState } from "react";
-import * as EyeIcon from "../Icons/Eye";
+import * as FilterIcon from "../Icons/Filter";
 import * as Episode from "./Episode";
 
 export type Props = {
@@ -11,6 +11,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
   return (
     <div>
       <input
+        type="text"
         value={filterKeyword}
         onChange={(e) => setFilterKeyword(e.target.value)}
         placeholder="タイトルで絞り込み"
@@ -28,6 +29,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
             >
               <div className="flex" title="タイトルで絞り込み">
                 <button
+                  className="flex"
                   onClick={() => {
                     if (filterKeyword === "") {
                       setFilterKeyword(e.title);
@@ -36,11 +38,13 @@ export const Component: React.FC<Props> = ({ episodes }) => {
                     }
                   }}
                 >
-                  {filterKeyword === "" ? (
-                    <EyeIcon.Component />
-                  ) : (
-                    <EyeIcon.AltComponent />
-                  )}
+                  <div>
+                    {filterKeyword === "" ? (
+                      <FilterIcon.Component />
+                    ) : (
+                      <FilterIcon.AltComponent />
+                    )}
+                  </div>
                 </button>
                 <Episode.Component.New {...e} />
               </div>

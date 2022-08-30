@@ -14,8 +14,16 @@
     h3 {
         @apply text-lg;
     }
-    
+
     a {
         @apply text-link;
+    }
+
+    input[type="text"] {
+        @apply bg-accent-area outline-none;
+    }
+
+    input[type="text"]::placeholder {
+        @apply text-text-weak;
     }
 }

@@ -1,28 +1,3 @@
-.icon-button {
-  padding: 2px;
-  width: 24px;
-  height: 24px;
-  border: none;
-  cursor: pointer;
-  background-color: white;
-}
-
-.subscribe-button {
-  background-color: rgba(250, 214, 214, 0.4);
-}
-
-.subscribe-button:hover {
-  background-color: rgba(146, 197, 186);
-}
-
-.unsubscribe-button {
-  background-color: rgba(146, 197, 186, 0.4);
-}
-
-.unsubscribe-button:hover {
-  background-color: rgba(250, 214, 214);
-}
-
 .icon {
   width: 24px;
   height: 24px;
@@ -34,7 +9,7 @@
   align-items: center;
 }
 
-.episode-heading > * + * {
+.episode-heading>*+* {
   margin-left: 0.25em;
 }
 
@@ -42,8 +17,8 @@
   display: flex;
 }
 
-.episode-action-menu summary { 
-  list-style-type: none; 
+.episode-action-menu summary {
+  list-style-type: none;
 }
 
 .work {
@@ -51,14 +26,6 @@
   flex-direction: row;
   align-items: center;
   gap: 4px;
-}
-
-.work-list {
-  list-style: none;
-}
-
-.work-list > li:not(:first-child) {
-  margin-top: 4px;
 }
 
 .works-filter-condition-list {
@@ -73,32 +40,14 @@
   align-items: center;
 }
 
-/* https://www.schemecolor.com/various-hues.php */
-
-.episode[data-status="tomorrow"] {
-  background-color: rgba(190, 173, 201, 0.4);
-}
-
-.episode[data-status="today"] {
-  background-color: rgba(250, 214, 214, 0.4);
-}
-
-.episode[data-status="published"] {
-  background-color: rgba(242, 240, 217, 0.4);
-}
-
-.episode[data-status="onair"] {
-  background-color: rgba(250, 214, 214);
-}
-
 .episode-list {
   list-style: none;
 }
 
-.episode-list > li[aria-hidden="true"] {
+.episode-list>li[aria-hidden="true"] {
   display: none;
 }
 
-.episode-list-item-container {
-  display: flex;
+body {
+  width: 100vw;
 }

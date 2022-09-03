@@ -188,7 +188,7 @@ export default function My() {
       </section>
       <section>
         <h2>最近見たエピソード</h2>
-        <ul>
+        <ul className="mt-4 flex flex-col gap-4">
           {recentWatchedEpisodes.map((e) => (
             <li key={`${e.workId}-${e.count}`}>
               <Episode.Component.Watched

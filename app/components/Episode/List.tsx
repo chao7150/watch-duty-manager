@@ -11,7 +11,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
   return (
     <div>
       <input
-        type="text"
+        type="search"
         value={filterKeyword}
         onChange={(e) => setFilterKeyword(e.target.value)}
         placeholder="タイトルで絞り込み"
@@ -27,9 +27,9 @@ export const Component: React.FC<Props> = ({ episodes }) => {
               key={`${e.workId}-${e.count}`}
               aria-hidden={hide}
             >
-              <div className="flex" title="タイトルで絞り込み">
+              <div className="flex">
                 <button
-                  className="flex"
+                  title="タイトルで絞り込み"
                   onClick={() => {
                     if (filterKeyword === "") {
                       setFilterKeyword(e.title);
@@ -38,13 +38,11 @@ export const Component: React.FC<Props> = ({ episodes }) => {
                     }
                   }}
                 >
-                  <div>
-                    {filterKeyword === "" ? (
-                      <FilterIcon.Component />
-                    ) : (
-                      <FilterIcon.AltComponent />
-                    )}
-                  </div>
+                  {filterKeyword === "" ? (
+                    <FilterIcon.Component />
+                  ) : (
+                    <FilterIcon.AltComponent />
+                  )}
                 </button>
                 <Episode.Component.New {...e} />
               </div>

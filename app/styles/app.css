@@ -430,19 +430,21 @@ a {
   color: rgb(138 180 248 / var(--tw-text-opacity));
 }
 
-input[type="text"] {
+input[type="text"], 
+    input[type="search"] {
   --tw-bg-opacity: 1;
   background-color: rgb(48 49 52 / var(--tw-bg-opacity));
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
 
-input[type="text"]::-moz-placeholder {
+input[type="text"]::-moz-placeholder, input[type="search"]::-moz-placeholder {
   --tw-text-opacity: 1;
   color: rgb(154 160 166 / var(--tw-text-opacity));
 }
 
-input[type="text"]::placeholder {
+input[type="text"]::placeholder, 
+    input[type="search"]::placeholder {
   --tw-text-opacity: 1;
   color: rgb(154 160 166 / var(--tw-text-opacity));
 }
@@ -601,20 +603,20 @@ input[type="text"]::placeholder {
   margin-left: auto;
 }
 
-.mt-1 {
-  margin-top: 0.25rem;
-}
-
-.ml-4 {
-  margin-left: 1rem;
+.ml-2 {
+  margin-left: 0.5rem;
 }
 
 .mt-4 {
   margin-top: 1rem;
 }
 
-.ml-2 {
-  margin-left: 0.5rem;
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
 }
 
 .flex {

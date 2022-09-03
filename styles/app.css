@@ -19,11 +19,13 @@
         @apply text-link;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="search"] {
         @apply bg-accent-area outline-none;
     }
 
-    input[type="text"]::placeholder {
+    input[type="text"]::placeholder,
+    input[type="search"]::placeholder {
         @apply text-text-weak;
     }
 }

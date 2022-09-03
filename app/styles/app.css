@@ -641,6 +641,10 @@ input[type="text"]::placeholder {
   width: 91.666667%;
 }
 
+.w-64 {
+  width: 16rem;
+}
+
 .w-4 {
   width: 1rem;
 }
@@ -655,10 +659,6 @@ input[type="text"]::placeholder {
 
 .w-24 {
   width: 6rem;
-}
-
-.w-64 {
-  width: 16rem;
 }
 
 .grow {

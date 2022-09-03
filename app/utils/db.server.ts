@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === "production") {
   db.$connect();
 } else {
   if (!global.__db) {
-    global.__db = new PrismaClient({ log: ["query", "info", "warn", "error"] });
+    global.__db = new PrismaClient({ log: ["info", "warn", "error"] });
     global.__db.$connect();
   }
   db = global.__db;

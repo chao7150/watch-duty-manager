@@ -91,7 +91,7 @@ export default function Works() {
       <h2>作品リスト</h2>
       <section>
         <details>
-          <summary className="list-none">
+          <summary className="list-none cursor-pointer">
             <h3>絞り込み</h3>
           </summary>
           <div className="mt-2 w-64">

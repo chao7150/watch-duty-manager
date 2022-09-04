@@ -36,14 +36,34 @@ export const serverAction = async (
       data: {
         title,
         ...optionalWorkCreateInput,
-        DistributorsOnWorks: { createMany: { data: distributions ?? [] } },
       },
     });
+    await Promise.all(
+      distributions.map(async (d) => {
+        await db.distributorsOnWorks.upsert({
+          where: {
+            workId_distributorId: {
+              workId: work.id,
+              distributorId: d.distributorId,
+            },
+          },
+          create: {
+            workIdOnDistributor: d.workIdOnDistributor,
+            distributorId: d.distributorId,
+            workId: work.id,
+          },
+          update: {
+            workIdOnDistributor: d.workIdOnDistributor,
+          },
+        });
+      })
+    );
     return E.right({
       successMessage: `${work.title} is successfully updated`,
       status: 200,
     });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return E.left({ errorMessage: "internal server error", status: 500 });
   }
 };
@@ -67,51 +87,56 @@ export const Component: React.VFC<Props> = ({
 }) => {
   const fetcher = useFetcher();
   return (
-    <fetcher.Form method="post" action={`/works/${workId}`}>
-      <ul>
-        <li>
-          <TextInput.Component
-            labelText="タイトル"
-            name="title"
-            isRequired={true}
-            {...title}
-          />
-        </li>
-        <li>
-          <TextInput.Component
-            labelText="公式サイトURL"
-            name="officialSiteUrl"
-            {...officialSiteUrl}
-          />
-        </li>
-        <li>
-          <TextInput.Component
-            labelText="ツイッターID"
-            name="twitterId"
-            {...twitterId}
-          />
-        </li>
-        <li>
-          <TextInput.Component
-            labelText="ハッシュタグ（#は不要）"
-            name="hashtag"
-            {...hashTag}
-          />
-        </li>
-        <li>
-          <DistributorForm.Component {...distributionForm} />
-        </li>
-        <li className="mt-2 flex">
-          <button
-            className="bg-accent-area rounded-full py-1 px-3 ml-auto"
-            type="submit"
-            name="_action"
-            value="edit"
-          >
-            送信
-          </button>
-        </li>
-      </ul>
-    </fetcher.Form>
+    <section>
+      {fetcher.data && (
+        <p>{fetcher.data.errorMessage || fetcher.data.successMessage}</p>
+      )}
+      <fetcher.Form method="post" action={`/works/${workId}`}>
+        <ul>
+          <li>
+            <TextInput.Component
+              labelText="タイトル"
+              name="title"
+              isRequired={true}
+              {...title}
+            />
+          </li>
+          <li>
+            <TextInput.Component
+              labelText="公式サイトURL"
+              name="officialSiteUrl"
+              {...officialSiteUrl}
+            />
+          </li>
+          <li>
+            <TextInput.Component
+              labelText="ツイッターID"
+              name="twitterId"
+              {...twitterId}
+            />
+          </li>
+          <li>
+            <TextInput.Component
+              labelText="ハッシュタグ（#は不要）"
+              name="hashtag"
+              {...hashTag}
+            />
+          </li>
+          <li>
+            <DistributorForm.Component {...distributionForm} />
+          </li>
+          <li className="mt-2 flex">
+            <button
+              className="bg-accent-area rounded-full py-1 px-3 ml-auto"
+              type="submit"
+              name="_action"
+              value="edit"
+            >
+              送信
+            </button>
+          </li>
+        </ul>
+      </fetcher.Form>
+    </section>
   );
 };

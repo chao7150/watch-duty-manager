@@ -22,10 +22,22 @@ export const serverAction = async (
     Object.fromEntries(formData),
     ["officialSiteUrl", "twitterId", "hashtag"]
   );
+  const distributions = Object.entries(Object.fromEntries(formData))
+    .filter(([k, v]) => k.startsWith("distributor-"))
+    .map(([k, v]) => {
+      return {
+        distributorId: Number(k.replace("distributor-", "")),
+        workIdOnDistributor: v as string,
+      };
+    });
   try {
     const work = await db.work.update({
       where: { id: workId },
-      data: { title, ...optionalWorkCreateInput },
+      data: {
+        title,
+        ...optionalWorkCreateInput,
+        DistributorsOnWorks: { createMany: { data: distributions ?? [] } },
+      },
     });
     return E.right({
       successMessage: `${work.title} is successfully updated`,

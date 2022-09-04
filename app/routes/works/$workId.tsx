@@ -1,6 +1,12 @@
 import { Outlet, Form, json, Link, useLoaderData } from "remix";
 
-import { Episode, SubscribedWorksOnUser, Work } from "@prisma/client";
+import {
+  DistributorsOnWorks,
+  Episode,
+  SubscribedWorksOnUser,
+  Work,
+  Distributor,
+} from "@prisma/client";
 import { useCallback, useState } from "react";
 import type { DataFunctionArgs } from "@remix-run/server-runtime";
 import * as E from "fp-ts/Either";
@@ -24,14 +30,15 @@ import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton"
 import * as EditIcon from "../../components/Icons/Edit";
 import * as CloseIcon from "../../components/Icons/Close";
 import * as TrashIcon from "../../components/Icons/Trash";
-import * as PlusIcon from "../../components/Icons/Plus";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
+import { createDistributorLinkHref } from "../distributors";
 
 type LoaderData = {
   work: Work & {
     users: SubscribedWorksOnUser[];
     episodes: (Episode & { WatchedEpisodesOnUser?: { createdAt: Date }[] })[];
+    DistributorsOnWorks: (DistributorsOnWorks & { distributor: Distributor })[];
   };
   ratings: { count: number; rating: number | null }[];
   subscribed: boolean;
@@ -60,6 +67,7 @@ export const loader = async ({
             }
           : {}),
       },
+      DistributorsOnWorks: { include: { distributor: true } },
     },
   });
   if (work === null) {
@@ -220,6 +228,11 @@ export default function Work() {
     officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
     twitterId: { defaultValue: work.twitterId ?? "" },
     hashTag: { defaultValue: work.hashtag ?? "" },
+    distributionForm: {
+      defaultValue: work.DistributorsOnWorks.reduce((acc, val) => {
+        return { ...acc, [val.distributorId]: val.workIdOnDistributor };
+      }, {}),
+    },
   };
 
   return (
@@ -282,6 +295,25 @@ export default function Work() {
                           />
                         </div>
                       )}
+                    </dd>
+                    <dt>配信サービス</dt>
+                    <dd>
+                      {work.DistributorsOnWorks.map((d) => {
+                        const href = createDistributorLinkHref({
+                          distributorId: d.distributorId,
+                          domain: d.distributor.domain,
+                          workIdOnDistributor: d.workIdOnDistributor,
+                        });
+                        return (
+                          <div>
+                            {href === undefined ? (
+                              <span>{d.distributor.name}</span>
+                            ) : (
+                              <a href={href}>{d.distributor.name}</a>
+                            )}
+                          </div>
+                        );
+                      })}
                     </dd>
                   </dl>
                 )}

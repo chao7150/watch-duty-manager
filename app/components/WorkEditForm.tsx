@@ -3,6 +3,7 @@ import { useFetcher } from "remix";
 import * as TextInput from "./TextInput";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
+import * as DistributorForm from "../components/Distributor/Form";
 
 export const serverAction = async (
   workId: number,
@@ -41,6 +42,7 @@ export type Props = {
   officialSiteUrl?: Partial<TextInput.Props>;
   twitterId?: Partial<TextInput.Props>;
   hashTag?: Partial<TextInput.Props>;
+  distributionForm?: DistributorForm.Props;
 };
 
 export const Component: React.VFC<Props> = ({
@@ -49,6 +51,7 @@ export const Component: React.VFC<Props> = ({
   officialSiteUrl,
   twitterId,
   hashTag,
+  distributionForm,
 }) => {
   const fetcher = useFetcher();
   return (
@@ -82,6 +85,9 @@ export const Component: React.VFC<Props> = ({
             name="hashtag"
             {...hashTag}
           />
+        </li>
+        <li>
+          <DistributorForm.Component {...distributionForm} />
         </li>
         <li className="mt-2 flex">
           <button

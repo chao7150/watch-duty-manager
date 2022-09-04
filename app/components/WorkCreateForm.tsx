@@ -3,6 +3,7 @@ import * as F from "fp-ts/function";
 import { Form, json } from "remix";
 import * as TextInput from "../components/TextInput";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
+import * as DistributorForm from "../components/Distributor/Form";
 
 import { isNonEmptyString } from "~/utils/validator";
 
@@ -17,6 +18,7 @@ export const serverValidator = (
     officialSiteUrl?: string;
     twitterId?: string;
     hashtag?: string;
+    distributions?: { distributorId: number; workIdOnDistributor: string }[];
   }
 > => {
   return F.pipe(
@@ -39,12 +41,24 @@ export const serverValidator = (
         ? E.right({ formData, episodeCount, ...rest })
         : E.left("episodeCount must not be empty");
     }),
+    E.chain(({ formData, ...rest }) => {
+      const distributions = Object.entries(Object.fromEntries(formData))
+        .filter(([k, v]) => k.startsWith("distributor-"))
+        .map(([k, v]) => {
+          return {
+            distributorId: Number(k.replace("distributor-", "")),
+            workIdOnDistributor: v as string,
+          };
+        });
+      return E.right({ formData, distributions, ...rest });
+    }),
     E.bimap(
       (l) => json({ errorMessage: l }, { status: 400 }),
-      ({ title, publishedAt, episodeCount, formData }) => ({
+      ({ title, publishedAt, episodeCount, distributions, formData }) => ({
         title,
         publishedAt: new Date(publishedAt),
         episodeCount: Number(episodeCount),
+        distributions,
         ...nonEmptyStringOrUndefined(Object.fromEntries(formData), [
           "officialSiteUrl",
           "twitterId",
@@ -55,9 +69,9 @@ export const serverValidator = (
   );
 };
 
-export type Props = Record<string, never>;
+export type Props = { distributors: { id: number; name: string }[] };
 
-export const Component: React.VFC<Props> = () => {
+export const Component: React.VFC<Props> = ({ distributors }) => {
   return (
     <Form method="post">
       <p>
@@ -105,6 +119,9 @@ export const Component: React.VFC<Props> = () => {
             labelText="ハッシュタグ（#は不要）"
             name="hashtag"
           />
+        </li>
+        <li>
+          <DistributorForm.Component />
         </li>
         <li>
           <button type="submit">submit</button>

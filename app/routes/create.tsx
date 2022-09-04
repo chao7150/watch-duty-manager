@@ -1,12 +1,14 @@
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as F from "fp-ts/function";
-import { json, useActionData } from "remix";
+import { json, useActionData, useFetcher } from "remix";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { db } from "~/utils/db.server";
-
+import { useEffect } from "react";
+import type { LoaderData as DistributorsLoaderData } from "./distributors/index";
+import { Serialized } from "~/utils/type";
 
 type ActionData =
   | { title: string }
@@ -91,13 +93,20 @@ export const action = async ({
     formData,
     WorkCreateForm.serverValidator,
     TE.fromEither,
-    TE.chain(({ episodeCount, ...work }) => {
+    TE.chain(({ episodeCount, distributions, ...work }) => {
       return TE.tryCatch(
         async () => ({
-          returnedWork: await db.work.create({ data: work }),
+          returnedWork: await db.work.create({
+            data: {
+              ...work,
+              DistributorsOnWorks: {
+                createMany: { data: distributions ?? [] },
+              },
+            },
+          }),
           episodeCount,
         }),
-        () => json({ errorMessage: "work already exists" }, { status: 409 })
+        (e) => json({ errorMessage: e }, { status: 409 })
       );
     }),
     TE.chain(({ returnedWork, episodeCount }) => {
@@ -117,8 +126,7 @@ export const action = async ({
           });
           return returnedWork;
         },
-        () =>
-          json({ errorMessage: "episode creation failed" }, { status: 500 })
+        () => json({ errorMessage: "episode creation failed" }, { status: 500 })
       );
     }),
     TE.foldW(
@@ -129,19 +137,24 @@ export const action = async ({
 };
 
 export default function Create() {
+  const fetcher = useFetcher();
+
+  useEffect(() => {
+    if (fetcher.type === "init") {
+      fetcher.load("/distributors?index");
+    }
+  }, [fetcher]);
+  const { distributors: distributors }: Serialized<DistributorsLoaderData> =
+    fetcher.type === "done" ? fetcher.data : { distributors: [] };
   // HACK: 型付けろ
   const actionData = useActionData<ActionData>();
 
   return (
     <>
-      <p>
-        {actionData &&
-          (actionData?.errorMessage ??
-            `${actionData.title} was successfully submitted.`)}
-      </p>
+      <p>{actionData && JSON.stringify(actionData)}</p>
       <div>
         <WorkBulkCreateForm.Component />
-        <WorkCreateForm.Component />
+        <WorkCreateForm.Component distributors={distributors} />
       </div>
     </>
   );

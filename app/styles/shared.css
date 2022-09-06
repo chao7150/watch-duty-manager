@@ -47,7 +47,3 @@
 .episode-list>li[aria-hidden="true"] {
   display: none;
 }
-
-body {
-  width: 100vw;
-}

@@ -6,7 +6,7 @@ import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { db } from "~/utils/db.server";
-import { useEffect } from "react";
+import { useState } from "react";
 import type { LoaderData as DistributorsLoaderData } from "./distributors/index";
 import { Serialized } from "~/utils/type";
 
@@ -137,25 +137,26 @@ export const action = async ({
 };
 
 export default function Create() {
-  const fetcher = useFetcher();
-
-  useEffect(() => {
-    if (fetcher.type === "init") {
-      fetcher.load("/distributors?index");
-    }
-  }, [fetcher]);
-  const { distributors: distributors }: Serialized<DistributorsLoaderData> =
-    fetcher.type === "done" ? fetcher.data : { distributors: [] };
+  const [bulkCreateMode, setBulkCreateMode] = useState(false);
   // HACK: 型付けろ
   const actionData = useActionData<ActionData>();
 
   return (
-    <>
-      <p>{actionData && JSON.stringify(actionData)}</p>
-      <div>
-        <WorkBulkCreateForm.Component />
-        <WorkCreateForm.Component distributors={distributors} />
-      </div>
-    </>
+    <div className="pb-8">
+      <h2>作品登録</h2>
+      <section className="mt-4">
+        <p>{actionData && JSON.stringify(actionData)}</p>
+        <div>
+          <button onClick={() => setBulkCreateMode((m) => !m)}>
+            {bulkCreateMode ? "戻る" : "複数入力する"}
+          </button>
+          {bulkCreateMode ? (
+            <WorkBulkCreateForm.Component />
+          ) : (
+            <WorkCreateForm.Component />
+          )}
+        </div>
+      </section>
+    </div>
   );
 }

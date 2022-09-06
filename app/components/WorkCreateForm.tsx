@@ -69,9 +69,9 @@ export const serverValidator = (
   );
 };
 
-export type Props = { distributors: { id: number; name: string }[] };
+export type Props = {};
 
-export const Component: React.VFC<Props> = ({ distributors }) => {
+export const Component: React.VFC<Props> = () => {
   return (
     <Form method="post">
       <p>

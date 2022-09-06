@@ -1,4 +1,4 @@
-import { useFetcher } from "remix";
+import { useFetcher } from "@remix-run/react";
 import * as EpisodeWatchOrUnwatchForm from "./EpisodeWatchOrUnwatchForm";
 
 export type Props = {

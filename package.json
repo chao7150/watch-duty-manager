@@ -13,15 +13,14 @@
     "format": "prettier --write \"./**/*.{ts,tsx,js,json}\"",
     "lint": "eslint \"app/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
-    "postinstall": "remix setup node",
     "start": "remix-serve build",
     "test": "vitest run"
   },
   "dependencies": {
     "@prisma/client": "^4.1.1",
-    "@remix-run/dev": "^1.5.1",
-    "@remix-run/react": "^1.5.1",
-    "@remix-run/serve": "^1.5.1",
+    "@remix-run/node": "^1.7.0",
+    "@remix-run/react": "^1.7.0",
+    "@remix-run/serve": "^1.7.0",
     "date-fns": "^2.29.1",
     "dotenv": "^10.0.0",
     "firebase": "^9.6.2",
@@ -31,10 +30,10 @@
     "react-dom": "^17.0.2",
     "react-firebaseui": "^6.0.0",
     "react-use": "^17.4.0",
-    "recharts": "^2.1.10",
-    "remix": "^1.5.1"
+    "recharts": "^2.1.10"
   },
   "devDependencies": {
+    "@remix-run/dev": "^1.7.0",
     "@types/react": "^17.0.24",
     "@types/react-dom": "^17.0.9",
     "@typescript-eslint/eslint-plugin": "^5.5.0",

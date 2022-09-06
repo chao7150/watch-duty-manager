@@ -1,7 +1,7 @@
 import { WatchedEpisodesOnUser, Work } from "@prisma/client";
 import { type DataFunctionArgs, json } from "@remix-run/server-runtime";
 import * as F from "fp-ts/function";
-import { Link, useLoaderData } from "remix";
+import { Link, useLoaderData } from "@remix-run/react";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import * as A from "fp-ts/Apply";

@@ -1,5 +1,6 @@
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
-import { type MetaFunction, useLoaderData } from "remix";
+import { MetaFunction } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 import "firebase/compat/auth";
 import { Episode as EpisodeType, PrismaClient } from "@prisma/client";
 import {

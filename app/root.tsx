@@ -1,17 +1,18 @@
+import type { LinksFunction } from "@remix-run/node";
+import { LoaderFunction } from "@remix-run/node";
+
 import {
   Form,
   Link,
   Links,
   LiveReload,
-  type LoaderFunction,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
   useCatch,
   useLoaderData,
-} from "remix";
-import type { LinksFunction } from "remix";
+} from "@remix-run/react";
 
 import { getUserId } from "./utils/session.server";
 import styles from "./styles/app.css";

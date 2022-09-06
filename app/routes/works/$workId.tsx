@@ -1,4 +1,5 @@
-import { Outlet, Form, json, Link, useLoaderData } from "remix";
+import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
+import { json } from "@remix-run/node";
 
 import {
   DistributorsOnWorks,

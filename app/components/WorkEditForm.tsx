@@ -1,5 +1,5 @@
 import * as E from "fp-ts/Either";
-import { useFetcher } from "remix";
+import { useFetcher } from "@remix-run/react";
 import * as TextInput from "./TextInput";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";

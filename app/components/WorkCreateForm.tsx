@@ -1,6 +1,7 @@
 import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
-import { Form, json } from "remix";
+import { json } from "@remix-run/node";
+import { Form } from "@remix-run/react";
 import * as TextInput from "../components/TextInput";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 import * as DistributorForm from "../components/Distributor/Form";

@@ -1,7 +1,7 @@
 import { Work as WorkModel, SubscribedWorksOnUser } from "@prisma/client";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import * as F from "fp-ts/function";
-import { useLoaderData } from "remix";
+import { useLoaderData } from "@remix-run/react";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/Either";
 import { useState } from "react";

@@ -1,5 +1,6 @@
 import { Distributor } from "@prisma/client";
-import { LoaderFunction, useLoaderData } from "remix";
+import { LoaderFunction } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Serialized } from "~/utils/type";
 

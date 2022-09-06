@@ -1,4 +1,4 @@
-import { useFetcher } from "remix";
+import { useFetcher } from "@remix-run/react";
 import { useHover } from "react-use";
 
 export type Props = {

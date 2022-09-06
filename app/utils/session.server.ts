@@ -1,4 +1,4 @@
-import { createCookieSessionStorage, redirect } from "remix";
+import { createCookieSessionStorage, redirect } from "@remix-run/node";
 
 const ONE_WEEK_SEC = 60 * 60 * 24 * 7;
 

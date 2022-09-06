@@ -1,7 +1,8 @@
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as F from "fp-ts/function";
-import { json, useActionData, useFetcher } from "remix";
+import { json } from "@remix-run/node";
+import { useActionData, useFetcher } from "@remix-run/react";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";

@@ -2,7 +2,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect } from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
-import { type ActionFunction, type LoaderFunction, redirect } from "remix";
+import { ActionFunction, LoaderFunction, redirect } from "@remix-run/node";
 import { commitSession, getSession , getUserId } from "~/utils/session.server";
 import { getAdmin } from "~/utils/firebase.server";
 

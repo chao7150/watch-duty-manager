@@ -2,11 +2,15 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect } from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
-import { ActionFunction, LoaderFunction, redirect } from "@remix-run/node";
-import { commitSession, getSession , getUserId } from "~/utils/session.server";
+import {
+  ActionArgs,
+  LoaderArgs,
+  redirect,
+} from "@remix-run/node";
+import { commitSession, getSession, getUserId } from "~/utils/session.server";
 import { getAdmin } from "~/utils/firebase.server";
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId) {
     return redirect("/");
@@ -14,7 +18,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   return null;
 };
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async ({ request }: ActionArgs) => {
   const authorizationHeader = request.headers.get("Authorization");
   if (
     authorizationHeader === null ||

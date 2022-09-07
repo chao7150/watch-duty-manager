@@ -1,8 +1,7 @@
-import { type DataFunctionArgs } from "@remix-run/server-runtime";
-import { MetaFunction } from "@remix-run/node";
+import { LoaderArgs, MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import "firebase/compat/auth";
-import { Episode as EpisodeType, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import {
   CartesianGrid,
   Legend,
@@ -18,7 +17,6 @@ import { addDays, addHours, startOfQuarter, subDays, subHours } from "date-fns";
 import * as A from "fp-ts/Apply";
 import * as T from "fp-ts/Task";
 import * as EpisodeList from "../components/Episode/List";
-import { Serialized } from "~/utils/type";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import {
@@ -26,24 +24,6 @@ import {
   getQuarterEachLocaleDateString,
   startOf4OriginDay,
 } from "~/utils/date";
-
-type LoaderData = {
-  userId: string | null;
-  tickets:
-    | (EpisodeType & {
-        work: { title: string; hashtag: string | null };
-      })[];
-  weekMetrics: {
-    date: string;
-    watchAchievements: number;
-    dutyAccumulation: number;
-  }[];
-  quarterMetrics: {
-    date: string;
-    watchAchievements: number;
-    dutyAccumulation: number;
-  }[];
-};
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
@@ -164,9 +144,7 @@ const getQuarterWatchAchievements =
     return countOccurrence(occurrence);
   };
 
-export const loader = async ({
-  request,
-}: DataFunctionArgs): Promise<LoaderData> => {
+export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId === null) {
     return {
@@ -284,7 +262,7 @@ export default function Index() {
     return () => clearInterval(timerId);
   });
   const { userId, tickets, weekMetrics, quarterMetrics } =
-    useLoaderData<Serialized<LoaderData>>();
+    useLoaderData<typeof loader>();
 
   return userId ? (
     <div className="remix__page">

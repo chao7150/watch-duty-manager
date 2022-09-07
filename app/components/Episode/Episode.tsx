@@ -147,6 +147,7 @@ const Watched: React.VFC<WatchedProps> = ({
         count={count}
         publishedAt={publishedAt}
         hashtag={hashtag}
+        status={getStatus(new Date(publishedAt), new Date())}
       />
       <fetcher.Form method="post" action={`/works/${workId}/${count}?index`}>
         {comment && (

@@ -1,30 +1,11 @@
 import { Episode } from "@prisma/client";
-import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import { useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
-import {
-  extractParams,
-  nonEmptyStringOrUndefined,
-  Serialized,
-} from "~/utils/type";
+import { extractParams, nonEmptyStringOrUndefined } from "~/utils/type";
+import { ActionArgs, LoaderArgs } from "@remix-run/node";
 
-type LoaderData = {
-  userId: string | null;
-  episode: Episode & {
-    work: { title: string };
-  };
-  histories: {
-    userId: string;
-    comment: string | null;
-    rating: number | null;
-    createdAt: number;
-  }[];
-};
-export const loader = async ({
-  request,
-  params,
-}: DataFunctionArgs): Promise<LoaderData> => {
+export const loader = async ({ request, params }: LoaderArgs) => {
   const userId = await getUserId(request);
   const { workId, count } = extractParams(params, ["workId", "count"]);
   const episode = await db.episode.findUnique({
@@ -57,11 +38,7 @@ export const loader = async ({
   };
 };
 
-type ActionData = null;
-export const action = async ({
-  request,
-  params,
-}: DataFunctionArgs): Promise<ActionData> => {
+export const action = async ({ request, params }: ActionArgs) => {
   const userId = await requireUserId(request);
   const { workId: _workId, count: _count } = extractParams(params, [
     "workId",
@@ -113,8 +90,7 @@ export const action = async ({
 };
 
 export default function Episode() {
-  const { userId, histories, episode } =
-    useLoaderData<Serialized<LoaderData>>();
+  const { userId, histories, episode } = useLoaderData<typeof loader>();
   const myHistory = userId && histories.find((w) => w.userId === userId);
   const otherHistories = histories.filter((h) => h.userId !== userId);
 

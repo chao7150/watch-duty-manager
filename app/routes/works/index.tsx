@@ -1,5 +1,4 @@
 import { Work as WorkModel, SubscribedWorksOnUser } from "@prisma/client";
-import { type DataFunctionArgs } from "@remix-run/server-runtime";
 import * as F from "fp-ts/function";
 import { useLoaderData } from "@remix-run/react";
 import * as TE from "fp-ts/TaskEither";
@@ -10,16 +9,9 @@ import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import * as WorkUI from "~/components/Work/Work";
 import { interval2CourList } from "~/utils/date";
-import { Serialized } from "~/utils/type";
+import { LoaderArgs } from "@remix-run/node";
 
-type LoaderData = {
-  works: (WorkModel & { users: SubscribedWorksOnUser[] })[];
-  loggedIn: boolean;
-};
-
-export const loader = async ({
-  request,
-}: DataFunctionArgs): Promise<LoaderData> => {
+export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const releasedDateBegin = url.searchParams.get("releasedDateBegin");
   const releasedDateEnd = url.searchParams.get("releasedDateEnd");
@@ -71,7 +63,7 @@ export const loader = async ({
 };
 
 export default function Works() {
-  const loaderData = useLoaderData<Serialized<LoaderData>>();
+  const loaderData = useLoaderData<typeof loader>();
   const [filterCondition, setFilterCondition] = useState<
     { label: string; start: Date } | undefined
   >(undefined);

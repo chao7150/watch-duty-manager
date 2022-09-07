@@ -2,23 +2,16 @@ import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as F from "fp-ts/function";
 import { json } from "@remix-run/node";
-import { useActionData, useFetcher } from "@remix-run/react";
-import { type DataFunctionArgs } from "@remix-run/server-runtime";
+import { useActionData } from "@remix-run/react";
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { db } from "~/utils/db.server";
 import { useState } from "react";
-import type { LoaderData as DistributorsLoaderData } from "./distributors/index";
-import { Serialized } from "~/utils/type";
-
-type ActionData =
-  | { title: string }
-  | Response
-  | { action: "bulkCreate"; count: number };
+import type { ActionArgs } from "@remix-run/server-runtime";
 
 export const action = async ({
   request,
-}: DataFunctionArgs): Promise<ActionData> => {
+}: ActionArgs) => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
     return await F.pipe(
@@ -140,7 +133,7 @@ export const action = async ({
 export default function Create() {
   const [bulkCreateMode, setBulkCreateMode] = useState(false);
   // HACK: 型付けろ
-  const actionData = useActionData<ActionData>();
+  const actionData = useActionData<typeof action>();
 
   return (
     <div className="pb-8">

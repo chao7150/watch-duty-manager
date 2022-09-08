@@ -1,9 +1,8 @@
 import * as E from "fp-ts/Either";
 import { useFetcher } from "@remix-run/react";
-import * as TextInput from "./TextInput";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
-import * as DistributorForm from "../components/Distributor/Form";
+import * as WorkInput from "./Work/Input";
 
 export const serverAction = async (
   workId: number,
@@ -70,21 +69,10 @@ export const serverAction = async (
 
 export type Props = {
   workId: string | number;
-  title?: Partial<TextInput.Props>;
-  officialSiteUrl?: Partial<TextInput.Props>;
-  twitterId?: Partial<TextInput.Props>;
-  hashTag?: Partial<TextInput.Props>;
-  distributionForm?: DistributorForm.Props;
+  workInput: WorkInput.Props;
 };
 
-export const Component: React.VFC<Props> = ({
-  workId,
-  title,
-  officialSiteUrl,
-  twitterId,
-  hashTag,
-  distributionForm,
-}) => {
+export const Component: React.VFC<Props> = ({ workId, workInput }) => {
   const fetcher = useFetcher();
   return (
     <section>
@@ -92,50 +80,15 @@ export const Component: React.VFC<Props> = ({
         <p>{fetcher.data.errorMessage || fetcher.data.successMessage}</p>
       )}
       <fetcher.Form method="post" action={`/works/${workId}`}>
-        <ul>
-          <li>
-            <TextInput.Component
-              labelText="タイトル"
-              name="title"
-              isRequired={true}
-              {...title}
-            />
-          </li>
-          <li>
-            <TextInput.Component
-              labelText="公式サイトURL"
-              name="officialSiteUrl"
-              {...officialSiteUrl}
-            />
-          </li>
-          <li>
-            <TextInput.Component
-              labelText="ツイッターID"
-              name="twitterId"
-              {...twitterId}
-            />
-          </li>
-          <li>
-            <TextInput.Component
-              labelText="ハッシュタグ（#は不要）"
-              name="hashtag"
-              {...hashTag}
-            />
-          </li>
-          <li>
-            <DistributorForm.Component {...distributionForm} />
-          </li>
-          <li className="mt-2 flex">
-            <button
-              className="bg-accent-area rounded-full py-1 px-3 ml-auto"
-              type="submit"
-              name="_action"
-              value="edit"
-            >
-              送信
-            </button>
-          </li>
-        </ul>
+        <WorkInput.Component {...workInput} />
+        <button
+          className="mt-4 bg-accent-area rounded-full py-1 px-3 ml-auto"
+          type="submit"
+          name="_action"
+          value="edit"
+        >
+          送信
+        </button>
       </fetcher.Form>
     </section>
   );

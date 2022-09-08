@@ -20,7 +20,9 @@
     }
 
     input[type="text"],
-    input[type="search"] {
+    input[type="search"],
+    input[type="datetime-local"],
+    input[type="number"] {
         @apply bg-accent-area outline-none;
     }
 

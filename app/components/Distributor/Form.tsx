@@ -24,14 +24,17 @@ export const Component: React.VFC<Props> = ({ defaultValue }) => {
       <ul>
         {distributors.map((d) => {
           return (
-            <label>
-              {d.name}
-              <input
-                type="text"
-                name={`distributor-${d.id}`}
-                defaultValue={defaultValue && defaultValue[d.id]}
-              />
-            </label>
+            <li key={d.id}>
+              <label className="flex">
+                <div className="w-24">{d.name}</div>
+                <input
+                  className="ml-2"
+                  type="text"
+                  name={`distributor-${d.id}`}
+                  defaultValue={defaultValue && defaultValue[d.id]}
+                />
+              </label>
+            </li>
           );
         })}
       </ul>

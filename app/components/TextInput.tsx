@@ -1,3 +1,5 @@
+import React from "react";
+
 export type Props = {
   labelText: string;
   name: string;
@@ -18,9 +20,11 @@ export const Component: React.VFC<Props> = ({
 }) => {
   return (
     <label>
-      {labelText}
-      {isRequired && <RequiredAbbreviation />}
-      <input type="text" {...props} />
+      <div>
+        {labelText}
+        {isRequired && <RequiredAbbreviation />}
+      </div>
+      <input className="w-2/3" type="text" {...props} />
     </label>
   );
 };

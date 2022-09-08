@@ -225,14 +225,16 @@ export default function Work() {
     useLoaderData<Serialized<LoaderData>>();
   const defaultValueMap: WorkEditForm.Props = {
     workId: work.id,
-    title: { defaultValue: work.title ?? "" },
-    officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
-    twitterId: { defaultValue: work.twitterId ?? "" },
-    hashTag: { defaultValue: work.hashtag ?? "" },
-    distributionForm: {
-      defaultValue: work.DistributorsOnWorks.reduce((acc, val) => {
-        return { ...acc, [val.distributorId]: val.workIdOnDistributor };
-      }, {}),
+    workInput: {
+      workTitle: { defaultValue: work.title ?? "" },
+      officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
+      twitterId: { defaultValue: work.twitterId ?? "" },
+      hashtag: { defaultValue: work.hashtag ?? "" },
+      distributorForm: {
+        defaultValue: work.DistributorsOnWorks.reduce((acc, val) => {
+          return { ...acc, [val.distributorId]: val.workIdOnDistributor };
+        }, {}),
+      },
     },
   };
 

@@ -2,11 +2,11 @@ import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
 import { json } from "@remix-run/node";
 import { Form } from "@remix-run/react";
-import * as TextInput from "../components/TextInput";
+
 import { nonEmptyStringOrUndefined } from "~/utils/type";
-import * as DistributorForm from "../components/Distributor/Form";
 
 import { isNonEmptyString } from "~/utils/validator";
+import * as WorkInput from "./Work/Input";
 
 export const serverValidator = (
   formData: FormData
@@ -76,58 +76,51 @@ export const Component: React.VFC<Props> = () => {
   return (
     <Form method="post">
       <p>
-        <abbr title="required">*</abbr>は必須です。
+        <small>
+          <abbr title="required">*</abbr>は必須です。
+        </small>
       </p>
-      <ul>
-        <li>
-          <TextInput.Component
-            labelText="タイトル"
-            name="title"
-            isRequired={true}
-          />
-        </li>
-        <li>
-          <label>
-            第1話放送日時
-            <abbr title="required" aria-label="required">
-              *
-            </abbr>
-            <input type="datetime-local" name="publishedAt" />
-          </label>
-        </li>
-        <li>
-          <label>
-            話数（予想でも可）
-            <input
-              type="number"
-              name="episodeCount"
-              min={1}
-              defaultValue={13}
-            ></input>
-          </label>
-        </li>
-        <li>
-          <TextInput.Component
-            labelText="公式サイトURL"
-            name="officialSiteUrl"
-          />
-        </li>
-        <li>
-          <TextInput.Component labelText="ツイッターID" name="twitterId" />
-        </li>
-        <li>
-          <TextInput.Component
-            labelText="ハッシュタグ（#は不要）"
-            name="hashtag"
-          />
-        </li>
-        <li>
-          <DistributorForm.Component />
-        </li>
-        <li>
-          <button type="submit">submit</button>
-        </li>
-      </ul>
+      <fieldset className="mt-4" name="基本情報">
+        <legend>
+          <h3>基本情報</h3>
+        </legend>
+        <WorkInput.Component />
+      </fieldset>
+      <fieldset className="mt-4" name="放送情報">
+        <legend>
+          <h3>放送情報</h3>
+        </legend>
+        <ul className="mt-2 flex flex-col gap-2">
+          <li>
+            <label>
+              <div>
+                第1話放送日時
+                <abbr title="required" aria-label="required">
+                  *
+                </abbr>
+              </div>
+              <input type="datetime-local" name="publishedAt" />
+            </label>
+          </li>
+          <li>
+            <label>
+              <div>話数（予想でも可）</div>
+              <input
+                type="number"
+                name="episodeCount"
+                min={1}
+                defaultValue={13}
+              ></input>
+            </label>
+          </li>
+        </ul>
+      </fieldset>
+      <button
+        className="mt-4 bg-accent-area rounded-full py-2 px-12"
+        type="submit"
+      >
+        送信
+      </button>
     </Form>
   );
 };

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import * as FilterIcon from "../Icons/Filter";
 import * as Episode from "./Episode";
 
 export type Props = {
@@ -27,25 +26,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
               key={`${e.workId}-${e.count}`}
               aria-hidden={hide}
             >
-              <div className="flex">
-                <button
-                  title="タイトルで絞り込み"
-                  onClick={() => {
-                    if (filterKeyword === "") {
-                      setFilterKeyword(e.title);
-                    } else {
-                      setFilterKeyword("");
-                    }
-                  }}
-                >
-                  {filterKeyword === "" ? (
-                    <FilterIcon.Component />
-                  ) : (
-                    <FilterIcon.AltComponent />
-                  )}
-                </button>
-                <Episode.Component.New {...e} />
-              </div>
+              <Episode.Component.New {...e} />
             </li>
           );
         })}

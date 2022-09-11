@@ -592,6 +592,26 @@ input[type="text"]::placeholder,
   --tw-backdrop-sepia:  ;
 }
 
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.left-10 {
+  left: 2.5rem;
+}
+
+.-top-1 {
+  top: -0.25rem;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -619,10 +639,6 @@ input[type="text"]::placeholder,
 
 .ml-4 {
   margin-left: 1rem;
-}
-
-.mt-8 {
-  margin-top: 2rem;
 }
 
 .flex {
@@ -745,9 +761,23 @@ input[type="text"]::placeholder,
   background-color: rgb(48 49 52 / var(--tw-bg-opacity));
 }
 
+.p-2 {
+  padding: 0.5rem;
+}
+
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.px-12 {
+  padding-left: 3rem;
+  padding-right: 3rem;
 }
 
 .py-1 {
@@ -760,35 +790,12 @@ input[type="text"]::placeholder,
   padding-right: 0.75rem;
 }
 
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.px-8 {
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
-.px-12 {
-  padding-left: 3rem;
-  padding-right: 3rem;
-}
-
 .pb-8 {
   padding-bottom: 2rem;
 }
 
 .pt-8 {
   padding-top: 2rem;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-right {
-  text-align: right;
 }
 
 .align-middle {
@@ -822,6 +829,12 @@ input[type="text"]::placeholder,
 .text-text-weak {
   --tw-text-opacity: 1;
   color: rgb(154 160 166 / var(--tw-text-opacity));
+}
+
+.shadow-menu {
+  --tw-shadow: 1px 1px 15px 0px #171717;
+  --tw-shadow-colored: 1px 1px 15px 0px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 .filter {

@@ -258,7 +258,7 @@ export default function Index() {
   useEffect(() => {
     const timerId = setInterval(() => {
       window.location.reload();
-    }, 1000 * 60 * 5);
+    }, 1000 * 60 * 15);
     return () => clearInterval(timerId);
   });
   const { userId, tickets, weekMetrics, quarterMetrics } =

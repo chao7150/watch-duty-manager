@@ -13,14 +13,6 @@
   margin-left: 0.25em;
 }
 
-.episode-action-menu {
-  display: flex;
-}
-
-.episode-action-menu summary {
-  list-style-type: none;
-}
-
 .work {
   display: flex;
   flex-direction: row;

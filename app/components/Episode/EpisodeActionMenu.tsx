@@ -1,5 +1,7 @@
 import { useFetcher } from "@remix-run/react";
-import * as EpisodeWatchOrUnwatchForm from "./EpisodeWatchOrUnwatchForm";
+import * as EyeOffIcon from "../Icons/EyeOff";
+import * as EyeIcon from "../Icons/Eye";
+import { useState } from "react";
 
 export type Props = {
   workId: number;
@@ -7,43 +9,45 @@ export type Props = {
   watched: boolean;
 };
 
-export const Component: React.VFC<Props> = (props) => {
+export const Component: React.VFC<Props> = ({ workId, count, watched }) => {
   const fetcher = useFetcher();
+  const [ratingEnabled, setRatingEnabled] = useState(true);
   return (
-    <div className="episode-action-menu">
-      <EpisodeWatchOrUnwatchForm.Component {...props} />
-      <details>
-        <summary className="cursor-pointer">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+    <details className="relative">
+      <summary className="cursor-pointer list-none">
+        {watched ? <EyeOffIcon.Component /> : <EyeIcon.Component />}
+      </summary>
+      <div className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2">
+        {watched ? (
+          <fetcher.Form
+            method="post"
+            action={`/works/${workId}/${count}?index`}
           >
-            <path
-              d="M2 6C2 5.44772 2.44772 5 3 5H21C21.5523 5 22 5.44772 22 6C22 6.55228 21.5523 7 21 7H3C2.44772 7 2 6.55228 2 6Z"
-              fill="currentColor"
-            />
-            <path
-              d="M2 12.0322C2 11.4799 2.44772 11.0322 3 11.0322H21C21.5523 11.0322 22 11.4799 22 12.0322C22 12.5845 21.5523 13.0322 21 13.0322H3C2.44772 13.0322 2 12.5845 2 12.0322Z"
-              fill="currentColor"
-            />
-            <path
-              d="M3 17.0645C2.44772 17.0645 2 17.5122 2 18.0645C2 18.6167 2.44772 19.0645 3 19.0645H21C21.5523 19.0645 22 18.6167 22 18.0645C22 17.5122 21.5523 17.0645 21 17.0645H3Z"
-              fill="currentColor"
-            />
-          </svg>
-        </summary>
-        <div>
+            <button
+              className="bg-accent-area rounded-full py-1 px-3"
+              type="submit"
+              name="_action"
+              value={"unwatch"}
+            >
+              {"unwatch"}
+            </button>
+          </fetcher.Form>
+        ) : (
           <fetcher.Form
             className="flex flex-col"
             method="post"
-            action={`/works/${props.workId}/${props.count}?index`}
+            action={`/works/${workId}/${count}?index`}
           >
-            <label className="ml-auto">
+            <label className="flex justify-between">
               <div className="hidden">rating</div>
               <input
+                type="checkbox"
+                title="レーティングを登録する"
+                checked={ratingEnabled}
+                onChange={(e) => setRatingEnabled(e.target.checked)}
+              />
+              <input
+                disabled={!ratingEnabled}
                 name="rating"
                 type="range"
                 min="0"
@@ -78,8 +82,8 @@ export const Component: React.VFC<Props> = (props) => {
               watch with comment
             </button>
           </fetcher.Form>
-        </div>
-      </details>
-    </div>
+        )}
+      </div>
+    </details>
   );
 };

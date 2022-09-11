@@ -21,6 +21,9 @@ module.exports = {
       flexBasis: {
         graph: "600px",
       },
+      boxShadow: {
+        menu: "1px 1px 15px 0px #171717",
+      },
     },
   },
   plugins: [],

@@ -22,7 +22,6 @@ import {
   Legend,
   Line,
 } from "recharts";
-import * as EpisodeWatchOrUnwatchForm from "../../components/Episode/EpisodeWatchOrUnwatchForm";
 import { db } from "~/utils/db.server";
 
 import * as WorkEditForm from "~/components/WorkEditForm";
@@ -31,6 +30,7 @@ import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton"
 import * as EditIcon from "../../components/Icons/Edit";
 import * as CloseIcon from "../../components/Icons/Close";
 import * as TrashIcon from "../../components/Icons/Trash";
+import * as EpisodeActionMenu from "../../components/Episode/EpisodeActionMenu";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, Serialized } from "~/utils/type";
 import { createDistributorLinkHref } from "../distributors";
@@ -359,7 +359,7 @@ export default function Work() {
                         </td>
                         <td className="ml-2">
                           {new Date(episode.publishedAt) < new Date() && (
-                            <EpisodeWatchOrUnwatchForm.Component
+                            <EpisodeActionMenu.Component
                               workId={episode.workId}
                               count={episode.count}
                               watched={
@@ -399,10 +399,10 @@ export default function Work() {
                 <section className="mt-2">
                   <h4>話数を追加する</h4>
                   <Form method="post">
-                    <ul>
+                    <ul className="mt-2 flex flex-col gap-2">
                       <li>
                         <label>
-                          開始日時
+                          <div>開始日時</div>
                           <input
                             type="datetime-local"
                             name="startDate"
@@ -425,7 +425,7 @@ export default function Work() {
                       </li>
                       <li>
                         <label>
-                          追加する最初の話数カウント
+                          <div>追加する最初の話数カウント</div>
                           <input
                             type="number"
                             name="offset"
@@ -437,7 +437,7 @@ export default function Work() {
                       </li>
                       <li>
                         <label>
-                          何話分
+                          <div>何話分</div>
                           <input
                             type="number"
                             name="length"

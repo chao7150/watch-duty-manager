@@ -100,7 +100,7 @@ const _New: React.VFC<NewProps> = ({
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
-    <div className={`w-full grow ${statusStyles[status]}`}>
+    <div className={`w-full grow ${statusStyles[status]} flex justify-between`}>
       <Information
         workId={workId}
         title={title}

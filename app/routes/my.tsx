@@ -11,6 +11,8 @@ import { requireUserIdTaskEither } from "~/utils/middlewares";
 import { Serialized } from "~/utils/type";
 import * as WorkUI from "~/components/Work/Work";
 import { useMemo, useState } from "react";
+import { getCourName, interval2CourList } from "~/utils/date";
+import { addQuarters } from "date-fns";
 
 type LoaderData = {
   subscribedWorks: (Work & { rating: number | undefined })[];
@@ -18,6 +20,8 @@ type LoaderData = {
     episode: { work: { title: string } };
   })[];
   onairOnly: boolean;
+  startDate: string | null;
+  oldestEpisodePublishedAt: string;
 };
 
 const isNumber = (val: unknown): val is number => typeof val === "number";
@@ -27,6 +31,19 @@ export const loader = async (
 ): Promise<LoaderData | Response> => {
   const url = new URL(args.request.url);
   const onairOnly = url.searchParams.get("onairOnly") !== "false";
+  const startDate = url.searchParams.get("startDate");
+  const oldestEpisodePublishedAt =
+    (
+      await db.episode.findFirst({
+        select: {
+          publishedAt: true,
+        },
+        orderBy: {
+          publishedAt: "asc",
+        },
+        take: 1,
+      })
+    )?.publishedAt.toISOString() ?? "";
   return await F.pipe(
     args,
     TE.of,
@@ -42,13 +59,28 @@ export const loader = async (
               await db.work.findMany({
                 where: {
                   users: { some: { userId } },
-                  ...(onairOnly
-                    ? {
-                        episodes: {
-                          some: { publishedAt: { gte: new Date() } },
-                        },
-                      }
-                    : {}),
+                  AND: [
+                    onairOnly
+                      ? {
+                          episodes: {
+                            some: { WatchedEpisodesOnUser: { none: {} } },
+                          },
+                        }
+                      : {},
+                    startDate
+                      ? {
+                          episodes: {
+                            some: {
+                              publishedAt: {
+                                // 4時始まりは未検討
+                                gte: new Date(startDate),
+                                lte: addQuarters(new Date(startDate), 1),
+                              },
+                            },
+                          },
+                        }
+                      : {},
+                  ],
                 },
                 include: {
                   episodes: {
@@ -102,24 +134,57 @@ export const loader = async (
     TE.foldW(
       (e) => T.of(e),
       (v) =>
-        T.of({ subscribedWorks: v[0], recentWatchedEpisodes: v[1], onairOnly })
+        T.of({
+          subscribedWorks: v[0],
+          recentWatchedEpisodes: v[1],
+          onairOnly,
+          startDate,
+          oldestEpisodePublishedAt,
+        })
     )
   )();
 };
 
 export const createQueries = ({
   onairOnly,
+  filterConditionStartDate,
 }: {
   onairOnly: boolean;
+  filterConditionStartDate: Date | undefined;
 }): string => {
   const url = new URLSearchParams();
   !onairOnly && url.set("onairOnly", "false");
+  filterConditionStartDate &&
+    url.set("startDate", filterConditionStartDate.toISOString());
   return url.toString();
 };
 
-const FilterComponent = () => {
+type FilterComponentProps = {
+  onairOnly: boolean;
+  initialStartDate: string | null;
+  oldestEpisodePublishedAt: Date;
+  now: Date;
+};
+
+const FilterComponent: React.FC<FilterComponentProps> = ({
+  onairOnly,
+  initialStartDate,
+  oldestEpisodePublishedAt,
+  now,
+}) => {
+  const [onairOnlyChecked, setOnairOnlyChecked] = useState(onairOnly);
+  const [filterCondition, setFilterCondition] = useState<
+    { label: string; start: Date } | undefined
+  >(
+    initialStartDate
+      ? {
+          label: getCourName(new Date(initialStartDate)),
+          start: new Date(initialStartDate),
+        }
+      : undefined
+  );
+  const courList = interval2CourList(oldestEpisodePublishedAt, now);
   return useMemo(() => {
-    const [onairOnlyChecked, setOnairOnlyChecked] = useState(true);
     return (
       <details>
         <summary className="list-none cursor-pointer">
@@ -127,7 +192,7 @@ const FilterComponent = () => {
         </summary>
         <div className="mt-2 w-64">
           <label>
-            放送中
+            未完走のみ
             <input
               className="ml-2"
               type="checkbox"
@@ -135,30 +200,80 @@ const FilterComponent = () => {
               onChange={(e) => setOnairOnlyChecked(e.target.checked)}
             />
           </label>
+          <div
+            className={`${
+              filterCondition === undefined
+                ? "text-text-strong font-bold bg-accent-area"
+                : ""
+            }`}
+          >
+            <button onClick={() => setFilterCondition(undefined)}>
+              全期間
+            </button>
+          </div>
+          <ul className="works-filter-condition-list">
+            {courList.map(([label, start]) => {
+              const selected = label == filterCondition?.label;
+              return (
+                <li
+                  className={`${
+                    selected ? "text-text-strong font-bold bg-accent-area" : ""
+                  }`}
+                  key={label}
+                >
+                  <button onClick={() => setFilterCondition({ label, start })}>
+                    {label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
           <div>
-            <Link to={`/my?${createQueries({ onairOnly: onairOnlyChecked })}`}>
+            <Link
+              to={`/my?${createQueries({
+                onairOnly: onairOnlyChecked,
+                filterConditionStartDate: filterCondition?.start,
+              })}`}
+            >
               適用する
             </Link>
           </div>
         </div>
       </details>
     );
-  }, undefined);
+  }, [onairOnlyChecked, filterCondition]);
 };
 
 export default function My() {
-  const { subscribedWorks, recentWatchedEpisodes, onairOnly } =
-    useLoaderData<Serialized<LoaderData>>();
+  const {
+    subscribedWorks,
+    recentWatchedEpisodes,
+    onairOnly,
+    startDate,
+    oldestEpisodePublishedAt,
+  } = useLoaderData<Serialized<LoaderData>>();
+  console.log(
+    interval2CourList(new Date(oldestEpisodePublishedAt), new Date())
+  );
   return (
     <div className="remix__page">
       <section>
         <h2>あなたの視聴作品リスト</h2>
         <section>
-          <FilterComponent />
+          <FilterComponent
+            onairOnly={onairOnly}
+            initialStartDate={startDate}
+            oldestEpisodePublishedAt={new Date(oldestEpisodePublishedAt)}
+            now={new Date()}
+          />
         </section>
         <section className="mt-4">
           <h3>
-            <span>{onairOnly ? "放送中" : "全て"}</span>のアニメ(
+            <span>
+              {startDate ? `${getCourName(new Date(startDate))}の` : ""}
+              {onairOnly ? "未完走" : "全て"}
+            </span>
+            のアニメ(
             <span>{subscribedWorks.length}</span>)
           </h3>
           <ul className="mt-2">

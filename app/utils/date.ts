@@ -21,6 +21,10 @@ const monthSeasonNameMap: { [K: number]: string } = {
   10: "秋",
 };
 
+export const getCourName = (date: Date): string => {
+  return `${date.getFullYear()}${monthSeasonNameMap[date.getMonth() + 1]}`;
+};
+
 export const interval2CourList = (start: Date, now: Date): [string, Date][] => {
   return eachQuarterOfInterval({
     start: subHours(start, 4),
@@ -28,7 +32,7 @@ export const interval2CourList = (start: Date, now: Date): [string, Date][] => {
   })
     .reverse()
     .map((q) => {
-      return [`${q.getFullYear()}${monthSeasonNameMap[q.getMonth() + 1]}`, q];
+      return [getCourName(q), q];
     });
 };
 

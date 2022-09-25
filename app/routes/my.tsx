@@ -30,7 +30,7 @@ export const loader = async (
   args: DataFunctionArgs
 ): Promise<LoaderData | Response> => {
   const url = new URL(args.request.url);
-  const onairOnly = url.searchParams.get("onairOnly") !== "false";
+  const onairOnly = url.searchParams.get("onairOnly") === "true";
   const startDate = url.searchParams.get("startDate");
   const oldestEpisodePublishedAt =
     (
@@ -252,9 +252,6 @@ export default function My() {
     startDate,
     oldestEpisodePublishedAt,
   } = useLoaderData<Serialized<LoaderData>>();
-  console.log(
-    interval2CourList(new Date(oldestEpisodePublishedAt), new Date())
-  );
   return (
     <div className="remix__page">
       <section>

@@ -1,4 +1,4 @@
-import { WatchedEpisodesOnUser, Work } from "@prisma/client";
+import { Prisma, WatchedEpisodesOnUser, Work } from "@prisma/client";
 import { type DataFunctionArgs, json } from "@remix-run/server-runtime";
 import * as F from "fp-ts/function";
 import { Link, useLoaderData } from "@remix-run/react";
@@ -12,7 +12,7 @@ import { Serialized } from "~/utils/type";
 import * as WorkUI from "~/components/Work/Work";
 import { useMemo, useState } from "react";
 import { getCourName, interval2CourList } from "~/utils/date";
-import { addQuarters } from "date-fns";
+import { addQuarters, startOfQuarter } from "date-fns";
 
 type LoaderData = {
   subscribedWorks: (Work & { rating: number | undefined })[];
@@ -20,18 +20,39 @@ type LoaderData = {
     episode: { work: { title: string } };
   })[];
   onairOnly: boolean;
-  startDate: string | null;
+  startDate: string;
   oldestEpisodePublishedAt: string;
 };
 
 const isNumber = (val: unknown): val is number => typeof val === "number";
+
+const generateStartDateQuery = (startDate: string): Prisma.WorkWhereInput => {
+  if (startDate === "all") {
+    return {};
+  }
+  const searchDate = new Date(startDate);
+  return {
+    episodes: {
+      some: {
+        publishedAt: {
+          // 4時始まりは未検討
+          gte: searchDate,
+          lte: addQuarters(searchDate, 1),
+        },
+      },
+    },
+  };
+};
 
 export const loader = async (
   args: DataFunctionArgs
 ): Promise<LoaderData | Response> => {
   const url = new URL(args.request.url);
   const onairOnly = url.searchParams.get("onairOnly") === "true";
-  const startDate = url.searchParams.get("startDate");
+  // ISOString | "all"
+  const startDate =
+    url.searchParams.get("startDate") ??
+    startOfQuarter(new Date()).toISOString();
   const oldestEpisodePublishedAt =
     (
       await db.episode.findFirst({
@@ -67,19 +88,7 @@ export const loader = async (
                           },
                         }
                       : {},
-                    startDate
-                      ? {
-                          episodes: {
-                            some: {
-                              publishedAt: {
-                                // 4時始まりは未検討
-                                gte: new Date(startDate),
-                                lte: addQuarters(new Date(startDate), 1),
-                              },
-                            },
-                          },
-                        }
-                      : {},
+                    generateStartDateQuery(startDate),
                   ],
                 },
                 include: {
@@ -150,18 +159,23 @@ export const createQueries = ({
   filterConditionStartDate,
 }: {
   onairOnly: boolean;
-  filterConditionStartDate: Date | undefined;
+  filterConditionStartDate: Date | "all" | undefined;
 }): string => {
   const url = new URLSearchParams();
-  !onairOnly && url.set("onairOnly", "false");
+  onairOnly && url.set("onairOnly", "true");
   filterConditionStartDate &&
-    url.set("startDate", filterConditionStartDate.toISOString());
+    url.set(
+      "startDate",
+      filterConditionStartDate === "all"
+        ? "all"
+        : filterConditionStartDate.toISOString()
+    );
   return url.toString();
 };
 
 type FilterComponentProps = {
   onairOnly: boolean;
-  initialStartDate: string | null;
+  initialStartDate: string;
   oldestEpisodePublishedAt: Date;
   now: Date;
 };
@@ -173,15 +187,16 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   now,
 }) => {
   const [onairOnlyChecked, setOnairOnlyChecked] = useState(onairOnly);
-  const [filterCondition, setFilterCondition] = useState<
-    { label: string; start: Date } | undefined
-  >(
-    initialStartDate
+  const [filterCondition, setFilterCondition] = useState<{
+    label: string;
+    start: Date | "all";
+  }>(
+    initialStartDate !== "all"
       ? {
           label: getCourName(new Date(initialStartDate)),
           start: new Date(initialStartDate),
         }
-      : undefined
+      : { label: "全て", start: "all" }
   );
   const courList = interval2CourList(oldestEpisodePublishedAt, now);
   return useMemo(() => {
@@ -207,7 +222,11 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                 : ""
             }`}
           >
-            <button onClick={() => setFilterCondition(undefined)}>
+            <button
+              onClick={() =>
+                setFilterCondition({ label: "全て", start: "all" })
+              }
+            >
               全期間
             </button>
           </div>
@@ -267,7 +286,7 @@ export default function My() {
         <section className="mt-4">
           <h3>
             <span>
-              {startDate ? `${getCourName(new Date(startDate))}の` : ""}
+              {startDate !== "all" && `${getCourName(new Date(startDate))}の`}
               {onairOnly ? "未完走" : "全て"}
             </span>
             のアニメ(

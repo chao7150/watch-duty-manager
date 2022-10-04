@@ -58,3 +58,6 @@ export type Serialized<T> = {
     ? Array<Serialized<S>>
     : T[Key];
 };
+
+export const isNumber = (val: unknown): val is number =>
+  typeof val === "number";

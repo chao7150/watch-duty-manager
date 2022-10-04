@@ -32,7 +32,7 @@ import * as CloseIcon from "../../components/Icons/Close";
 import * as TrashIcon from "../../components/Icons/Trash";
 import * as EpisodeActionMenu from "../../components/Episode/EpisodeActionMenu";
 import { getUserId, requireUserId } from "~/utils/session.server";
-import { extractParams, Serialized } from "~/utils/type";
+import { extractParams, isNumber, Serialized } from "~/utils/type";
 import { createDistributorLinkHref } from "../distributors";
 
 type LoaderData = {
@@ -245,12 +245,24 @@ export default function Work() {
           <Link to={`/works/${work.id}`}>{work.title}</Link>
         </h2>
         {loggedIn && (
-          <div className="ml-4">
-            <WorkSubscribeForm.Component
-              id={work.id.toString()}
-              subscribing={subscribed}
-            />
-          </div>
+          <>
+            <div className="ml-4">
+              <WorkSubscribeForm.Component
+                id={work.id.toString()}
+                subscribing={subscribed}
+              />
+            </div>
+            <div className="ml-4 flex items-center">
+              <div>
+                {(
+                  ratings
+                    .map((r) => r.rating)
+                    .filter(isNumber)
+                    .reduce((acc, val) => acc + val, 0) / ratings.length
+                ).toFixed(1)}
+              </div>
+            </div>
+          </>
         )}
       </div>
       <div className="pt-8">

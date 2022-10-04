@@ -8,7 +8,7 @@ import * as A from "fp-ts/Apply";
 import * as Episode from "../components/Episode/Episode";
 import { db } from "~/utils/db.server";
 import { requireUserIdTaskEither } from "~/utils/middlewares";
-import { Serialized } from "~/utils/type";
+import { isNumber, Serialized } from "~/utils/type";
 import * as WorkUI from "~/components/Work/Work";
 import { useMemo, useState } from "react";
 import { getCourName, interval2CourList } from "~/utils/date";
@@ -23,8 +23,6 @@ type LoaderData = {
   startDate: string;
   oldestEpisodePublishedAt: string;
 };
-
-const isNumber = (val: unknown): val is number => typeof val === "number";
 
 const generateStartDateQuery = (startDate: string): Prisma.WorkWhereInput => {
   if (startDate === "all") {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import * as Episode from "./Episode";
 
 export type Props = {
-  episodes: Episode.NewProps[];
+  episodes: Episode.Props[];
 };
 
 export const Component: React.FC<Props> = ({ episodes }) => {
@@ -26,7 +26,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
               key={`${e.workId}-${e.count}`}
               aria-hidden={hide}
             >
-              <Episode.Component.New {...e} />
+              <Episode.Component {...e} />
             </li>
           );
         })}

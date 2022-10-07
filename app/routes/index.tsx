@@ -288,6 +288,7 @@ export default function Index() {
               publishedAt: ticket.publishedAt,
               hashtag: ticket.work.hashtag ?? undefined,
               watchReady: ticket.watchReady,
+              watched: false
             };
           })}
         />

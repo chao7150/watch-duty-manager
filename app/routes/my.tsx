@@ -320,12 +320,12 @@ export default function My() {
         <ul className="mt-4 flex flex-col gap-4">
           {recentWatchedEpisodes.map((e) => (
             <li key={`${e.workId}-${e.count}`}>
-              <Episode.Component.Watched
+              <Episode.Component
                 workId={e.workId}
                 title={e.episode.work.title}
                 count={e.count}
                 publishedAt={e.createdAt}
-                comment={e.comment ?? undefined}
+                watched={true}
               />
             </li>
           ))}

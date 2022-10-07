@@ -89,14 +89,15 @@ const statusStyles: { [K in Status]: string } = {
   tomorrow: "",
 };
 
-export type NewProps = Omit<InformationProps, "status">;
-const _New: React.VFC<NewProps> = ({
+export type Props = Omit<InformationProps, "status"> & { watched: boolean };
+const _Component: React.VFC<Props> = ({
   workId,
   title,
   count,
   publishedAt,
   hashtag,
   watchReady,
+  watched,
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
@@ -115,7 +116,7 @@ const _New: React.VFC<NewProps> = ({
           {...{
             workId,
             count,
-            watched: false,
+            watched,
           }}
         />
       )}
@@ -123,47 +124,5 @@ const _New: React.VFC<NewProps> = ({
   );
 };
 
-const New = (props: NewProps) =>
-  useMemo(() => <_New {...props} />, [...Object.values(props)]);
-
-export type WatchedProps = Omit<InformationProps, "status"> & {
-  comment?: string;
-};
-
-const Watched: React.VFC<WatchedProps> = ({
-  workId,
-  title,
-  count,
-  publishedAt,
-  hashtag,
-  comment,
-}) => {
-  const fetcher = useFetcher();
-  return (
-    <div>
-      <Information
-        workId={workId}
-        title={title}
-        count={count}
-        publishedAt={publishedAt}
-        hashtag={hashtag}
-        status={getStatus(new Date(publishedAt), new Date())}
-      />
-      <fetcher.Form method="post" action={`/works/${workId}/${count}?index`}>
-        {comment && (
-          <details>
-            <summary>コメント</summary>
-            <label>
-              <pre>{comment}</pre>
-            </label>
-          </details>
-        )}
-        <button type="submit" name="_action" value="unwatch">
-          unwatch
-        </button>
-      </fetcher.Form>
-    </div>
-  );
-};
-
-export const Component = { New, Watched };
+export const Component = (props: Props) =>
+  useMemo(() => <_Component {...props} />, [...Object.values(props)]);

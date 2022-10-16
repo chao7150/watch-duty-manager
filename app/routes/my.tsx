@@ -5,7 +5,6 @@ import { Link, useLoaderData } from "@remix-run/react";
 import * as TE from "fp-ts/TaskEither";
 import * as T from "fp-ts/Task";
 import * as A from "fp-ts/Apply";
-import * as Episode from "../components/Episode/Episode";
 import { db } from "~/utils/db.server";
 import { requireUserIdTaskEither } from "~/utils/middlewares";
 import { isNumber, Serialized } from "~/utils/type";
@@ -16,9 +15,6 @@ import { addQuarters, startOfQuarter } from "date-fns";
 
 type LoaderData = {
   subscribedWorks: (Work & { rating: number | undefined })[];
-  recentWatchedEpisodes: (WatchedEpisodesOnUser & {
-    episode: { work: { title: string } };
-  })[];
   onairOnly: boolean;
   startDate: string;
   oldestEpisodePublishedAt: string;
@@ -119,22 +115,6 @@ export const loader = async (
               { status: 500 }
             );
           }
-        ),
-        TE.tryCatch(
-          async () =>
-            await db.watchedEpisodesOnUser.findMany({
-              where: { userId },
-              orderBy: { createdAt: "desc" },
-              take: 10,
-              include: {
-                episode: { include: { work: { select: { title: true } } } },
-              },
-            }),
-          () =>
-            json(
-              { errorMessage: "recently watched episodes db error" },
-              { status: 500 }
-            )
         )
       )
     ),
@@ -143,7 +123,6 @@ export const loader = async (
       (v) =>
         T.of({
           subscribedWorks: v[0],
-          recentWatchedEpisodes: v[1],
           onairOnly,
           startDate,
           oldestEpisodePublishedAt,
@@ -262,13 +241,8 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
 };
 
 export default function My() {
-  const {
-    subscribedWorks,
-    recentWatchedEpisodes,
-    onairOnly,
-    startDate,
-    oldestEpisodePublishedAt,
-  } = useLoaderData<Serialized<LoaderData>>();
+  const { subscribedWorks, onairOnly, startDate, oldestEpisodePublishedAt } =
+    useLoaderData<Serialized<LoaderData>>();
   return (
     <div className="remix__page">
       <section>
@@ -314,22 +288,6 @@ export default function My() {
               ))}
           </ul>
         </section>
-      </section>
-      <section>
-        <h2>最近見たエピソード</h2>
-        <ul className="mt-4 flex flex-col gap-4">
-          {recentWatchedEpisodes.map((e) => (
-            <li key={`${e.workId}-${e.count}`}>
-              <Episode.Component
-                workId={e.workId}
-                title={e.episode.work.title}
-                count={e.count}
-                publishedAt={e.createdAt}
-                watched={true}
-              />
-            </li>
-          ))}
-        </ul>
       </section>
     </div>
   );

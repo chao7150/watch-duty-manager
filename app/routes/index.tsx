@@ -24,6 +24,7 @@ import {
   getQuarterEachLocaleDateString,
   startOf4OriginDay,
 } from "~/utils/date";
+import { string } from "fp-ts";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
@@ -144,6 +145,19 @@ const getQuarterWatchAchievements =
     return countOccurrence(occurrence);
   };
 
+const getRecentWatchAchievements =
+  ({ db, userId }: { db: PrismaClient; userId: string }) =>
+  async () => {
+    return await db.watchedEpisodesOnUser.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: {
+        episode: { include: { work: { select: { title: true } } } },
+      },
+    });
+  };
+
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId === null) {
@@ -152,6 +166,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       tickets: [],
       weekMetrics: [],
       quarterMetrics: [],
+      recentWatchAchievements: [],
     };
   }
   const now = new Date();
@@ -161,12 +176,14 @@ export const loader = async ({ request }: LoaderArgs) => {
     weekDutyAccumulation,
     quarterDuties,
     quarterWatchAchievements,
+    recentWatchAchievements,
   ] = await A.sequenceT(T.ApplyPar)(
     getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
     getWeekWatchAchievements({ db, userId, now }),
     getWeekDutyAccumulation({ db, userId, now }),
     getQuarterDuties({ db, userId, now }),
-    getQuarterWatchAchievements({ db, userId, now })
+    getQuarterWatchAchievements({ db, userId, now }),
+    getRecentWatchAchievements({ db, userId })
   )();
   const weekKeys = getPast7DaysLocaleDateString(now);
   const mergedWeekMetricsMap = new Map<
@@ -226,6 +243,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     tickets,
     weekMetrics,
     quarterMetrics,
+    recentWatchAchievements,
   };
 };
 
@@ -261,8 +279,13 @@ export default function Index() {
     }, 1000 * 60 * 15);
     return () => clearInterval(timerId);
   });
-  const { userId, tickets, weekMetrics, quarterMetrics } =
-    useLoaderData<typeof loader>();
+  const {
+    userId,
+    tickets,
+    weekMetrics,
+    quarterMetrics,
+    recentWatchAchievements,
+  } = useLoaderData<typeof loader>();
 
   return userId ? (
     <div className="remix__page">
@@ -288,7 +311,7 @@ export default function Index() {
               publishedAt: ticket.publishedAt,
               hashtag: ticket.work.hashtag ?? undefined,
               watchReady: ticket.watchReady,
-              watched: false
+              watched: false,
             };
           })}
         />
@@ -317,6 +340,16 @@ export default function Index() {
             <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
           </LineChart>
         </ResponsiveContainer>
+        <h2 className="mt-4">最近見たエピソード</h2>
+        <EpisodeList.Component
+          episodes={recentWatchAchievements.map((a) => ({
+            workId: a.workId,
+            title: a.episode.work.title,
+            count: a.count,
+            publishedAt: a.createdAt,
+            watched: true,
+          }))}
+        />
       </section>
     </div>
   ) : (

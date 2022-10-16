@@ -41,6 +41,7 @@ type LoaderData = {
     episodes: (Episode & { WatchedEpisodesOnUser?: { createdAt: Date }[] })[];
     DistributorsOnWorks: (DistributorsOnWorks & { distributor: Distributor })[];
   };
+  rating: number;
   ratings: { count: number; rating: number | null }[];
   subscribed: boolean;
   loggedIn: boolean;
@@ -77,6 +78,7 @@ export const loader = async ({
   if (userId === undefined) {
     return {
       work,
+      rating: 0,
       ratings: [],
       subscribed: work?.users.length === 1,
       loggedIn: userId !== undefined,
@@ -105,8 +107,14 @@ export const loader = async ({
   ratings.forEach((r) => {
     map.set(r.episode.count, r.rating);
   });
+  const nonNullRatings = ratings.map((r) => r.rating).filter(isNumber);
   return {
     work,
+    rating:
+      ratings.length === 0
+        ? 0
+        : nonNullRatings.reduce((acc, val) => acc + val, 0) /
+          nonNullRatings.length,
     ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
       return { count: idx + 1, rating: map.get(idx + 1) ?? null };
     }),
@@ -221,7 +229,7 @@ export default function Work() {
   const [editMode, setEditMode] = useState(false);
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, work, subscribed, ratings } =
+  const { loggedIn, work, subscribed, rating, ratings } =
     useLoaderData<Serialized<LoaderData>>();
   const defaultValueMap: WorkEditForm.Props = {
     workId: work.id,
@@ -253,14 +261,7 @@ export default function Work() {
               />
             </div>
             <div className="ml-4 flex items-center">
-              <div>
-                {(
-                  ratings
-                    .map((r) => r.rating)
-                    .filter(isNumber)
-                    .reduce((acc, val) => acc + val, 0) / ratings.length
-                ).toFixed(1)}
-              </div>
+              <div>{rating.toFixed(1)}</div>
             </div>
           </>
         )}

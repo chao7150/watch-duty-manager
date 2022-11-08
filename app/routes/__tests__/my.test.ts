@@ -3,7 +3,11 @@ import { createQueries } from "../my";
 
 describe("createQueries", () => {
   it("", () => {
-    expect(createQueries({ onairOnly: false })).toBe("onairOnly=false");
-    expect(createQueries({ onairOnly: true })).toBe("");
+    expect(
+      createQueries({ onairOnly: false, filterConditionStartDate: undefined })
+    ).toBe("");
+    expect(
+      createQueries({ onairOnly: true, filterConditionStartDate: undefined })
+    ).toBe("onairOnly=true");
   });
 });

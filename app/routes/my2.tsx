@@ -5,7 +5,6 @@ import { addQuarters } from "date-fns";
 import { interval2CourList } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
-import * as WorkUI from "~/components/Work/Work";
 import { isNumber } from "~/utils/type";
 
 const generateStartDateQuery = (
@@ -56,7 +55,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   ]);
   const cours = interval2CourList(oldestEpisode.publishedAt, new Date());
   return {
-    selectedCour: cour,
+    selectedCourDate: cour,
     courList: cours.map(([label, date]) => [label, date.toISOString()]),
     works: watchingWorks.map((work) => ({
       ...work,
@@ -69,63 +68,73 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 export default function My() {
-  const { selectedCour, courList, works } = useLoaderData<typeof loader>();
+  const { selectedCourDate, courList, works } = useLoaderData<typeof loader>();
+  const selectedCour = courList.find((cour) => cour[1] === selectedCourDate);
   return (
     <div>
-      <select
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value === "all") {
-            location.href = "/my2";
-            return;
-          }
-          location.href = `/my2?cour=${value}`;
-        }}
-      >
-        <option value="all">全て</option>
-        {courList.map(([label, date]) => {
-          return (
-            <option value={date} selected={date === selectedCour}>
-              {label}
-            </option>
-          );
-        })}
-      </select>
-      <ul>
-        {works
-          .sort((a, b) => {
-            return (b.rating ?? 0) - (a.rating ?? 0);
-          })
-          .map((work) => {
+      <h2>あなたの視聴作品リスト</h2>
+      <section>
+        <select className="border bg-dark"
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "all") {
+              location.href = "/my2";
+              return;
+            }
+            location.href = `/my2?cour=${value}`;
+          }}
+        >
+          <option value="all">全て</option>
+          {courList.map(([label, date]) => {
             return (
-              <li className="mt-1 flex gap-4" key={work.id}>
-                <meter
-                  min={0}
-                  max={work.episodes.length}
-                  value={
-                    work.episodes.filter(
-                      (episode) => episode.WatchedEpisodesOnUser.length === 1
-                    ).length
-                  }
-                  title={`完走率: ${
-                    work.episodes.filter(
-                      (episode) => episode.WatchedEpisodesOnUser.length === 1
-                    ).length
-                  }/${work.episodes.length}`}
-                >
-                  {
-                    work.episodes.filter(
-                      (episode) => episode.WatchedEpisodesOnUser.length === 1
-                    ).length
-                  }
-                  /{work.episodes.length}
-                </meter>
-                <div>{work.rating.toFixed(1)}</div>
-                <Link to={`/works/${work.id}`}>{work.title}</Link>
-              </li>
+              <option value={date} selected={date === selectedCourDate}>
+                {label}
+              </option>
             );
           })}
-      </ul>
+        </select>
+      </section>
+      <section className="mt-4 flex flex-col gap-2">
+        <h3>
+          {selectedCour ? selectedCour[0] : "不明"}のアニメ(
+          {works.length})
+        </h3>
+        <ul className="flex flex-col gap-2">
+          {works
+            .sort((a, b) => {
+              return (b.rating ?? 0) - (a.rating ?? 0);
+            })
+            .map((work) => {
+              return (
+                <li className="flex gap-4 items-center" key={work.id}>
+                  <meter
+                    min={0}
+                    max={work.episodes.length}
+                    value={
+                      work.episodes.filter(
+                        (episode) => episode.WatchedEpisodesOnUser.length === 1
+                      ).length
+                    }
+                    title={`完走率: ${
+                      work.episodes.filter(
+                        (episode) => episode.WatchedEpisodesOnUser.length === 1
+                      ).length
+                    }/${work.episodes.length}`}
+                  >
+                    {
+                      work.episodes.filter(
+                        (episode) => episode.WatchedEpisodesOnUser.length === 1
+                      ).length
+                    }
+                    /{work.episodes.length}
+                  </meter>
+                  <div>{work.rating.toFixed(1)}</div>
+                  <Link to={`/works/${work.id}`}>{work.title}</Link>
+                </li>
+              );
+            })}
+        </ul>
+      </section>
     </div>
   );
 }

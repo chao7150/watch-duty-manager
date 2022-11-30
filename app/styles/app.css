@@ -751,6 +751,10 @@ input[type="text"]::placeholder,
   border-radius: 9999px;
 }
 
+.border {
+  border-width: 1px;
+}
+
 .bg-dark {
   --tw-bg-opacity: 1;
   background-color: rgb(32 33 36 / var(--tw-bg-opacity));

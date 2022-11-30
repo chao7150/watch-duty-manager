@@ -22,7 +22,8 @@ export const loader = async ({ request }: LoaderArgs) => {
         async () => {
           const works = await db.work.findMany({
             include: {
-              users: { where: { userId } },
+              // 非ログイン時は0件ヒットにするために空文字で検索
+              users: { where: { userId: userId ?? "" } },
               episodes: { where: { count: 1 } },
             },
             orderBy: { id: "asc" },

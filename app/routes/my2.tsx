@@ -1,11 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { LoaderArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { addQuarters } from "date-fns";
 import { interval2CourList } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import * as WorkUI from "~/components/Work/Work";
+import { isNumber } from "~/utils/type";
 
 const generateStartDateQuery = (
   startDate: string | null
@@ -42,7 +43,11 @@ export const loader = async ({ request }: LoaderArgs) => {
       ...generateStartDateQuery(cour),
     },
     include: {
-      episodes: { include: { WatchedEpisodesOnUser: { where: { userId } } } },
+      episodes: {
+        include: {
+          WatchedEpisodesOnUser: { where: { userId } },
+        },
+      },
     },
   });
   const [oldestEpisode, watchingWorks] = await Promise.all([
@@ -53,7 +58,13 @@ export const loader = async ({ request }: LoaderArgs) => {
   return {
     selectedCour: cour,
     courList: cours.map(([label, date]) => [label, date.toISOString()]),
-    works: watchingWorks,
+    works: watchingWorks.map((work) => ({
+      ...work,
+      rating: work.episodes
+        .map((episode) => episode.WatchedEpisodesOnUser[0]?.rating)
+        .filter(isNumber)
+        .reduce((acc, val, _, array) => acc + val / array.length, 0),
+    })),
   };
 };
 
@@ -81,39 +92,39 @@ export default function My() {
         })}
       </select>
       <ul>
-        {works.map((work) => {
-          return (
-            <li className="mt-1" key={work.id}>
-              <meter
-                min={0}
-                max={work.episodes.length}
-                value={
-                  work.episodes.filter(
-                    (episode) => episode.WatchedEpisodesOnUser.length === 1
-                  ).length
-                }
-                title={`完走率: ${
-                  work.episodes.filter(
-                    (episode) => episode.WatchedEpisodesOnUser.length === 1
-                  ).length
-                }/${work.episodes.length}`}
-              >
-                {
-                  work.episodes.filter(
-                    (episode) => episode.WatchedEpisodesOnUser.length === 1
-                  ).length
-                }
-                /{work.episodes.length}
-              </meter>
-              <WorkUI.Component
-                loggedIn={true}
-                id={work.id.toString()}
-                title={work.title}
-                subscribed={true}
-              />
-            </li>
-          );
-        })}
+        {works
+          .sort((a, b) => {
+            return (b.rating ?? 0) - (a.rating ?? 0);
+          })
+          .map((work) => {
+            return (
+              <li className="mt-1 flex gap-4" key={work.id}>
+                <meter
+                  min={0}
+                  max={work.episodes.length}
+                  value={
+                    work.episodes.filter(
+                      (episode) => episode.WatchedEpisodesOnUser.length === 1
+                    ).length
+                  }
+                  title={`完走率: ${
+                    work.episodes.filter(
+                      (episode) => episode.WatchedEpisodesOnUser.length === 1
+                    ).length
+                  }/${work.episodes.length}`}
+                >
+                  {
+                    work.episodes.filter(
+                      (episode) => episode.WatchedEpisodesOnUser.length === 1
+                    ).length
+                  }
+                  /{work.episodes.length}
+                </meter>
+                <div>{work.rating.toFixed(1)}</div>
+                <Link to={`/works/${work.id}`}>{work.title}</Link>
+              </li>
+            );
+          })}
       </ul>
     </div>
   );

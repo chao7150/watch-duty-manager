@@ -21,7 +21,7 @@ export const Component: React.VFC<Props> = ({
       {loggedIn && (
         <WorkSubscribeForm.Component givenClassName="work-work-subscribe-form" id={id} subscribing={subscribed} />
       )}
-      <Link className="work-title" to={`/works/${id}`}>{title}</Link>
+      <Link to={`/works/${id}`}>{title}</Link>
     </div>
   );
 };

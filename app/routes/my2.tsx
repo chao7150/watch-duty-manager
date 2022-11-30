@@ -5,6 +5,7 @@ import { addQuarters } from "date-fns";
 import { interval2CourList } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
+import * as WorkUI from "~/components/Work/Work";
 
 const generateStartDateQuery = (
   startDate: string | null
@@ -40,6 +41,9 @@ export const loader = async ({ request }: LoaderArgs) => {
       users: { some: { userId } },
       ...generateStartDateQuery(cour),
     },
+    include: {
+      episodes: { include: { WatchedEpisodesOnUser: { where: { userId } } } },
+    },
   });
   const [oldestEpisode, watchingWorks] = await Promise.all([
     oldestEpisodePromise,
@@ -47,30 +51,68 @@ export const loader = async ({ request }: LoaderArgs) => {
   ]);
   const cours = interval2CourList(oldestEpisode.publishedAt, new Date());
   return {
+    selectedCour: cour,
     courList: cours.map(([label, date]) => [label, date.toISOString()]),
     works: watchingWorks,
   };
 };
 
 export default function My() {
-  const { courList, works } = useLoaderData<typeof loader>();
+  const { selectedCour, courList, works } = useLoaderData<typeof loader>();
   return (
     <div>
-      <ul>
-        <li key="all">
-          <a href="/my2">全て</a>
-        </li>
+      <select
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value === "all") {
+            location.href = "/my2";
+            return;
+          }
+          location.href = `/my2?cour=${value}`;
+        }}
+      >
+        <option value="all">全て</option>
         {courList.map(([label, date]) => {
           return (
-            <li key={label}>
-              <a href={`/my2?cour=${date}`}>{label}</a>
-            </li>
+            <option value={date} selected={date === selectedCour}>
+              {label}
+            </option>
           );
         })}
-      </ul>
+      </select>
       <ul>
         {works.map((work) => {
-          return <li key={work.id}>{work.title}</li>;
+          return (
+            <li className="mt-1" key={work.id}>
+              <meter
+                min={0}
+                max={work.episodes.length}
+                value={
+                  work.episodes.filter(
+                    (episode) => episode.WatchedEpisodesOnUser.length === 1
+                  ).length
+                }
+                title={`完走率: ${
+                  work.episodes.filter(
+                    (episode) => episode.WatchedEpisodesOnUser.length === 1
+                  ).length
+                }/${work.episodes.length}`}
+              >
+                {
+                  work.episodes.filter(
+                    (episode) => episode.WatchedEpisodesOnUser.length === 1
+                  ).length
+                }
+                /{work.episodes.length}
+              </meter>
+              <WorkUI.Component
+                loggedIn={true}
+                id={work.id.toString()}
+                title={work.title}
+                subscribed={true}
+              />
+            </li>
+          );
         })}
       </ul>
     </div>

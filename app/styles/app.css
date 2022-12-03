@@ -633,10 +633,6 @@ input[type="text"]::placeholder,
   margin-left: 0.5rem;
 }
 
-.mt-1 {
-  margin-top: 0.25rem;
-}
-
 .ml-4 {
   margin-left: 1rem;
 }
@@ -669,14 +665,6 @@ input[type="text"]::placeholder,
   width: 66.666667%;
 }
 
-.w-64 {
-  width: 16rem;
-}
-
-.w-4 {
-  width: 1rem;
-}
-
 .w-24 {
   width: 6rem;
 }
@@ -687,6 +675,10 @@ input[type="text"]::placeholder,
 
 .w-6 {
   width: 1.5rem;
+}
+
+.w-64 {
+  width: 16rem;
 }
 
 .grow {
@@ -749,10 +741,6 @@ input[type="text"]::placeholder,
 
 .rounded-full {
   border-radius: 9999px;
-}
-
-.border {
-  border-width: 1px;
 }
 
 .bg-dark {
@@ -820,14 +808,14 @@ input[type="text"]::placeholder,
   color: rgb(138 180 248 / var(--tw-text-opacity));
 }
 
-.text-text-strong {
-  --tw-text-opacity: 1;
-  color: rgb(188 192 195 / var(--tw-text-opacity));
-}
-
 .text-red {
   --tw-text-opacity: 1;
   color: rgb(242 139 130 / var(--tw-text-opacity));
+}
+
+.text-text-strong {
+  --tw-text-opacity: 1;
+  color: rgb(188 192 195 / var(--tw-text-opacity));
 }
 
 .text-text-weak {

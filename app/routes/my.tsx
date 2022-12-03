@@ -71,21 +71,25 @@ export const loader = async ({ request }: LoaderArgs) => {
   };
 };
 
-const sortMap = {
-  rating: (a: { rating: number }, b: { rating: number }) => {
-    return b.rating - a.rating;
-  },
-  complete: (
-    a: { complete: number; episodes: any[] },
-    b: { complete: number; episodes: any[] }
-  ) => {
-    return b.complete / b.episodes.length - a.complete / a.episodes.length;
-  },
-} as const;
-
 export default function My() {
-  const [sort, setSort] = useState<keyof typeof sortMap>("rating");
-  const { selectedCourDate, courList, works } = useLoaderData<typeof loader>();
+  const [sort, setSort] = useState<"rating" | "complete">("rating");
+  const [completeByPublished, setCompleteByPublished] = useState(true);
+  const {
+    selectedCourDate,
+    courList,
+    works: _w,
+  } = useLoaderData<typeof loader>();
+  const works = _w.map((w) => {
+    const watchedEpisodesDenominator = completeByPublished
+      ? w.episodes.filter((e) => new Date(e.publishedAt) < new Date()).length
+      : w.episodes.length;
+    return {
+      ...w,
+      watchedEpisodesDenominator,
+      sortKey:
+        sort === "rating" ? w.rating : w.complete / watchedEpisodesDenominator,
+    };
+  });
   const selectedCour = courList.find((cour) => cour[1] === selectedCourDate);
   return (
     <div>
@@ -121,6 +125,16 @@ export default function My() {
           <option value="rating">評価が高い順</option>
           <option value="complete">完走率が高い順</option>
         </select>
+        <label>
+          <input
+            type="checkbox"
+            checked={completeByPublished}
+            onChange={(e) => {
+              setCompleteByPublished(e.target.checked);
+            }}
+          ></input>
+          完走率を放送済み話数に対して計算する
+        </label>
       </section>
       <section className="mt-4 flex flex-col gap-2">
         <h3>
@@ -128,26 +142,30 @@ export default function My() {
           {works.length})
         </h3>
         <ul className="flex flex-col gap-2">
-          {works.sort(sortMap[sort]).map((work) => {
-            return (
-              <li className="flex gap-4 items-center" key={work.id}>
-                <meter
-                  min={0}
-                  max={work.episodes.length}
-                  value={work.complete}
-                  title={`完走率: ${
-                    work.episodes.filter(
-                      (episode) => episode.WatchedEpisodesOnUser.length === 1
-                    ).length
-                  }/${work.episodes.length}`}
-                >
-                  {work.complete}/{work.episodes.length}
-                </meter>
-                <div>{work.rating.toFixed(1)}</div>
-                <Link to={`/works/${work.id}`}>{work.title}</Link>
-              </li>
-            );
-          })}
+          {works
+            .sort((a, b) => {
+              return b.sortKey - a.sortKey;
+            })
+            .map((work) => {
+              return (
+                <li className="flex gap-4 items-center" key={work.id}>
+                  <meter
+                    min={0}
+                    max={work.watchedEpisodesDenominator}
+                    value={work.complete}
+                    title={`完走率: ${
+                      work.episodes.filter(
+                        (episode) => episode.WatchedEpisodesOnUser.length === 1
+                      ).length
+                    }/${work.watchedEpisodesDenominator}`}
+                  >
+                    {work.complete}/{work.watchedEpisodesDenominator}
+                  </meter>
+                  <div>{work.rating.toFixed(1)}</div>
+                  <Link to={`/works/${work.id}`}>{work.title}</Link>
+                </li>
+              );
+            })}
         </ul>
       </section>
     </div>

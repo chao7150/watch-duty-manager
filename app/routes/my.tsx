@@ -152,6 +152,7 @@ export default function My() {
                   <meter
                     min={0}
                     max={work.watchedEpisodesDenominator}
+                    low={work.watchedEpisodesDenominator / 2}
                     value={work.complete}
                     title={`完走率: ${
                       work.episodes.filter(

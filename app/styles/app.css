@@ -681,6 +681,14 @@ input[type="text"]::placeholder,
   width: 16rem;
 }
 
+.w-4 {
+  width: 1rem;
+}
+
+.shrink-0 {
+  flex-shrink: 0;
+}
+
 .grow {
   flex-grow: 1;
 }

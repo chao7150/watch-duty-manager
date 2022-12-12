@@ -49,8 +49,9 @@ export const action = async ({ request, params }: ActionArgs) => {
   const formData = Object.fromEntries(await request.formData());
 
   if (request.method === "PATCH") {
-    if (formData._action === "add_description") {
-      const { description } = nonEmptyStringOrUndefined(formData, [
+    if (formData._action === "add_title_description") {
+      const { title, description } = nonEmptyStringOrUndefined(formData, [
+        "title",
         "description",
       ]);
       await db.episode.update({
@@ -61,6 +62,7 @@ export const action = async ({ request, params }: ActionArgs) => {
           },
         },
         data: {
+          title: title || null,
           description: description || null,
         },
       });
@@ -121,6 +123,10 @@ export default function Episode() {
       <dl>
         <dt>放送日時</dt>
         <dd>{new Date(episode.publishedAt).toLocaleString()}</dd>
+        <dt>タイトル</dt>
+        <dd>
+          <p>{episode.title}</p>
+        </dd>
         <dt>あらすじ</dt>
         <dd>
           <p>{episode.description}</p>

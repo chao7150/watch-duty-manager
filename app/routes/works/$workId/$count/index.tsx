@@ -39,7 +39,6 @@ export const loader = async ({ request, params }: LoaderArgs) => {
 };
 
 export const action = async ({ request, params }: ActionArgs) => {
-  const userId = await requireUserId(request);
   const { workId: _workId, count: _count } = extractParams(params, [
     "workId",
     "count",
@@ -48,6 +47,28 @@ export const action = async ({ request, params }: ActionArgs) => {
   const count = parseInt(_count, 10);
 
   const formData = Object.fromEntries(await request.formData());
+
+  if (request.method === "PATCH") {
+    if (formData._action === "add_description") {
+      const { description } = nonEmptyStringOrUndefined(formData, [
+        "description",
+      ]);
+      await db.episode.update({
+        where: {
+          workId_count: {
+            workId,
+            count,
+          },
+        },
+        data: {
+          description: description || null,
+        },
+      });
+    }
+    return null;
+  }
+
+  const userId = await requireUserId(request);
 
   if (formData._action === "unwatch") {
     await db.watchedEpisodesOnUser.delete({
@@ -100,6 +121,10 @@ export default function Episode() {
       <dl>
         <dt>放送日時</dt>
         <dd>{new Date(episode.publishedAt).toLocaleString()}</dd>
+        <dt>あらすじ</dt>
+        <dd>
+          <p>{episode.description}</p>
+        </dd>
         {myHistory && (
           <>
             <dt>視聴日時</dt>

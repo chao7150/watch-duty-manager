@@ -677,12 +677,12 @@ input[type="text"]::placeholder,
   width: 1.5rem;
 }
 
-.w-64 {
-  width: 16rem;
-}
-
 .w-4 {
   width: 1rem;
+}
+
+.w-64 {
+  width: 16rem;
 }
 
 .shrink-0 {

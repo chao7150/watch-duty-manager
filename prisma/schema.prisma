@@ -50,6 +50,7 @@ model Episode {
   workId                Int
   count                 Int
   publishedAt           DateTime
+  description           String?
   WatchedEpisodesOnUser WatchedEpisodesOnUser[]
 
   @@id(fields: [workId, count])

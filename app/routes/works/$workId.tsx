@@ -111,7 +111,7 @@ export const loader = async ({
   return {
     work,
     rating:
-      ratings.length === 0
+      nonNullRatings.length === 0
         ? 0
         : nonNullRatings.reduce((acc, val) => acc + val, 0) /
           nonNullRatings.length,

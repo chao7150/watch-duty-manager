@@ -1,8 +1,4 @@
-import { Work as WorkModel, SubscribedWorksOnUser } from "@prisma/client";
-import * as F from "fp-ts/function";
 import { useLoaderData } from "@remix-run/react";
-import * as TE from "fp-ts/TaskEither";
-import * as E from "fp-ts/Either";
 import { useState } from "react";
 import { isSameQuarter } from "date-fns";
 import { db } from "~/utils/db.server";
@@ -10,57 +6,58 @@ import { getUserId } from "~/utils/session.server";
 import * as WorkUI from "~/components/Work/Work";
 import { interval2CourList } from "~/utils/date";
 import { LoaderArgs } from "@remix-run/node";
+import {
+  cour2expression,
+  cour2startDate,
+  isCour,
+  next,
+} from "~/domain/cour/util";
+import { getCourList } from "~/domain/cour/db";
+import { Cour } from "~/domain/cour/consts";
+import * as CourSelect from "~/components/CourSelect";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
-  const releasedDateBegin = url.searchParams.get("releasedDateBegin");
-  const releasedDateEnd = url.searchParams.get("releasedDateEnd");
-  const result = await F.pipe(
-    (await getUserId(request)) ?? undefined,
-    (userId) =>
-      TE.tryCatch(
-        async () => {
-          const works = await db.work.findMany({
-            include: {
-              // 非ログイン時は0件ヒットにするために空文字で検索
-              users: { where: { userId: userId ?? "" } },
-              episodes: { where: { count: 1 } },
-            },
-            orderBy: { id: "asc" },
-          });
-          return { works, loggedIn: userId !== undefined };
-        },
-        () => "db error"
-      ),
-    TE.chain((v) =>
-      TE.of({
-        ...v,
-        works: v.works.filter((work) => {
-          const firstEpisode = work.episodes[0];
-          if (firstEpisode === undefined) {
-            return false;
-          }
-          const publishedAt = firstEpisode.publishedAt;
-          const beginConditionFullfilled =
-            releasedDateBegin === null ||
-            new Date(
-              new Date(releasedDateBegin).getTime() - 1000 * 60 * 60 * 9
-            ) < publishedAt;
-          const endConditionFullfilled =
-            releasedDateEnd === null ||
-            publishedAt <
-              new Date(
-                new Date(releasedDateEnd).getTime() - 1000 * 60 * 60 * 9
-              );
-          return beginConditionFullfilled && endConditionFullfilled;
-        }),
-      })
-    )
-  )();
-  if (E.isLeft(result)) {
-    throw new Error(result.left);
+  const userId = await getUserId(request);
+  const cour = url.searchParams.get("cour");
+  if (cour !== null && !isCour(cour)) {
+    throw new Error("cour is invalid.");
   }
-  return result.right;
+  const worksPromise = db.work.findMany({
+    ...(cour
+      ? {
+          where: {
+            episodes: {
+              some: {
+                AND: [
+                  {
+                    publishedAt: {
+                      gte: cour2startDate(cour),
+                      lt: cour2startDate(next(cour)),
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      : {}),
+    include: {
+      // 非ログイン時は0件ヒットにするために空文字で検索
+      users: { where: { userId: userId ?? "" } },
+      episodes: { where: { count: 1 } },
+    },
+    orderBy: { id: "asc" },
+  });
+  const [works, cours] = await Promise.all([worksPromise, getCourList(db)]);
+  return {
+    works,
+    loggedIn: userId !== undefined,
+    selectedCourDate: cour,
+    courList: cours.map(
+      (cour) => [cour2expression(cour), cour] as [string, Cour]
+    ),
+  };
 };
 
 export default function Works() {
@@ -68,11 +65,7 @@ export default function Works() {
   const [filterCondition, setFilterCondition] = useState<
     { label: string; start: Date } | undefined
   >(undefined);
-  const { works, loggedIn } = loaderData;
-  const oldest = Math.min(
-    ...works.map((w) => new Date(w.publishedAt).getTime())
-  );
-  const courList = interval2CourList(new Date(oldest), new Date());
+  const { works, loggedIn, courList, selectedCourDate } = loaderData;
   const shownWorks = works.filter((w) => {
     if (filterCondition === undefined) {
       return true;
@@ -82,31 +75,18 @@ export default function Works() {
   return (
     <div>
       <h2>作品リスト</h2>
-      <section>
-        <details>
-          <summary className="list-none cursor-pointer">
-            <h3>絞り込み</h3>
-          </summary>
-          <div className="mt-2 w-64">
-            <button onClick={() => setFilterCondition(undefined)}>
-              絞り込み解除
-            </button>
-            <ul className="works-filter-condition-list">
-              {courList.map(([label, start]) => {
-                return (
-                  <li className="works-filter-condition-item" key={label}>
-                    <button
-                      onClick={() => setFilterCondition({ label, start })}
-                    >
-                      {label}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </details>
-      </section>
+      <CourSelect.Component
+        courList={courList.reverse()}
+        defaultSelectedValue={selectedCourDate ?? undefined}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value === "all") {
+            location.href = "/works";
+            return;
+          }
+          location.href = `/works?cour=${value}`;
+        }}
+      />
       <section className="mt-4">
         <h3>
           <span>

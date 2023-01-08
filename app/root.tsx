@@ -143,7 +143,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <Link to="/works">Works</Link>
+                <Link to={`/works?cour=${date2cour(new Date())}`}>Works</Link>
               </li>
               <li>
                 <Link to="/create">Create</Link>

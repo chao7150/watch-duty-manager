@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eachCourOfInterval, date2cour } from "../util";
+import { eachCourOfInterval, date2cour, next } from "../util";
 
 describe("date2cour", () => {
   it("翌日4時までは当クール", () => {
@@ -9,6 +9,15 @@ describe("date2cour", () => {
   });
   it("4時から次クール", () => {
     expect(date2cour(new Date("2023-01-01T04:00:00+0900"))).toBe("2023winter");
+  });
+});
+
+describe("next", () => {
+  it("年をまたがない", () => {
+    expect(next("2022summer")).toBe("2022autumn");
+  });
+  it("年をまたぐ", () => {
+    expect(next("2022autumn")).toBe("2023winter");
   });
 });
 

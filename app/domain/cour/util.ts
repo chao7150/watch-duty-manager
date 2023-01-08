@@ -57,6 +57,15 @@ export const cour2expression = (cour: Cour): string => {
   return `${getCourYear(cour)}${SeasonExpression[getCourSeason(cour)]}`;
 };
 
+export const next = (cour: Cour): Cour => {
+  const year = getCourYear(cour);
+  const season = getCourSeason(cour);
+  if (season === "autumn") {
+    return `${Number(year) + 1}winter` as Cour;
+  }
+  return `${year}${Season[Season.indexOf(season) + 1]}`;
+};
+
 export const eachCourOfInterval = (first: Cour, last: Cour): Cour[] => {
   if (first === last) {
     return [first];

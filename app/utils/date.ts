@@ -21,7 +21,7 @@ const monthSeasonNameMap: { [K: number]: string } = {
   10: "秋",
 };
 
-export const getCourName = (date: Date): string => {
+export const getCourExpression = (date: Date): string => {
   return `${date.getFullYear()}${monthSeasonNameMap[date.getMonth() + 1]}`;
 };
 
@@ -32,7 +32,7 @@ export const interval2CourList = (start: Date, now: Date): [string, Date][] => {
   })
     .reverse()
     .map((q) => {
-      return [getCourName(q), q];
+      return [getCourExpression(q), q];
     });
 };
 

@@ -7,14 +7,18 @@ import { interval2CourList } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
+import * as CourSelect from "~/components/CourSelect";
+import { getCourList } from "~/domain/cour/db";
+import { cour2expression, cour2startDate, isCour } from "~/domain/cour/util";
+import { Cour } from "~/domain/cour/consts";
 
 const generateStartDateQuery = (
-  startDate: string | null
+  cour: Cour | null
 ): Prisma.WorkWhereInput => {
-  if (startDate === null) {
+  if (cour === null) {
     return {};
   }
-  const searchDate = new Date(startDate);
+  const searchDate = cour2startDate(cour);
   return {
     episodes: {
       some: {
@@ -32,11 +36,9 @@ export const loader = async ({ request }: LoaderArgs) => {
   const userId = await requireUserId(request);
   const url = new URL(request.url);
   const cour = url.searchParams.get("cour");
-  const oldestEpisodePromise = db.episode.findFirstOrThrow({
-    select: { publishedAt: true },
-    orderBy: { publishedAt: "asc" },
-    take: 1,
-  });
+  if (cour !== null && !isCour(cour)) {
+    throw new Error("cour is invalid.");
+  }
   const watchingWorksPromise = db.work.findMany({
     where: {
       users: { some: { userId } },
@@ -68,15 +70,16 @@ export const loader = async ({ request }: LoaderArgs) => {
     take: 30,
   });
 
-  const [oldestEpisode, watchingWorks, bestEpisodesOnUser] = await Promise.all([
-    oldestEpisodePromise,
+  const [cours, watchingWorks, bestEpisodesOnUser] = await Promise.all([
+    getCourList(db),
     watchingWorksPromise,
     bestEpisodesOnUserPromise,
   ]);
-  const cours = interval2CourList(oldestEpisode.publishedAt, new Date());
   return {
     selectedCourDate: cour,
-    courList: cours.map(([label, date]) => [label, date.toISOString()]),
+    courList: cours.map(
+      (cour) => [cour2expression(cour), cour] as [string, Cour]
+    ),
     works: watchingWorks.map((work) => ({
       ...work,
       rating: work.episodes
@@ -116,8 +119,9 @@ export default function My() {
     <div>
       <header className="flex gap-4">
         <h2>マイページ</h2>
-        <select
-          className="bg-accent-area"
+        <CourSelect.Component
+          courList={courList.reverse()}
+          defaultSelectedValue={selectedCourDate ?? undefined}
           onChange={(e) => {
             const value = e.target.value;
             if (value === "all") {
@@ -126,16 +130,7 @@ export default function My() {
             }
             location.href = `/my?cour=${value}`;
           }}
-        >
-          <option value="all">全期間</option>
-          {courList.map(([label, date]) => {
-            return (
-              <option value={date} selected={date === selectedCourDate}>
-                {label}
-              </option>
-            );
-          })}
-        </select>
+        />
       </header>
       <main className="mt-4 grid grid-cols-2 gap-4">
         <section className="flex flex-col gap-2">

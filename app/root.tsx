@@ -18,7 +18,7 @@ import { getUserId } from "./utils/session.server";
 import styles from "./styles/app.css";
 import globalStylesUrl from "~/styles/global.css";
 import sharedStylesUrl from "~/styles/shared.css";
-import { startOfQuarter } from "date-fns";
+import { date2cour } from "./domain/cour/util";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
@@ -152,13 +152,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               {userId ? (
                 <>
                   <li>
-                    <Link
-                      to={`/my?cour=${startOfQuarter(
-                        new Date()
-                      ).toISOString()}`}
-                    >
-                      My
-                    </Link>
+                    <Link to={`/my?cour=${date2cour(new Date())}`}>My</Link>
                   </li>
                   <li className="text-link">
                     <Form action="/logout" method="post">

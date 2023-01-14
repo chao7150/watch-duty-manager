@@ -10,3 +10,6 @@ node_modules
 firebase-service-account.json
 
 dump.sql
+/test-results/
+/playwright-report/
+/playwright/.cache/

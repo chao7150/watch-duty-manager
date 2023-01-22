@@ -9,12 +9,26 @@ import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
 import * as CourSelect from "~/components/CourSelect";
 import { getCourList } from "~/domain/cour/db";
-import { cour2expression, cour2startDate, isCour } from "~/domain/cour/util";
+import {
+  cour2expression,
+  cour2startDate,
+  isCour,
+  next,
+} from "~/domain/cour/util";
 import { Cour } from "~/domain/cour/consts";
+import { getQuarterMetrics } from "..";
+import {
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+} from "recharts";
 
-const generateStartDateQuery = (
-  cour: Cour | null
-): Prisma.WorkWhereInput => {
+const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   if (cour === null) {
     return {};
   }
@@ -70,11 +84,20 @@ export const loader = async ({ request }: LoaderArgs) => {
     take: 30,
   });
 
-  const [cours, watchingWorks, bestEpisodesOnUser] = await Promise.all([
-    getCourList(db),
-    watchingWorksPromise,
-    bestEpisodesOnUserPromise,
-  ]);
+  const [cours, watchingWorks, bestEpisodesOnUser, quarterMetrics] =
+    await Promise.all([
+      getCourList(db),
+      watchingWorksPromise,
+      bestEpisodesOnUserPromise,
+      getQuarterMetrics({
+        db,
+        now:
+          cour === null
+            ? new Date()
+            : new Date(cour2startDate(next(cour)).getTime() - 1),
+        userId,
+      })(),
+    ]);
   return {
     selectedCourDate: cour,
     courList: cours.map(
@@ -91,6 +114,7 @@ export const loader = async ({ request }: LoaderArgs) => {
       ).length,
     })),
     bestEpisodesOnUser,
+    quarterMetrics,
   };
 };
 
@@ -102,6 +126,7 @@ export default function My() {
     courList,
     works: _w,
     bestEpisodesOnUser,
+    quarterMetrics,
   } = useLoaderData<typeof loader>();
   const works = _w.map((w) => {
     const watchedEpisodesDenominator = completeByPublished
@@ -135,7 +160,7 @@ export default function My() {
       <main className="mt-4 grid grid-cols-2 gap-4">
         <section className="flex flex-col gap-2">
           <h3>
-            {selectedCour ? selectedCour[0] : "不明"}のアニメ(
+            作品(
             {works.length})
           </h3>
           <section className="flex gap-4">
@@ -192,7 +217,19 @@ export default function My() {
         </section>
 
         <section className="flex flex-col gap-2">
-          <h3>{selectedCour ? selectedCour[0] : "不明"}のベストエピソード</h3>
+          <h3>視聴闘争の推移</h3>
+          <ResponsiveContainer height={300}>
+            <LineChart data={quarterMetrics}>
+              <CartesianGrid />
+              <XAxis dataKey="date" stroke="#bdc1c6" />
+              <YAxis tickCount={5} stroke="#bdc1c6" />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="watchAchievements" />
+              <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
+            </LineChart>
+          </ResponsiveContainer>
+          <h3>ベストエピソード</h3>
           <ul className="flex flex-col gap-1">
             {bestEpisodesOnUser.map((e) => {
               return (

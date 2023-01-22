@@ -25,19 +25,3 @@ services:
       MYSQL_PASSWORD: tsuji
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-  app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    env_file: ../.env
-    environment:
-      DATABASE_URL: mysql://masaki:tsuji@db:3306/watch-duty-manager?schema=public
-      TZ: Asia/Tokyo
-    ports:
-      - "3000:3000"
-    depends_on:
-      db:
-        condition: service_healthy
-
-      
-    

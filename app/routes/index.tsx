@@ -24,7 +24,7 @@ import {
   getQuarterEachLocaleDateString,
   startOf4OriginDay,
 } from "~/utils/date";
-import { string } from "fp-ts";
+import { cour2startDate, date2cour } from "~/domain/cour/util";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
@@ -117,7 +117,7 @@ const getQuarterDuties =
         select: { publishedAt: true },
         where: {
           work: { users: { some: { userId } } },
-          publishedAt: { gte: addHours(startOfQuarter(now), 4), lte: now },
+          publishedAt: { gte: cour2startDate(date2cour(now)), lte: now },
         },
       })
     ).map((e) => subHours(e.publishedAt, 4).toLocaleDateString());
@@ -133,7 +133,7 @@ const getQuarterWatchAchievements =
         where: {
           episode: {
             publishedAt: {
-              gte: addHours(startOfQuarter(now), 4),
+              gte: addHours(cour2startDate(date2cour(now)), 4),
               lte: now,
             },
             work: { users: { some: { userId } } },
@@ -158,6 +158,51 @@ const getRecentWatchAchievements =
     });
   };
 
+export const getQuarterMetrics =
+  ({ db, now, userId }: { db: PrismaClient; now: Date; userId: string }) =>
+  async (): Promise<
+    { date: string; watchAchievements: number; dutyAccumulation: number }[]
+  > => {
+    const quarterWatchAchievements = await getQuarterWatchAchievements({
+      db,
+      userId,
+      now,
+    })();
+    const quarterDuties = await getQuarterDuties({ db, userId, now })();
+    const quarterKeys = getQuarterEachLocaleDateString(now);
+    const mergedQuarterMetricsMap = new Map<
+      string,
+      { watchAchievements: number; dutyAccumulation: number }
+    >();
+    quarterKeys.forEach((k) => {
+      mergedQuarterMetricsMap.set(k, {
+        watchAchievements: quarterWatchAchievements.get(k) ?? 0,
+        dutyAccumulation: quarterDuties.get(k) ?? 0,
+      });
+    });
+    return Object.entries(Object.fromEntries(mergedQuarterMetricsMap))
+      .map(([k, v]) => {
+        return {
+          date: k,
+          ...v,
+        };
+      })
+      .reduce((acc, val) => {
+        if (acc.length === 0) {
+          return [val];
+        }
+        const last = acc[acc.length - 1];
+        return [
+          ...acc,
+          {
+            date: val.date,
+            watchAchievements: last.watchAchievements + val.watchAchievements,
+            dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
+          },
+        ];
+      }, [] as Array<{ date: string; watchAchievements: number; dutyAccumulation: number }>);
+  };
+
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId === null) {
@@ -174,16 +219,14 @@ export const loader = async ({ request }: LoaderArgs) => {
     tickets,
     weekWatchAchievements,
     weekDutyAccumulation,
-    quarterDuties,
-    quarterWatchAchievements,
     recentWatchAchievements,
+    quarterMetrics,
   ] = await A.sequenceT(T.ApplyPar)(
     getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
     getWeekWatchAchievements({ db, userId, now }),
     getWeekDutyAccumulation({ db, userId, now }),
-    getQuarterDuties({ db, userId, now }),
-    getQuarterWatchAchievements({ db, userId, now }),
-    getRecentWatchAchievements({ db, userId })
+    getRecentWatchAchievements({ db, userId }),
+    getQuarterMetrics({ db, userId, now })
   )();
   const weekKeys = getPast7DaysLocaleDateString(now);
   const mergedWeekMetricsMap = new Map<
@@ -202,41 +245,6 @@ export const loader = async ({ request }: LoaderArgs) => {
     date: k,
     ...v,
   }));
-
-  const quarterKeys = getQuarterEachLocaleDateString(now);
-  const mergedQuarterMetricsMap = new Map<
-    string,
-    { watchAchievements: number; dutyAccumulation: number }
-  >();
-  quarterKeys.forEach((k) => {
-    mergedQuarterMetricsMap.set(k, {
-      watchAchievements: quarterWatchAchievements.get(k) ?? 0,
-      dutyAccumulation: quarterDuties.get(k) ?? 0,
-    });
-  });
-  const quarterMetrics = Object.entries(
-    Object.fromEntries(mergedQuarterMetricsMap)
-  )
-    .map(([k, v]) => {
-      return {
-        date: k,
-        ...v,
-      };
-    })
-    .reduce((acc, val) => {
-      if (acc.length === 0) {
-        return [val];
-      }
-      const last = acc[acc.length - 1];
-      return [
-        ...acc,
-        {
-          date: val.date,
-          watchAchievements: last.watchAchievements + val.watchAchievements,
-          dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
-        },
-      ];
-    }, [] as Array<{ date: string; watchAchievements: number; dutyAccumulation: number }>);
 
   return {
     userId,

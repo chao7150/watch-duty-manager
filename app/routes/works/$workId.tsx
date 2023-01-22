@@ -1,5 +1,5 @@
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
-import { json } from "@remix-run/node";
+import { json, LoaderArgs } from "@remix-run/node";
 
 import {
   DistributorsOnWorks,
@@ -9,7 +9,6 @@ import {
   Distributor,
 } from "@prisma/client";
 import { useCallback, useState } from "react";
-import type { DataFunctionArgs } from "@remix-run/server-runtime";
 import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
 import {
@@ -35,21 +34,7 @@ import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton"
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber, Serialized } from "~/utils/type";
 
-type LoaderData = {
-  work: Work & {
-    users: SubscribedWorksOnUser[];
-    episodes: (Episode & { WatchedEpisodesOnUser?: { createdAt: Date }[] })[];
-    DistributorsOnWorks: (DistributorsOnWorks & { distributor: Distributor })[];
-  };
-  rating: number;
-  ratings: { count: number; rating: number | null }[];
-  subscribed: boolean;
-  loggedIn: boolean;
-};
-export const loader = async ({
-  request,
-  params,
-}: DataFunctionArgs): Promise<LoaderData> => {
+export const loader = async ({ request, params }: LoaderArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
   const { workId } = extractParams(params, ["workId"]);
   const work = await db.work.findUnique({
@@ -123,39 +108,14 @@ export const loader = async ({
   };
 };
 
-type ActionData = Response | null;
-
 export const action = async ({
   request,
   params,
-}: DataFunctionArgs): Promise<ActionData> => {
+}: LoaderArgs) => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 
   const formData = await request.formData();
-  if (formData.get("_action") === "watchUpTo") {
-    const userId = await requireUserId(request);
-    const { upToCount: _upToCount } = extractParams(
-      Object.fromEntries(formData),
-      ["upToCount"]
-    );
-    const upToCount = parseInt(_upToCount, 10);
-    const alreadyWatchedCounts = (
-      await db.watchedEpisodesOnUser.findMany({
-        where: { workId, userId },
-        select: { count: true },
-      })
-    ).map((w) => w.count);
-    await db.watchedEpisodesOnUser.createMany({
-      data: Array.from({ length: upToCount })
-        .map((_, index) => index + 1)
-        .filter((count) => !alreadyWatchedCounts.includes(count))
-        .map((count) => {
-          return { workId, count, createdAt: new Date(), userId };
-        }),
-    });
-    return null;
-  }
   if (formData.get("_action") === "delete") {
     const { count: _count } = extractParams(Object.fromEntries(formData), [
       "count",
@@ -219,8 +179,9 @@ export const action = async ({
   return F.pipe(
     await WorkEditForm.serverAction(workId, formData),
     E.match(
-      ({ errorMessage, status }) => json({ errorMessage }, { status }),
-      ({ successMessage, status }) => json({ successMessage }, { status })
+      ({ errorMessage, status }) => json({ message: errorMessage }, { status }),
+      ({ successMessage, status }) =>
+        json({ message: successMessage }, { status })
     )
   );
 };
@@ -230,7 +191,7 @@ export default function Work() {
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
   const { loggedIn, work, subscribed, rating, ratings } =
-    useLoaderData<Serialized<LoaderData>>();
+    useLoaderData<typeof loader>();
   const defaultValueMap: WorkEditForm.Props = {
     workId: work.id,
     workInput: {
@@ -376,8 +337,10 @@ export default function Work() {
                               workId={episode.workId}
                               count={episode.count}
                               watched={
+                                // @ts-expect-error
                                 episode.WatchedEpisodesOnUser
-                                  ? episode.WatchedEpisodesOnUser.length >= 1
+                                  ? // @ts-expect-error
+                                    episode.WatchedEpisodesOnUser.length >= 1
                                   : false
                               }
                             />

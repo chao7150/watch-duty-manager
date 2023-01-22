@@ -1,7 +1,7 @@
 import { useFetcher } from "@remix-run/react";
+import { useState } from "react";
 import * as EyeOffIcon from "../Icons/EyeOff";
 import * as EyeIcon from "../Icons/Eye";
-import { useState } from "react";
 
 export type Props = {
   workId: number;

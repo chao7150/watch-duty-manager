@@ -3,7 +3,17 @@ import { LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { addQuarters } from "date-fns";
 import { useState } from "react";
-import { interval2CourList } from "~/utils/date";
+import {
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+} from "recharts";
+import { getQuarterMetrics } from "..";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
@@ -16,17 +26,6 @@ import {
   next,
 } from "~/domain/cour/util";
 import { Cour } from "~/domain/cour/consts";
-import { getQuarterMetrics } from "..";
-import {
-  ResponsiveContainer,
-  LineChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  Line,
-} from "recharts";
 
 const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   if (cour === null) {

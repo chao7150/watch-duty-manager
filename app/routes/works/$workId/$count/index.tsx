@@ -1,9 +1,9 @@
 import { Episode } from "@prisma/client";
 import { useLoaderData } from "@remix-run/react";
+import { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, nonEmptyStringOrUndefined } from "~/utils/type";
-import { ActionArgs, LoaderArgs } from "@remix-run/node";
 
 export const loader = async ({ request, params }: LoaderArgs) => {
   const userId = await getUserId(request);

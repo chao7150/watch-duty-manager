@@ -1,11 +1,8 @@
 import { useLoaderData } from "@remix-run/react";
-import { useState } from "react";
-import { isSameQuarter } from "date-fns";
+import { LoaderArgs } from "@remix-run/node";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import * as WorkUI from "~/components/Work/Work";
-import { interval2CourList } from "~/utils/date";
-import { LoaderArgs } from "@remix-run/node";
 import {
   cour2expression,
   cour2startDate,
@@ -62,16 +59,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 
 export default function Works() {
   const loaderData = useLoaderData<typeof loader>();
-  const [filterCondition, setFilterCondition] = useState<
-    { label: string; start: Date } | undefined
-  >(undefined);
   const { works, loggedIn, courList, selectedCourDate } = loaderData;
-  const shownWorks = works.filter((w) => {
-    if (filterCondition === undefined) {
-      return true;
-    }
-    return isSameQuarter(new Date(w.publishedAt), filterCondition.start);
-  });
   return (
     <div>
       <h2>作品リスト</h2>
@@ -89,13 +77,10 @@ export default function Works() {
       />
       <section className="mt-4">
         <h3>
-          <span>
-            {filterCondition === undefined ? "全て" : filterCondition.label}
-          </span>
-          のアニメ(<span>{shownWorks.length}</span>)
+          作品(<span>{works.length}</span>)
         </h3>
         <ul className="grid grid-cols-2 gap-1">
-          {shownWorks.map((work) => {
+          {works.map((work) => {
             return (
               <li key={work.id}>
                 <WorkUI.Component

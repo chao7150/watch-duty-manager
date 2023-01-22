@@ -1,8 +1,8 @@
 import * as E from "fp-ts/Either";
 import { useFetcher } from "@remix-run/react";
+import * as WorkInput from "./Work/Input";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
-import * as WorkInput from "./Work/Input";
 
 export const serverAction = async (
   workId: number,

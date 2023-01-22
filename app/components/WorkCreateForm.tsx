@@ -3,10 +3,10 @@ import * as F from "fp-ts/function";
 import { json } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 
+import * as WorkInput from "./Work/Input";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 import { isNonEmptyString } from "~/utils/validator";
-import * as WorkInput from "./Work/Input";
 
 export const serverValidator = (
   formData: FormData
@@ -70,9 +70,7 @@ export const serverValidator = (
   );
 };
 
-export type Props = {};
-
-export const Component: React.VFC<Props> = () => {
+export const Component: React.VFC = () => {
   return (
     <Form method="post">
       <p>

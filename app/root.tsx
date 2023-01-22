@@ -16,9 +16,9 @@ import {
 
 import { getUserId } from "./utils/session.server";
 import styles from "./styles/app.css";
+import { date2cour } from "./domain/cour/util";
 import globalStylesUrl from "~/styles/global.css";
 import sharedStylesUrl from "~/styles/shared.css";
-import { date2cour } from "./domain/cour/util";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {

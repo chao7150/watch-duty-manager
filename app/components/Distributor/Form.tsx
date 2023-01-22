@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
-import { Serialized } from "~/utils/type";
 import type { LoaderData as DistributorsLoaderData } from "../../routes/distributors/index";
+import { Serialized } from "~/utils/type";
 
 export type Props = {
   defaultValue?: { [N: number]: string };

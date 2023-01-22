@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { useEffect } from "react";
-import { addDays, addHours, startOfQuarter, subDays, subHours } from "date-fns";
+import { addDays, addHours, subDays, subHours } from "date-fns";
 import * as A from "fp-ts/Apply";
 import * as T from "fp-ts/Task";
 import * as EpisodeList from "../components/Episode/List";

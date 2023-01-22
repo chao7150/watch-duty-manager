@@ -64,7 +64,7 @@ export default function Works() {
     <div>
       <h2>作品リスト</h2>
       <CourSelect.Component
-        courList={courList.reverse()}
+        courList={[...courList].reverse()}
         defaultSelectedValue={selectedCourDate ?? undefined}
         onChange={(e) => {
           const value = e.target.value;

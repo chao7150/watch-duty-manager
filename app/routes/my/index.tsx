@@ -3,17 +3,6 @@ import { LoaderArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { addQuarters } from "date-fns";
 import { useState } from "react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  Line,
-} from "recharts";
-import { getQuarterMetrics } from "..";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
@@ -26,6 +15,17 @@ import {
   next,
 } from "~/domain/cour/util";
 import { Cour } from "~/domain/cour/consts";
+import { getQuarterMetrics } from "..";
+import {
+  ResponsiveContainer,
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Line,
+} from "recharts";
 
 const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   if (cour === null) {
@@ -138,13 +138,12 @@ export default function My() {
         sort === "rating" ? w.rating : w.complete / watchedEpisodesDenominator,
     };
   });
-  const selectedCour = courList.find((cour) => cour[1] === selectedCourDate);
   return (
     <div>
       <header className="flex gap-4">
         <h2>マイページ</h2>
         <CourSelect.Component
-          courList={courList.reverse()}
+          courList={[...courList].reverse()}
           defaultSelectedValue={selectedCourDate ?? undefined}
           onChange={(e) => {
             const value = e.target.value;

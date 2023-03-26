@@ -33,6 +33,7 @@ import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber, Serialized } from "~/utils/type";
+import { MultipleDatePicker } from "~/components/WorkCreateForm";
 
 export const loader = async ({ request, params }: LoaderArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
@@ -108,10 +109,7 @@ export const loader = async ({ request, params }: LoaderArgs) => {
   };
 };
 
-export const action = async ({
-  request,
-  params,
-}: LoaderArgs) => {
+export const action = async ({ request, params }: LoaderArgs) => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 
@@ -132,24 +130,17 @@ export const action = async ({
     ]);
   }
   if (formData.get("_action") === "addEpisodes") {
-    const {
-      startDate,
-      offset: _offset,
-      length: _length,
-    } = extractParams(Object.fromEntries(formData), [
-      "startDate",
-      "offset",
-      "length",
-    ]);
+    const { episodeDate: _episodeDate, offset: _offset } = extractParams(
+      Object.fromEntries(formData),
+      ["episodeDate", "offset"]
+    );
+    const episodeDate = _episodeDate.split(",").map((d) => new Date(d));
     const offset = parseInt(_offset, 10);
-    const length = parseInt(_length, 10);
     await db.episode.createMany({
-      data: Array.from({ length }).map((_, index) => ({
+      data: episodeDate.map((date, index) => ({
         count: offset + index,
         workId,
-        publishedAt: new Date(
-          new Date(startDate).getTime() + index * 1000 * 60 * 60 * 24 * 7
-        ),
+        publishedAt: date,
       })),
     });
     return null;
@@ -378,29 +369,6 @@ export default function Work() {
                     <ul className="mt-2 flex flex-col gap-2">
                       <li>
                         <label>
-                          <div>開始日時</div>
-                          <input
-                            type="datetime-local"
-                            name="startDate"
-                            defaultValue={
-                              work.episodes.length !== 0
-                                ? new Date(
-                                    Math.max(
-                                      ...work.episodes.map((e) =>
-                                        new Date(e.publishedAt).getTime()
-                                      )
-                                    ) +
-                                      1000 * 60 * 60 * (24 * 7 + 9)
-                                  )
-                                    .toISOString()
-                                    .slice(0, -8)
-                                : undefined
-                            }
-                          />
-                        </label>
-                      </li>
-                      <li>
-                        <label>
                           <div>追加する最初の話数カウント</div>
                           <input
                             type="number"
@@ -412,14 +380,11 @@ export default function Work() {
                         </label>
                       </li>
                       <li>
-                        <label>
-                          <div>何話分</div>
-                          <input
-                            type="number"
-                            name="length"
-                            defaultValue={13}
-                          />
-                        </label>
+                        <MultipleDatePicker
+                          defaultDates={work.episodes.map(
+                            (e) => new Date(e.publishedAt)
+                          )}
+                        />
                       </li>
                       <li>
                         <button

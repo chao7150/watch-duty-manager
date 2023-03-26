@@ -70,18 +70,20 @@ export const serverValidator = (
   );
 };
 
-const MultipleDatePicker: React.FC = () => {
-  const [value, setValue] = useState<Date[]>([]);
+export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
+  defaultDates = [],
+}) => {
+  const [addedDates, setAddedDates] = useState<Date[]>([]);
 
   return (
     <>
       <input
         type="hidden"
         name="episodeDate"
-        value={value.map((v) => v.toISOString()).join(",")}
+        value={addedDates.map((v) => v.toISOString()).join(",")}
       ></input>
       <DatePicker
-        value={value}
+        value={[...defaultDates, ...addedDates]}
         onChange={(dateObject) => {
           if (dateObject === null) {
             return;
@@ -89,7 +91,15 @@ const MultipleDatePicker: React.FC = () => {
           if (!Array.isArray(dateObject)) {
             dateObject = [dateObject];
           }
-          setValue(dateObject.map((d) => new Date(d.unix * 1000)));
+          setAddedDates(
+            dateObject
+              .filter((x) => {
+                return !defaultDates.some(
+                  (y) => x.unix === Math.round(y.getTime() / 1000)
+                );
+              })
+              .map((d) => new Date(d.unix * 1000))
+          );
         }}
         placeholder={"click to open"}
         multiple={true}
@@ -101,6 +111,12 @@ const MultipleDatePicker: React.FC = () => {
           <DatePanel markFocused={true} />,
         ]}
       />
+      <div>追加しようとしているエピソード</div>
+      <ul>
+        {addedDates.map((d) => {
+          return <li>{d.toLocaleString()}</li>;
+        })}
+      </ul>
     </>
   );
 };

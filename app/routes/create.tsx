@@ -9,9 +9,7 @@ import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { db } from "~/utils/db.server";
 
-export const action = async ({
-  request,
-}: ActionArgs) => {
+export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
     return await F.pipe(
@@ -87,34 +85,32 @@ export const action = async ({
     formData,
     WorkCreateForm.serverValidator,
     TE.fromEither,
-    TE.chain(({ episodeCount, distributions, ...work }) => {
+    TE.chain(({ episodeDate, distributions, ...work }) => {
       return TE.tryCatch(
         async () => ({
           returnedWork: await db.work.create({
             data: {
               ...work,
+              publishedAt: episodeDate[0],
               DistributorsOnWorks: {
                 createMany: { data: distributions ?? [] },
               },
             },
           }),
-          episodeCount,
+          episodeDate,
         }),
-        (e) => json({ errorMessage: e }, { status: 409 })
+        (e) => json({ errorMessage: e as string }, { status: 409 })
       );
     }),
-    TE.chain(({ returnedWork, episodeCount }) => {
+    TE.chain(({ returnedWork, episodeDate }) => {
       return TE.tryCatch(
         async () => {
           await db.episode.createMany({
-            data: Array.from({ length: episodeCount }).map((_, index) => {
+            data: episodeDate.map((date, index) => {
               return {
                 workId: returnedWork.id,
                 count: index + 1,
-                publishedAt: new Date(
-                  returnedWork.publishedAt.getTime() +
-                    1000 * 60 * 60 * 24 * 7 * index
-                ),
+                publishedAt: date,
               };
             }),
           });

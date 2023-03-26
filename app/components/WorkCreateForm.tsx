@@ -7,6 +7,10 @@ import * as WorkInput from "./Work/Input";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 import { isNonEmptyString } from "~/utils/validator";
+import { useState } from "react";
+import DatePicker from "react-multi-date-picker";
+import TimePicker from "react-multi-date-picker/plugins/time_picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel";
 
 export const serverValidator = (
   formData: FormData
@@ -14,8 +18,7 @@ export const serverValidator = (
   Response,
   {
     title: string;
-    publishedAt: Date;
-    episodeCount: number;
+    episodeDate: Date[];
     officialSiteUrl?: string;
     twitterId?: string;
     hashtag?: string;
@@ -31,16 +34,14 @@ export const serverValidator = (
         : E.left("title must not be empty");
     },
     E.chain(({ formData, ...rest }) => {
-      const publishedAt = formData.get("publishedAt");
-      return isNonEmptyString(publishedAt)
-        ? E.right({ formData, publishedAt, ...rest })
-        : E.left("publishedAt must not be empty");
-    }),
-    E.chain(({ formData, ...rest }) => {
-      const episodeCount = formData.get("episodeCount");
-      return isNonEmptyString(episodeCount)
-        ? E.right({ formData, episodeCount, ...rest })
-        : E.left("episodeCount must not be empty");
+      const episodeDate = formData.get("episodeDate");
+      return isNonEmptyString(episodeDate)
+        ? E.right({
+            formData,
+            episodeDate: episodeDate.split(",").map((d) => new Date(d)),
+            ...rest,
+          })
+        : E.left("episodeDate must not be empty");
     }),
     E.chain(({ formData, ...rest }) => {
       const distributions = Object.entries(Object.fromEntries(formData))
@@ -55,10 +56,9 @@ export const serverValidator = (
     }),
     E.bimap(
       (l) => json({ errorMessage: l }, { status: 400 }),
-      ({ title, publishedAt, episodeCount, distributions, formData }) => ({
+      ({ title, episodeDate, distributions, formData }) => ({
         title,
-        publishedAt: new Date(publishedAt),
-        episodeCount: Number(episodeCount),
+        episodeDate,
         distributions,
         ...nonEmptyStringOrUndefined(Object.fromEntries(formData), [
           "officialSiteUrl",
@@ -67,6 +67,41 @@ export const serverValidator = (
         ]),
       })
     )
+  );
+};
+
+const MultipleDatePicker: React.FC = () => {
+  const [value, setValue] = useState<Date[]>([]);
+
+  return (
+    <>
+      <input
+        type="hidden"
+        name="episodeDate"
+        value={value.map((v) => v.toISOString()).join(",")}
+      ></input>
+      <DatePicker
+        value={value}
+        onChange={(dateObject) => {
+          if (dateObject === null) {
+            return;
+          }
+          if (!Array.isArray(dateObject)) {
+            dateObject = [dateObject];
+          }
+          setValue(dateObject.map((d) => new Date(d.unix * 1000)));
+        }}
+        placeholder={"click to open"}
+        multiple={true}
+        sort={true}
+        numberOfMonths={3}
+        format="YYYY/MM/DD HH:mm:ss"
+        plugins={[
+          <TimePicker position="bottom" />,
+          <DatePanel markFocused={true} />,
+        ]}
+      />
+    </>
   );
 };
 
@@ -90,26 +125,7 @@ export const Component: React.VFC = () => {
         </legend>
         <ul className="mt-2 flex flex-col gap-2">
           <li>
-            <label>
-              <div>
-                第1話放送日時
-                <abbr title="required" aria-label="required">
-                  *
-                </abbr>
-              </div>
-              <input type="datetime-local" name="publishedAt" />
-            </label>
-          </li>
-          <li>
-            <label>
-              <div>話数（予想でも可）</div>
-              <input
-                type="number"
-                name="episodeCount"
-                min={1}
-                defaultValue={13}
-              ></input>
-            </label>
+            <MultipleDatePicker />
           </li>
         </ul>
       </fieldset>

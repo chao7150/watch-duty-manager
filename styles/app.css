@@ -22,7 +22,8 @@
     input[type="text"],
     input[type="search"],
     input[type="datetime-local"],
-    input[type="number"] {
+    input[type="number"],
+    textarea {
         @apply bg-accent-area outline-none;
     }
 

@@ -442,7 +442,8 @@ a {
 input[type="text"],
     input[type="search"],
     input[type="datetime-local"],
-    input[type="number"] {
+    input[type="number"],
+    textarea {
   --tw-bg-opacity: 1;
   background-color: rgb(48 49 52 / var(--tw-bg-opacity));
   outline: 2px solid transparent;

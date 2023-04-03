@@ -4,7 +4,7 @@ import * as F from "fp-ts/function";
 import { json } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 import { useState } from "react";
-import type { ActionArgs } from "@remix-run/server-runtime";
+import { ActionArgs, redirect } from "@remix-run/server-runtime";
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { db } from "~/utils/db.server";
@@ -121,7 +121,7 @@ export const action = async ({ request }: ActionArgs) => {
     }),
     TE.foldW(
       (e) => T.of(e),
-      (v) => T.of(v)
+      (v) => T.of(redirect(`/works/${v.id}`))
     )
   )();
 };

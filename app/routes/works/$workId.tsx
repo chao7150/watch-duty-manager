@@ -339,7 +339,7 @@ export default function Work() {
                         </td>
                         {episodesEditMode && (
                           <td className="align-middle">
-                            <Form method="post">
+                            <Form method="POST">
                               <input
                                 type="hidden"
                                 name="count"
@@ -365,7 +365,7 @@ export default function Work() {
               {episodesEditMode && (
                 <section className="mt-2">
                   <h4>話数を追加する</h4>
-                  <Form method="post">
+                  <Form method="POST">
                     <ul className="mt-2 flex flex-col gap-2">
                       <li>
                         <label>

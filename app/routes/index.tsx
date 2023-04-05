@@ -1,4 +1,4 @@
-import { LoaderArgs, MetaFunction } from "@remix-run/node";
+import { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import "firebase/compat/auth";
 import { PrismaClient } from "@prisma/client";
@@ -256,11 +256,11 @@ export const loader = async ({ request }: LoaderArgs) => {
 };
 
 // https://remix.run/api/conventions#meta
-export const meta: MetaFunction = () => {
-  return {
-    title: "Watch duty manager",
-    description: "Welcome to remix!",
-  };
+export const meta: V2_MetaFunction = ({}) => {
+  return [
+    { title: "Watch duty manager" },
+    { description: "Just watch anime." },
+  ];
 };
 
 export const setOldestOfWork = <T extends { workId: number }>(

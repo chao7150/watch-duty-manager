@@ -123,7 +123,7 @@ export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
 
 export const Component: React.VFC = () => {
   return (
-    <Form method="post">
+    <Form method="POST">
       <p>
         <small>
           <abbr title="required">*</abbr>は必須です。

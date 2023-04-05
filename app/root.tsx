@@ -56,44 +56,6 @@ export function ErrorBoundary({ error }: { error: Error }) {
   );
 }
 
-// https://remix.run/docs/en/v1/api/conventions#catchboundary
-export function CatchBoundary() {
-  const caught = useCatch();
-  let message;
-  switch (caught.status) {
-    case 400:
-      message = <p>{caught.data}</p>;
-      break;
-    case 401:
-      message = (
-        <p>
-          Oops! Looks like you tried to visit a page that you do not have access
-          to.
-        </p>
-      );
-      break;
-    case 404:
-      message = (
-        <p>Oops! Looks like you tried to visit a page that does not exist.</p>
-      );
-      break;
-
-    default:
-      throw new Error(caught.data || caught.statusText);
-  }
-
-  return (
-    <Document title={`${caught.status} ${caught.statusText}`}>
-      <Layout>
-        <h1>
-          {caught.status}: {caught.statusText}
-        </h1>
-        {message}
-      </Layout>
-    </Document>
-  );
-}
-
 function Document({
   children,
   title,
@@ -155,7 +117,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                     <Link to={`/my?cour=${date2cour(new Date())}`}>My</Link>
                   </li>
                   <li className="text-link">
-                    <Form action="/logout" method="post">
+                    <Form action="/logout" method="POST">
                       <button type="submit">Logout</button>
                     </Form>
                   </li>

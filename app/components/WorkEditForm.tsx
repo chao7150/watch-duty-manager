@@ -79,7 +79,7 @@ export const Component: React.VFC<Props> = ({ workId, workInput }) => {
       {fetcher.data && (
         <p>{fetcher.data.errorMessage || fetcher.data.successMessage}</p>
       )}
-      <fetcher.Form method="post" action={`/works/${workId}`}>
+      <fetcher.Form method="POST" action={`/works/${workId}`}>
         <WorkInput.Component {...workInput} />
         <button
           className="mt-4 bg-accent-area rounded-full py-1 px-3 ml-auto"

@@ -16,7 +16,7 @@ export const Component: React.VFC<Props> = ({
   return (
     <fetcher.Form
       className={`work-subscribe-form ${givenClassName}`}
-      method="post"
+      method="POST"
       action={`/works/${id}`}
     >
       {subscribing ? <UnsubscribeButton /> : <SubscribeButton />}

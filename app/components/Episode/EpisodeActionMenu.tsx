@@ -20,7 +20,7 @@ export const Component: React.VFC<Props> = ({ workId, count, watched }) => {
       <div className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2">
         {watched ? (
           <fetcher.Form
-            method="post"
+            method="POST"
             action={`/works/${workId}/${count}?index`}
           >
             <button
@@ -35,7 +35,7 @@ export const Component: React.VFC<Props> = ({ workId, count, watched }) => {
         ) : (
           <fetcher.Form
             className="flex flex-col"
-            method="post"
+            method="POST"
             action={`/works/${workId}/${count}?index`}
           >
             <label className="flex justify-between">

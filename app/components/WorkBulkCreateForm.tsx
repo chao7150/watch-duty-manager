@@ -46,7 +46,7 @@ export type Props = Record<string, never>;
 
 export const Component: React.VFC<Props> = () => {
   return (
-    <Form method="post">
+    <Form method="POST">
       <li>
         <label>
           複数番組

@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    container_name: watch-duty-manager-app
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -15,6 +16,7 @@ services:
       db:
         condition: service_healthy
   db:
+    container_name: watch-duty-manager-db
     image: mysql:8.0.27
     ports:
       - "3306:3306"

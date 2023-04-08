@@ -1,7 +1,6 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect } from "react";
-import { StyledFirebaseAuth } from "react-firebaseui";
 import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import {
   commitSession,
@@ -10,6 +9,7 @@ import {
   ONE_WEEK_SEC,
 } from "~/utils/session.server";
 import { getAdmin } from "~/utils/firebase.server";
+import StyledFirebaseAuth from "~/components/StylesFirebaseAuth";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);

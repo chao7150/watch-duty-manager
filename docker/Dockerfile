@@ -2,7 +2,7 @@ FROM node:16
 
 WORKDIR /usr/src/app
 COPY . ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npx prisma generate
 RUN npm run build
 

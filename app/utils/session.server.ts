@@ -1,6 +1,6 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 
-const ONE_WEEK_SEC = 60 * 60 * 24 * 7;
+export const ONE_WEEK_SEC = 60 * 60 * 24 * 7;
 
 export const { getSession, commitSession, destroySession } =
   createCookieSessionStorage({
@@ -8,12 +8,11 @@ export const { getSession, commitSession, destroySession } =
     cookie: {
       name: "__session",
       // all of these are optional
-      expires: new Date(Date.now() + ONE_WEEK_SEC),
       httpOnly: true,
       maxAge: ONE_WEEK_SEC,
       path: "/",
       sameSite: "lax",
-      secrets: ["s3cret1"],
+      secrets: [process.env.SECRET ?? "s3cret1"],
       secure: true,
     },
   });

@@ -2,12 +2,13 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect } from "react";
 import { StyledFirebaseAuth } from "react-firebaseui";
+import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import {
-  ActionArgs,
-  LoaderArgs,
-  redirect,
-} from "@remix-run/node";
-import { commitSession, getSession, getUserId } from "~/utils/session.server";
+  commitSession,
+  getSession,
+  getUserId,
+  ONE_WEEK_SEC,
+} from "~/utils/session.server";
 import { getAdmin } from "~/utils/firebase.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -33,7 +34,11 @@ export const action = async ({ request }: ActionArgs) => {
   const session = await getSession();
   session.set("uid", uid);
   return new Response("/", {
-    headers: { "Set-Cookie": await commitSession(session) },
+    headers: {
+      "Set-Cookie": await commitSession(session, {
+        expires: new Date(Date.now() + ONE_WEEK_SEC),
+      }),
+    },
   });
 };
 

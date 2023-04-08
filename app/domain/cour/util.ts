@@ -1,39 +1,20 @@
 import { subHours } from "date-fns";
 import { pipe } from "fp-ts/function";
-import {
-  Cour,
-  Season,
-  SeasonExpression,
-  SeasonStartMonth,
-  Year,
-} from "./consts";
+import { Cour, Season, SeasonExpression, SeasonStartMonth } from "./consts";
 
-const isSeason = (s: string): s is Season => {
-  return Season.includes(s as any);
+const isSeason = (s: unknown): s is Season => {
+  return typeof s === "string" && Season.includes(s as any);
 };
 
-const isYear = (s: string): s is Year => {
-  return s.length === 4 && 2000 <= Number(s) && Number(s) < 3000;
-};
-
-export const isCour = (s: string): s is Cour => {
-  return isYear(s.substring(0, 4)) && isSeason(s.substring(4));
-};
-
-const getCourYear = (c: Cour): Year => {
-  const year = c.substring(0, 4);
-  if (!isYear(year)) {
-    throw new Error("cannot parse year from cour string");
-  }
-  return year;
-};
-
-const getCourSeason = (c: Cour): Season => {
-  const season = c.substring(4);
-  if (!isSeason(season)) {
-    throw new Error("cannot parse season from cour string");
-  }
-  return season;
+export const isCour = (s: unknown): s is Cour => {
+  return (
+    typeof s === "object" &&
+    s !== null &&
+    "year" in s &&
+    "season" in s &&
+    typeof s.year === "number" &&
+    isSeason(s.season)
+  );
 };
 
 export const date2cour = (date: Date): Cour =>
@@ -41,70 +22,91 @@ export const date2cour = (date: Date): Cour =>
     date,
     (date) => subHours(date, 4),
     (date) => {
-      return `${String(date.getFullYear()) as Year}${
-        Season[Math.floor(date.getMonth() / 3)]
-      }` as Cour;
+      return {
+        year: date.getFullYear(),
+        season: Season[Math.floor(date.getMonth() / 3)],
+      };
     }
   );
 
 export const cour2startDate = (cour: Cour): Date => {
-  return new Date(
-    `${getCourYear(cour)}-${SeasonStartMonth[getCourSeason(cour)]}`
-  );
+  return new Date(`${cour.year}-${SeasonStartMonth[cour.season]}`);
+};
+
+export const cour2symbol = (cour: Cour): string => {
+  return `${cour.year}${cour.season}`;
+};
+
+// パースできないsymbolの場合undefinedを返す
+export const symbol2cour = (symbol: string): Cour | undefined => {
+  const yearString = symbol.substring(0, 4);
+  const year = Number(yearString);
+  if (Number.isNaN(year)) {
+    return undefined;
+  }
+  const seasonString = symbol.substring(4);
+  if (!isSeason(seasonString)) {
+    return undefined;
+  }
+  return {
+    year,
+    season: seasonString,
+  };
 };
 
 export const cour2expression = (cour: Cour): string => {
-  return `${getCourYear(cour)}${SeasonExpression[getCourSeason(cour)]}`;
+  return `${cour.year}${SeasonExpression[cour.season]}`;
 };
 
 export const next = (cour: Cour): Cour => {
-  const year = getCourYear(cour);
-  const season = getCourSeason(cour);
+  const year = cour.year;
+  const season = cour.season;
   if (season === "autumn") {
-    return `${Number(year) + 1}winter` as Cour;
+    return {
+      year: year + 1,
+      season: "winter",
+    };
   }
-  return `${year}${Season[Season.indexOf(season) + 1]}`;
+  return {
+    year,
+    season: Season[Season.indexOf(season) + 1],
+  };
 };
 
 export const eachCourOfInterval = (first: Cour, last: Cour): Cour[] => {
   if (first === last) {
     return [first];
   }
-  const firstYear = first.substring(0, 4);
-  const lastYear = last.substring(0, 4);
-  if (!isYear(firstYear) || !isYear(lastYear)) {
-    return [];
-  }
-  const firstSeason = first.substring(4);
-  const lastSeason = last.substring(4);
-  if (!isSeason(firstSeason) || !isSeason(lastSeason)) {
-    return [];
-  }
+  const { year: firstYear, season: firstSeason } = first;
+  const { year: lastYear, season: lastSeason } = last;
+
   const firstSeasonIndex = Season.indexOf(firstSeason);
   const lastSeasonIndex = Season.indexOf(lastSeason);
   if (firstYear === lastYear) {
     const ret: Cour[] = [];
     for (let i = firstSeasonIndex; i <= lastSeasonIndex; i++) {
-      ret.push(`${firstYear}${Season[i]}`);
+      ret.push({ year: firstYear, season: Season[i] });
     }
     return ret;
   }
   const ret: Cour[] = [];
-  for (let y = Number(firstYear); y <= Number(lastYear); y++) {
-    if (y === Number(firstYear)) {
+  for (let y = firstYear; y <= lastYear; y++) {
+    if (y === firstYear) {
       ret.push(
-        ...Season.slice(firstSeasonIndex).map(
-          (season) => `${firstYear}${season}` as Cour
-        )
+        ...Season.slice(firstSeasonIndex).map((season) => ({
+          year: firstYear,
+          season,
+        }))
       );
-    } else if (y === Number(lastYear)) {
+    } else if (y === lastYear) {
       ret.push(
-        ...Season.slice(0, lastSeasonIndex + 1).map(
-          (season) => `${lastYear}${season}` as Cour
-        )
+        ...Season.slice(0, lastSeasonIndex + 1).map((season) => ({
+          year: lastYear,
+          season,
+        }))
       );
     } else {
-      ret.push(...Season.map((season) => `${y}${season}` as Cour));
+      ret.push(...Season.map((season) => ({ year: y, season })));
     }
   }
   return ret;

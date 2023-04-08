@@ -3,6 +3,7 @@ import { LoaderFunction } from "@remix-run/node";
 
 import {
   Form,
+  isRouteErrorResponse,
   Link,
   Links,
   LiveReload,
@@ -12,11 +13,12 @@ import {
   ScrollRestoration,
   useCatch,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 
 import { getUserId } from "./utils/session.server";
 import styles from "./styles/app.css";
-import { date2cour } from "./domain/cour/util";
+import { cour2symbol, date2cour } from "./domain/cour/util";
 import globalStylesUrl from "~/styles/global.css";
 import sharedStylesUrl from "~/styles/shared.css";
 
@@ -41,19 +43,22 @@ export default function App() {
   );
 }
 
-// https://remix.run/docs/en/v1/api/conventions#errorboundary
-export function ErrorBoundary({ error }: { error: Error }) {
-  console.error(error);
-  return (
-    <Document title="Error!">
-      <Layout>
-        <div>
-          <h1>There was an error</h1>
-          <p>{error.message}</p>
-        </div>
-      </Layout>
-    </Document>
-  );
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (error instanceof Error) {
+    return <div>An unexpected error occurred: {error.message}</div>;
+  }
+
+  if (!isRouteErrorResponse(error)) {
+    return <h1>Unknown Error</h1>;
+  }
+
+  if (error.status === 404) {
+    return <div>Note not found</div>;
+  }
+
+  return <div>An unexpected error occurred: {error.statusText}</div>;
 }
 
 function Document({
@@ -105,7 +110,9 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <Link to={`/works?cour=${date2cour(new Date())}`}>Works</Link>
+                <Link to={`/works?cour=${cour2symbol(date2cour(new Date()))}`}>
+                  Works
+                </Link>
               </li>
               <li>
                 <Link to="/create">Create</Link>
@@ -114,7 +121,9 @@ function Layout({ children }: { children: React.ReactNode }) {
               {userId ? (
                 <>
                   <li>
-                    <Link to={`/my?cour=${date2cour(new Date())}`}>My</Link>
+                    <Link to={`/my?cour=${cour2symbol(date2cour(new Date()))}`}>
+                      My
+                    </Link>
                   </li>
                   <li className="text-link">
                     <Form action="/logout" method="POST">

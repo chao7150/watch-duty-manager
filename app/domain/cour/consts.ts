@@ -1,9 +1,9 @@
-type Digits = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
-// 型チェックの負担軽減のために2000以降に絞っている
-export type Year = `20${Digits}${Digits}`;
 export const Season = ["winter", "spring", "summer", "autumn"] as const;
-export type Season = typeof Season[number];
-export type Cour = `${Year}${Season}`;
+export type Season = (typeof Season)[number];
+export type Cour = {
+  year: number;
+  season: Season;
+};
 
 export const SeasonExpression = {
   winter: "冬",

@@ -11,8 +11,10 @@ import { getCourList } from "~/domain/cour/db";
 import {
   cour2expression,
   cour2startDate,
+  cour2symbol,
   isCour,
   next,
+  symbol2cour,
 } from "~/domain/cour/util";
 import { Cour } from "~/domain/cour/consts";
 import { getQuarterMetrics } from "..";
@@ -48,9 +50,15 @@ const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await requireUserId(request);
   const url = new URL(request.url);
-  const cour = url.searchParams.get("cour");
-  if (cour !== null && !isCour(cour)) {
-    throw new Error("cour is invalid.");
+  const courString = url.searchParams.get("cour");
+  let cour: Cour | null;
+  if (courString === null) {
+    cour = null;
+  } else {
+    cour = symbol2cour(courString) ?? null;
+    if (cour === null) {
+      throw new Error("cour is invalid.");
+    }
   }
   const watchingWorksPromise = db.work.findMany({
     where: {
@@ -98,9 +106,13 @@ export const loader = async ({ request }: LoaderArgs) => {
       })(),
     ]);
   return {
-    selectedCourDate: cour,
+    selectedCourDate: cour && cour2symbol(cour),
     courList: cours.map(
-      (cour) => [cour2expression(cour), cour] as [string, Cour]
+      (cour) =>
+        [cour2expression(cour), `${cour.year}${cour.season}`] as [
+          string,
+          string
+        ]
     ),
     works: watchingWorks.map((work) => ({
       ...work,

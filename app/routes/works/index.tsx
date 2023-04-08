@@ -6,19 +6,27 @@ import * as WorkUI from "~/components/Work/Work";
 import {
   cour2expression,
   cour2startDate,
+  cour2symbol,
   isCour,
   next,
+  symbol2cour,
 } from "~/domain/cour/util";
 import { getCourList } from "~/domain/cour/db";
-import { Cour } from "~/domain/cour/consts";
+import { Cour, Season } from "~/domain/cour/consts";
 import * as CourSelect from "~/components/CourSelect";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const userId = await getUserId(request);
-  const cour = url.searchParams.get("cour");
-  if (cour !== null && !isCour(cour)) {
-    throw new Error("cour is invalid.");
+  const courString = url.searchParams.get("cour");
+  let cour: Cour | null;
+  if (courString === null) {
+    cour = null;
+  } else {
+    cour = symbol2cour(courString) ?? null;
+    if (cour === null) {
+      throw new Error("cour is invalid.");
+    }
   }
   const worksPromise = db.work.findMany({
     ...(cour
@@ -50,9 +58,13 @@ export const loader = async ({ request }: LoaderArgs) => {
   return {
     works,
     loggedIn: userId !== undefined,
-    selectedCourDate: cour,
+    selectedCourDate: cour && cour2symbol(cour),
     courList: cours.map(
-      (cour) => [cour2expression(cour), cour] as [string, Cour]
+      (cour) =>
+        [cour2expression(cour), `${cour.year}${cour.season}`] as [
+          string,
+          string
+        ]
     ),
   };
 };

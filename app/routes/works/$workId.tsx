@@ -218,92 +218,98 @@ export default function Work() {
           </>
         )}
       </div>
-      <div className="pt-8">
-        <div className="flex flex-row flex-wrap justify-between gap-4">
+      <div className="grid grid-cols-3 gap-4 pt-8">
+        <div className="flex flex-col justify-between gap-4">
           <div>
-            <>
-              <section>
-                <header className="flex">
-                  <h3>作品情報</h3>
-                  <button className="ml-2" onClick={turnEditMode}>
-                    {editMode ? (
-                      <CloseIcon.Component />
-                    ) : (
-                      <EditIcon.Component />
-                    )}
-                  </button>
-                </header>
-                {editMode ? (
-                  <WorkEditForm.Component {...defaultValueMap} />
-                ) : (
-                  <dl className="mt-2">
-                    <dt>公式サイト</dt>
-                    <dd>
-                      <a href={work.officialSiteUrl ?? undefined}>
-                        {work.officialSiteUrl}
-                      </a>
-                    </dd>
-                    <dt>公式ツイッター</dt>
-                    <dd>
-                      <a href={`https://twitter.com/${work.twitterId}`}>
-                        {work.twitterId}
-                      </a>
-                    </dd>
-                    <dt>ハッシュタグ</dt>
-                    <dd>
-                      {work.hashtag !== null && work.hashtag !== "" && (
-                        <div>
-                          <a
-                            href={`https://twitter.com/hashtag/${work.hashtag}`}
-                          >
-                            <span>#{work.hashtag}</span>
-                          </a>
-                          <WorkHashtagCopyButton.Component
-                            hashtag={work.hashtag}
-                          />
-                        </div>
-                      )}
-                    </dd>
-                    <dt>配信サービス</dt>
-                    <dd>
-                      {work.DistributorsOnWorks.map((d) => {
-                        const href = createDistributorLinkHref({
-                          distributorId: d.distributorId,
-                          domain: d.distributor.domain,
-                          workIdOnDistributor: d.workIdOnDistributor,
-                        });
-                        return (
-                          <div>
-                            {href === undefined ? (
-                              <span>{d.distributor.name}</span>
-                            ) : (
-                              <a href={href}>{d.distributor.name}</a>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </dd>
-                  </dl>
-                )}
-              </section>
-            </>
-          </div>
-          <section className="flex flex-col">
-            <div>
+            <section>
               <header className="flex">
-                <h3>放送スケジュール</h3>
-                <button
-                  className="ml-2"
-                  type="button"
-                  onClick={() => setEpisodesEditMode((c) => !c)}
-                >
-                  {episodesEditMode ? (
-                    <CloseIcon.Component />
-                  ) : (
-                    <EditIcon.Component />
-                  )}
+                <h3>作品情報</h3>
+                <button className="ml-2" onClick={turnEditMode}>
+                  {editMode ? <CloseIcon.Component /> : <EditIcon.Component />}
                 </button>
               </header>
+              {editMode ? (
+                <WorkEditForm.Component {...defaultValueMap} />
+              ) : (
+                <dl className="mt-2">
+                  <dt>公式サイト</dt>
+                  <dd>
+                    <a href={work.officialSiteUrl ?? undefined}>
+                      {work.officialSiteUrl}
+                    </a>
+                  </dd>
+                  <dt>公式ツイッター</dt>
+                  <dd>
+                    <a href={`https://twitter.com/${work.twitterId}`}>
+                      {work.twitterId}
+                    </a>
+                  </dd>
+                  <dt>ハッシュタグ</dt>
+                  <dd>
+                    {work.hashtag !== null && work.hashtag !== "" && (
+                      <div>
+                        <a href={`https://twitter.com/hashtag/${work.hashtag}`}>
+                          <span>#{work.hashtag}</span>
+                        </a>
+                        <WorkHashtagCopyButton.Component
+                          hashtag={work.hashtag}
+                        />
+                      </div>
+                    )}
+                  </dd>
+                  <dt>配信サービス</dt>
+                  <dd>
+                    {work.DistributorsOnWorks.map((d) => {
+                      const href = createDistributorLinkHref({
+                        distributorId: d.distributorId,
+                        domain: d.distributor.domain,
+                        workIdOnDistributor: d.workIdOnDistributor,
+                      });
+                      return (
+                        <div>
+                          {href === undefined ? (
+                            <span>{d.distributor.name}</span>
+                          ) : (
+                            <a href={href}>{d.distributor.name}</a>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </dd>
+                </dl>
+              )}
+            </section>
+          </div>
+          <section className="flex-1">
+            <ResponsiveContainer height={300}>
+              <LineChart data={ratings}>
+                <CartesianGrid />
+                <XAxis dataKey="count" domain={[1, "dataMax"]} />
+                <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="rating" />
+              </LineChart>
+            </ResponsiveContainer>
+          </section>
+        </div>
+        <section>
+          <header className="flex">
+            <h3>放送スケジュール</h3>
+            <button
+              className="ml-2"
+              type="button"
+              onClick={() => setEpisodesEditMode((c) => !c)}
+            >
+              {episodesEditMode ? (
+                <CloseIcon.Component />
+              ) : (
+                <EditIcon.Component />
+              )}
+            </button>
+          </header>
+          <div className="flex flex-row gap-4 mt-4">
+            <div>
               <table className="mt-2 border-spacing-2">
                 <thead>
                   <tr>
@@ -362,62 +368,48 @@ export default function Work() {
                   })}
                 </tbody>
               </table>
-              {episodesEditMode && (
-                <section className="mt-2">
-                  <h4>話数を追加する</h4>
-                  <Form method="POST">
-                    <ul className="mt-2 flex flex-col gap-2">
-                      <li>
-                        <label>
-                          <div>追加する最初の話数カウント</div>
-                          <input
-                            type="number"
-                            name="offset"
-                            defaultValue={
-                              Math.max(...work.episodes.map((e) => e.count)) + 1
-                            }
-                          />
-                        </label>
-                      </li>
-                      <li>
-                        <MultipleDatePicker
-                          defaultDates={work.episodes.map(
-                            (e) => new Date(e.publishedAt)
-                          )}
-                        />
-                      </li>
-                      <li>
-                        <button
-                          className="bg-accent-area rounded-full py-1 px-3"
-                          type="submit"
-                          name="_action"
-                          value="addEpisodes"
-                        >
-                          送信
-                        </button>
-                      </li>
-                    </ul>
-                  </Form>
-                </section>
-              )}
             </div>
-          </section>
-          <section className="basis-graph">
-            <ResponsiveContainer height={300}>
-              <LineChart data={ratings}>
-                <CartesianGrid />
-                <XAxis dataKey="count" domain={[1, "dataMax"]} />
-                <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="rating" />
-              </LineChart>
-            </ResponsiveContainer>
-          </section>
-        </div>
-        <section className="mt-4">
-          <Outlet />
+            {episodesEditMode && (
+              <section>
+                <h4>話数を追加する</h4>
+                <Form method="POST">
+                  <ul className="mt-2 flex flex-col gap-2">
+                    <li>
+                      <label>
+                        <div>追加する最初の話数カウント</div>
+                        <input
+                          type="number"
+                          name="offset"
+                          defaultValue={
+                            Math.max(...work.episodes.map((e) => e.count)) + 1
+                          }
+                        />
+                      </label>
+                    </li>
+                    <li>
+                      <MultipleDatePicker
+                        defaultDates={work.episodes.map(
+                          (e) => new Date(e.publishedAt)
+                        )}
+                      />
+                    </li>
+                    <li>
+                      <button
+                        className="bg-accent-area rounded-full py-1 px-3"
+                        type="submit"
+                        name="_action"
+                        value="addEpisodes"
+                      >
+                        送信
+                      </button>
+                    </li>
+                  </ul>
+                </Form>
+              </section>
+            )}
+          </div>
         </section>
+        <Outlet />
       </div>
     </div>
   );

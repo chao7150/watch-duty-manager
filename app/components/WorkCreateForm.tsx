@@ -111,7 +111,9 @@ export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
           <DatePanel markFocused={true} />,
         ]}
       />
-      <div>追加しようとしているエピソード</div>
+      <div>
+        追加しようとしているエピソード<span>({addedDates.length})</span>
+      </div>
       <ul>
         {addedDates.map((d) => {
           return <li>{d.toLocaleString()}</li>;

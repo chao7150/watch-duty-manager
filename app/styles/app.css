@@ -575,6 +575,10 @@ input[type="text"]::placeholder,
   z-index: 10;
 }
 
+.m-2 {
+  margin: 0.5rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -644,6 +648,10 @@ input[type="text"]::placeholder,
   width: 1rem;
 }
 
+.flex-1 {
+  flex: 1 1 0%;
+}
+
 .shrink-0 {
   flex-shrink: 0;
 }
@@ -672,6 +680,10 @@ input[type="text"]::placeholder,
 
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .flex-row {

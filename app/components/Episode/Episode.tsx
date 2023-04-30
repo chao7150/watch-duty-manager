@@ -29,7 +29,7 @@ const timeStyles: { [K in Status]: string } = {
   tomorrow: "",
 };
 
-const Information: React.VFC<InformationProps> = ({
+const Information: React.FC<InformationProps> = ({
   workId,
   title,
   count,
@@ -54,7 +54,7 @@ const Information: React.VFC<InformationProps> = ({
           </div>
         )}
       </h3>
-      <div className="episode-information-additional-area text-text-weak">
+      <div className="flex gap-1 items-center text-text-weak">
         <span className={timeStyle}>
           {new Date(publishedAt).toLocaleString()}
         </span>
@@ -90,7 +90,7 @@ const statusStyles: { [K in Status]: string } = {
 };
 
 export type Props = Omit<InformationProps, "status"> & { watched: boolean };
-const _Component: React.VFC<Props> = ({
+const _Component: React.FC<Props> = ({
   workId,
   title,
   count,

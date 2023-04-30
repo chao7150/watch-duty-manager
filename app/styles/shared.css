@@ -26,12 +26,6 @@
   grid-template-columns: repeat(4, 1fr);
 }
 
-.episode-information-additional-area {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
 .episode-list {
   list-style: none;
 }

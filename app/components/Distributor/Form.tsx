@@ -7,7 +7,7 @@ export type Props = {
   defaultValue?: { [N: number]: string };
 };
 
-export const Component: React.VFC<Props> = ({ defaultValue }) => {
+export const Component: React.FC<Props> = ({ defaultValue }) => {
   const fetcher = useFetcher();
 
   useEffect(() => {

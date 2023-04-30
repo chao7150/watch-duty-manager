@@ -575,10 +575,6 @@ input[type="text"]::placeholder,
   z-index: 10;
 }
 
-.m-2 {
-  margin: 0.5rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -660,10 +656,6 @@ input[type="text"]::placeholder,
   flex-grow: 1;
 }
 
-.basis-graph {
-  flex-basis: 600px;
-}
-
 .border-spacing-2 {
   --tw-border-spacing-x: 0.5rem;
   --tw-border-spacing-y: 0.5rem;
@@ -692,10 +684,6 @@ input[type="text"]::placeholder,
 
 .flex-col {
   flex-direction: column;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
 }
 
 .items-center {

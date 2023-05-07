@@ -1,5 +1,5 @@
 import { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import "firebase/compat/auth";
 import { PrismaClient } from "@prisma/client";
 import {
@@ -25,6 +25,7 @@ import {
   startOf4OriginDay,
 } from "~/utils/date";
 import { cour2startDate, date2cour } from "~/domain/cour/util";
+import { parseSearchParamAsNumber } from "~/utils/validator";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
@@ -146,12 +147,12 @@ const getQuarterWatchAchievements =
   };
 
 const getRecentWatchAchievements =
-  ({ db, userId }: { db: PrismaClient; userId: string }) =>
+  ({ db, userId, take }: { db: PrismaClient; userId: string; take: number }) =>
   async () => {
     return await db.watchedEpisodesOnUser.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take,
       include: {
         episode: { include: { work: { select: { title: true } } } },
       },
@@ -214,6 +215,11 @@ export const loader = async ({ request }: LoaderArgs) => {
       recentWatchAchievements: [],
     };
   }
+  const recentWatchAchievementCount = parseSearchParamAsNumber(
+    request.url,
+    "recentWatchAchievementCount",
+    10
+  );
   const now = new Date();
   const [
     tickets,
@@ -225,7 +231,11 @@ export const loader = async ({ request }: LoaderArgs) => {
     getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
     getWeekWatchAchievements({ db, userId, now }),
     getWeekDutyAccumulation({ db, userId, now }),
-    getRecentWatchAchievements({ db, userId }),
+    getRecentWatchAchievements({
+      db,
+      userId,
+      take: recentWatchAchievementCount,
+    }),
     getQuarterMetrics({ db, userId, now })
   )();
   const weekKeys = getPast7DaysLocaleDateString(now);
@@ -358,6 +368,14 @@ export default function Index() {
             watched: true,
           }))}
         />
+        <Link
+          className="mt-2 py-2 flex flex-row justify-center hover:bg-accent-area"
+          to={`/?recentWatchAchievementCount=${
+            recentWatchAchievements.length + 10
+          }`}
+        >
+          <span>もっと見る</span>
+        </Link>
       </section>
     </div>
   ) : (

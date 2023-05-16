@@ -379,6 +379,8 @@ export default function Index() {
       </section>
     </div>
   ) : (
-    <div>not logged in</div>
+    <div>
+      <Link to="/login">ログイン</Link>してください。
+    </div>
   );
 }

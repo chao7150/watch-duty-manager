@@ -1,7 +1,12 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect } from "react";
-import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
+import {
+  ActionArgs,
+  LinksFunction,
+  LoaderArgs,
+  redirect,
+} from "@remix-run/node";
 import {
   commitSession,
   getSession,
@@ -10,6 +15,15 @@ import {
 } from "~/utils/session.server";
 import { getAdmin } from "~/utils/firebase.server";
 import StyledFirebaseAuth from "~/components/StylesFirebaseAuth";
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: "stylesheet",
+      href: "https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css",
+    },
+  ];
+};
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);

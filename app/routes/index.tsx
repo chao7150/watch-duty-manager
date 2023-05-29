@@ -308,29 +308,26 @@ export default function Index() {
     quarterMetrics,
     recentWatchAchievements,
   } = useLoaderData<typeof loader>();
+  const now = new Date();
+  const unwatchedTickets = tickets.filter((ticket) => {
+    return new Date(ticket.publishedAt) < now;
+  });
 
   return userId ? (
     <div className="remix__page">
       <section>
-        <h2>
-          未視聴のエピソード
-          <span>
-            (
-            {
-              tickets.filter((ticket) => {
-                return new Date(ticket.publishedAt) < new Date();
-              }).length
-            }
-            本/
-            {tickets
-              .filter((ticket) => {
-                return new Date(ticket.publishedAt) < new Date();
-              })
-              .map((ticket) => ticket.work.durationMin)
-              .reduce((acc, val) => acc + val, 0)}
-            分)
-          </span>
-        </h2>
+        <header className="flex gap-2 ">
+          <h2>未視聴のエピソード</h2>
+          <h3 className="flex gap-1 items-center text-text-weak text-base">
+            <span>{unwatchedTickets.length}本</span>
+            <span>
+              {unwatchedTickets
+                .map((ticket) => ticket.work.durationMin)
+                .reduce((acc, val) => acc + val, 0)}
+              分
+            </span>
+          </h3>
+        </header>
         <EpisodeList.Component
           episodes={setOldestOfWork([...tickets]).map((ticket) => {
             return {

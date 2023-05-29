@@ -227,6 +227,8 @@ export default function Work() {
                 <WorkEditForm.Component {...defaultValueMap} />
               ) : (
                 <dl className="mt-2">
+                  <dt>尺</dt>
+                  <dd>{work.durationMin}分</dd>
                   <dt>公式サイト</dt>
                   <dd>
                     <a href={work.officialSiteUrl ?? undefined}>

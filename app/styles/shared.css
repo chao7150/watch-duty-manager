@@ -29,7 +29,3 @@
 .episode-list {
   list-style: none;
 }
-
-.episode-list>li[aria-hidden="true"] {
-  display: none;
-}

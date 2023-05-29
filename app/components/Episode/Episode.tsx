@@ -12,6 +12,7 @@ type Status = "published" | "onair" | "today" | "tomorrow";
 type InformationProps = {
   workId: number;
   title: string;
+  durationMin: number;
   count: number;
   /**
    * ISO8601
@@ -32,6 +33,7 @@ const timeStyles: { [K in Status]: string } = {
 const Information: React.FC<InformationProps> = ({
   workId,
   title,
+  durationMin,
   count,
   publishedAt,
   hashtag,
@@ -58,6 +60,7 @@ const Information: React.FC<InformationProps> = ({
         <span className={timeStyle}>
           {new Date(publishedAt).toLocaleString()}
         </span>
+        {durationMin !== 30 && <span className="bg-accent-area px-0.5">{durationMin}分</span>}
         {hashtag !== undefined && hashtag !== "" && (
           <WorkHashtagCopyButton.Component hashtag={hashtag} />
         )}
@@ -93,6 +96,7 @@ export type Props = Omit<InformationProps, "status"> & { watched: boolean };
 const _Component: React.FC<Props> = ({
   workId,
   title,
+  durationMin,
   count,
   publishedAt,
   hashtag,
@@ -105,6 +109,7 @@ const _Component: React.FC<Props> = ({
       <Information
         workId={workId}
         title={title}
+        durationMin={durationMin}
         count={count}
         publishedAt={publishedAt}
         hashtag={hashtag}

@@ -19,7 +19,7 @@ export const serverAction = async (
   }
   const optionalWorkCreateInput = nonEmptyStringOrUndefined(
     Object.fromEntries(formData),
-    ["officialSiteUrl", "twitterId", "hashtag"]
+    ["officialSiteUrl", "twitterId", "hashtag", "durationMin"]
   );
   const distributions = Object.entries(Object.fromEntries(formData))
     .filter(([k, v]) => k.startsWith("distributor-"))
@@ -35,6 +35,11 @@ export const serverAction = async (
       data: {
         title,
         ...optionalWorkCreateInput,
+        durationMin:
+          optionalWorkCreateInput.durationMin &&
+          optionalWorkCreateInput.durationMin !== ""
+            ? Number(optionalWorkCreateInput.durationMin)
+            : undefined,
       },
     });
     await Promise.all(
@@ -72,7 +77,7 @@ export type Props = {
   workInput: WorkInput.Props;
 };
 
-export const Component: React.VFC<Props> = ({ workId, workInput }) => {
+export const Component: React.FC<Props> = ({ workId, workInput }) => {
   const fetcher = useFetcher();
   return (
     <section>

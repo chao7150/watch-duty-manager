@@ -18,6 +18,7 @@ export const serverValidator = (
   Response,
   {
     title: string;
+    durationMin?: number;
     episodeDate: Date[];
     officialSiteUrl?: string;
     twitterId?: string;
@@ -56,16 +57,22 @@ export const serverValidator = (
     }),
     E.bimap(
       (l) => json({ errorMessage: l }, { status: 400 }),
-      ({ title, episodeDate, distributions, formData }) => ({
-        title,
-        episodeDate,
-        distributions,
-        ...nonEmptyStringOrUndefined(Object.fromEntries(formData), [
-          "officialSiteUrl",
-          "twitterId",
-          "hashtag",
-        ]),
-      })
+      ({ title, episodeDate, distributions, formData }) => {
+        const optionals = nonEmptyStringOrUndefined(
+          Object.fromEntries(formData),
+          ["officialSiteUrl", "twitterId", "hashtag", "durationMin"]
+        );
+        return {
+          title,
+          episodeDate,
+          distributions,
+          ...optionals,
+          durationMin:
+            optionals.durationMin && optionals.durationMin !== ""
+              ? Number(optionals.durationMin)
+              : undefined,
+        };
+      }
     )
   );
 };
@@ -123,7 +130,7 @@ export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
   );
 };
 
-export const Component: React.VFC = () => {
+export const Component: React.FC = () => {
   return (
     <Form method="POST">
       <p>

@@ -1,13 +1,7 @@
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
 import { json, LoaderArgs } from "@remix-run/node";
 
-import {
-  DistributorsOnWorks,
-  Episode,
-  SubscribedWorksOnUser,
-  Work,
-  Distributor,
-} from "@prisma/client";
+import { Work } from "@prisma/client";
 import { useCallback, useState } from "react";
 import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
@@ -32,7 +26,7 @@ import * as WorkEditForm from "~/components/WorkEditForm";
 import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import { getUserId, requireUserId } from "~/utils/session.server";
-import { extractParams, isNumber, Serialized } from "~/utils/type";
+import { extractParams, isNumber } from "~/utils/type";
 import { MultipleDatePicker } from "~/components/WorkCreateForm";
 
 export const loader = async ({ request, params }: LoaderArgs) => {
@@ -187,6 +181,7 @@ export default function Work() {
     workId: work.id,
     workInput: {
       workTitle: { defaultValue: work.title ?? "" },
+      durationMin: { defaultValue: work.durationMin },
       officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
       twitterId: { defaultValue: work.twitterId ?? "" },
       hashtag: { defaultValue: work.hashtag ?? "" },

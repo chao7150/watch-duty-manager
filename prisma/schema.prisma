@@ -20,6 +20,7 @@ model Work {
   episodes            Episode[]
   title               String                  @unique
   publishedAt         DateTime
+  durationMin         Int                     @default(30)
   officialSiteUrl     String?
   twitterId           String?
   hashtag             String?

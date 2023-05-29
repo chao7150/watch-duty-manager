@@ -13,7 +13,7 @@ const RequiredAbbreviation: React.FC = () => (
   </abbr>
 );
 
-export const Component: React.VFC<Props> = ({
+export const Component: React.FC<Props> = ({
   labelText,
   isRequired,
   ...props

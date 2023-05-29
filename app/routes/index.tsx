@@ -66,7 +66,9 @@ const getTickets =
             lte: publishedUntilDate,
           },
         },
-        include: { work: { select: { title: true, hashtag: true } } },
+        include: {
+          work: { select: { title: true, hashtag: true, durationMin: true } },
+        },
         orderBy: { publishedAt: "desc" },
       });
     } catch (e) {
@@ -154,7 +156,9 @@ const getRecentWatchAchievements =
       orderBy: { createdAt: "desc" },
       take,
       include: {
-        episode: { include: { work: { select: { title: true } } } },
+        episode: {
+          include: { work: { select: { title: true, durationMin: true } } },
+        },
       },
     });
   };
@@ -317,7 +321,14 @@ export default function Index() {
                 return new Date(ticket.publishedAt) < new Date();
               }).length
             }
-            )
+            本/
+            {tickets
+              .filter((ticket) => {
+                return new Date(ticket.publishedAt) < new Date();
+              })
+              .map((ticket) => ticket.work.durationMin)
+              .reduce((acc, val) => acc + val, 0)}
+            分)
           </span>
         </h2>
         <EpisodeList.Component
@@ -325,6 +336,7 @@ export default function Index() {
             return {
               workId: ticket.workId,
               title: ticket.work.title,
+              durationMin: ticket.work.durationMin,
               count: ticket.count,
               publishedAt: ticket.publishedAt,
               hashtag: ticket.work.hashtag ?? undefined,
@@ -363,6 +375,7 @@ export default function Index() {
           episodes={recentWatchAchievements.map((a) => ({
             workId: a.workId,
             title: a.episode.work.title,
+            durationMin: a.episode.work.durationMin,
             count: a.count,
             publishedAt: a.createdAt,
             watched: true,

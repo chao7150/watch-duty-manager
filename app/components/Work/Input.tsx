@@ -8,14 +8,16 @@ type TextInputOptionalProps = Pick<
 
 export type Props = {
   workTitle?: TextInputOptionalProps;
+  durationMin: { defaultValue: number };
   officialSiteUrl?: TextInputOptionalProps;
   twitterId?: TextInputOptionalProps;
   hashtag?: TextInputOptionalProps;
   distributorForm?: DistributorForm.Props;
 };
 
-export const Component: React.VFC<Props> = ({
+export const Component: React.FC<Props> = ({
   workTitle,
+  durationMin,
   officialSiteUrl,
   twitterId,
   hashtag,
@@ -30,6 +32,19 @@ export const Component: React.VFC<Props> = ({
           isRequired={true}
           {...workTitle}
         />
+      </li>
+      <li>
+        <label>
+          <div>尺（分・未入力なら30分）</div>
+          <input
+            name="durationMin"
+            className="w-2/3"
+            type="number"
+            min={1}
+            step={1}
+            defaultValue={durationMin?.defaultValue}
+          />
+        </label>
       </li>
       <li>
         <TextInput.Component

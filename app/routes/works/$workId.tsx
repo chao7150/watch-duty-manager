@@ -384,11 +384,7 @@ export default function Work() {
                       </label>
                     </li>
                     <li>
-                      <MultipleDatePicker
-                        defaultDates={work.episodes.map(
-                          (e) => new Date(e.publishedAt)
-                        )}
-                      />
+                      <MultipleDatePicker />
                     </li>
                     <li>
                       <button

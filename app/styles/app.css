@@ -686,10 +686,6 @@ input[type="text"]::placeholder,
   flex-direction: column;
 }
 
-.items-end {
-  align-items: flex-end;
-}
-
 .items-center {
   align-items: center;
 }
@@ -798,6 +794,11 @@ input[type="text"]::placeholder,
   color: rgb(138 180 248 / var(--tw-text-opacity));
 }
 
+.text-text-weak {
+  --tw-text-opacity: 1;
+  color: rgb(154 160 166 / var(--tw-text-opacity));
+}
+
 .text-red {
   --tw-text-opacity: 1;
   color: rgb(242 139 130 / var(--tw-text-opacity));
@@ -806,11 +807,6 @@ input[type="text"]::placeholder,
 .text-text-strong {
   --tw-text-opacity: 1;
   color: rgb(188 192 195 / var(--tw-text-opacity));
-}
-
-.text-text-weak {
-  --tw-text-opacity: 1;
-  color: rgb(154 160 166 / var(--tw-text-opacity));
 }
 
 .shadow-menu {

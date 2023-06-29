@@ -77,9 +77,7 @@ export const serverValidator = (
   );
 };
 
-export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
-  defaultDates = [],
-}) => {
+export const MultipleDatePicker: React.FC = () => {
   const [addedDates, setAddedDates] = useState<Date[]>([]);
 
   return (
@@ -90,7 +88,7 @@ export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
         value={addedDates.map((v) => v.toISOString()).join(",")}
       ></input>
       <DatePicker
-        value={[...defaultDates, ...addedDates]}
+        value={addedDates}
         onChange={(dateObject) => {
           if (dateObject === null) {
             return;
@@ -98,15 +96,7 @@ export const MultipleDatePicker: React.FC<{ defaultDates?: Date[] }> = ({
           if (!Array.isArray(dateObject)) {
             dateObject = [dateObject];
           }
-          setAddedDates(
-            dateObject
-              .filter((x) => {
-                return !defaultDates.some(
-                  (y) => x.unix === Math.round(y.getTime() / 1000)
-                );
-              })
-              .map((d) => new Date(d.unix * 1000))
-          );
+          setAddedDates(dateObject.map((d) => new Date(d.unix * 1000)));
         }}
         placeholder={"click to open"}
         multiple={true}

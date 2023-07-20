@@ -17,7 +17,7 @@ import {
 } from "@remix-run/react";
 
 import { getUserId } from "./utils/session.server";
-import styles from "./styles/app.css";
+import styles from "./tailwind.css";
 import { cour2symbol, date2cour } from "./domain/cour/util";
 import globalStylesUrl from "~/styles/global.css";
 import sharedStylesUrl from "~/styles/shared.css";

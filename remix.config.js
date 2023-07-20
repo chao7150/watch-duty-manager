@@ -1,5 +1,5 @@
 /**
- * @type {import('@remix-run/dev/config').AppConfig}
+ * @type {import('@remix-run/dev').AppConfig}
  */
 module.exports = {
   appDirectory: "app",
@@ -13,4 +13,5 @@ module.exports = {
     v2_errorBoundary: true,
     v2_normalizeFormMethod: true,
   },
+  tailwind: true,
 };

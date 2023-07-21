@@ -15,11 +15,11 @@ import {
   Legend,
   Line,
 } from "recharts";
-import * as EditIcon from "../../components/Icons/Edit";
-import * as CloseIcon from "../../components/Icons/Close";
-import * as TrashIcon from "../../components/Icons/Trash";
-import * as EpisodeActionMenu from "../../components/Episode/EpisodeActionMenu";
-import { createDistributorLinkHref } from "../distributors";
+import * as EditIcon from "../components/Icons/Edit";
+import * as CloseIcon from "../components/Icons/Close";
+import * as TrashIcon from "../components/Icons/Trash";
+import * as EpisodeActionMenu from "../components/Episode/EpisodeActionMenu";
+import { createDistributorLinkHref } from "./distributors";
 import { db } from "~/utils/db.server";
 
 import * as WorkEditForm from "~/components/WorkEditForm";
@@ -171,7 +171,7 @@ export const action = async ({ request, params }: LoaderArgs) => {
   );
 };
 
-export default function Work() {
+export default function Component() {
   const [editMode, setEditMode] = useState(false);
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);

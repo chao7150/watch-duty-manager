@@ -17,7 +17,7 @@ import {
   symbol2cour,
 } from "~/domain/cour/util";
 import { Cour } from "~/domain/cour/consts";
-import { getQuarterMetrics } from "..";
+import { getQuarterMetrics } from "./_index";
 import {
   ResponsiveContainer,
   LineChart,

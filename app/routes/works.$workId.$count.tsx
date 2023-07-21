@@ -112,7 +112,7 @@ export const action = async ({ request, params }: ActionArgs) => {
   return null;
 };
 
-export default function Episode() {
+export default function Component() {
   const { userId, histories, episode } = useLoaderData<typeof loader>();
   const myHistory = userId && histories.find((w) => w.userId === userId);
   const otherHistories = histories.filter((h) => h.userId !== userId);

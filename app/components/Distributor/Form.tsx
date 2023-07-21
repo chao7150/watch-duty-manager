@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
-import type { LoaderData as DistributorsLoaderData } from "../../routes/distributors/index";
+import type { LoaderData as DistributorsLoaderData } from "../../routes/distributors";
 import { Serialized } from "~/utils/type";
 
 export type Props = {

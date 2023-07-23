@@ -8,7 +8,7 @@ type TextInputOptionalProps = Pick<
 
 export type Props = {
   workTitle?: TextInputOptionalProps;
-  durationMin: { defaultValue: number };
+  durationMin?: { defaultValue: number };
   officialSiteUrl?: TextInputOptionalProps;
   twitterId?: TextInputOptionalProps;
   hashtag?: TextInputOptionalProps;

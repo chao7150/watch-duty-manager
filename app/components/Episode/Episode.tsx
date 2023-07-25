@@ -6,6 +6,8 @@ import { get4OriginDate } from "../../utils/date";
 import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
 import * as ExclamationCircleIcon from "../../components/Icons/ExclamationCircle";
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
+import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
+import { bindUrl as bindUrlForWorks$WorkId$Count } from "../../routes/works.$workId.$count";
 
 type Status = "published" | "onair" | "today" | "tomorrow";
 
@@ -45,10 +47,10 @@ const Information: React.FC<InformationProps> = ({
     <div className="episode">
       <h3 className="episode-heading">
         <div className="hover:text-cadet-blue hover:underline">
-          <Link to={`/works/${workId}`}>{title}</Link>
+          <Link to={bindUrlForWorks$WorkId({ workId })}>{title}</Link>
         </div>
         <div className="hover:text-cadet-blue hover:underline">
-          <Link to={`/works/${workId}/${count}`}>#{count}</Link>
+          <Link to={bindUrlForWorks$WorkId$Count({ workId, count })}>#{count}</Link>
         </div>
         {watchReady === false && (
           <div className="icon" title="まだ前の話数を見ていません">

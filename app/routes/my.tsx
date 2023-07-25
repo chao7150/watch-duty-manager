@@ -12,7 +12,6 @@ import {
   cour2expression,
   cour2startDate,
   cour2symbol,
-  isCour,
   next,
   symbol2cour,
 } from "~/domain/cour/util";
@@ -28,6 +27,11 @@ import {
   Legend,
   Line,
 } from "recharts";
+import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";
+import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
+import urlFrom from "url-from";
+
+export const bindUrl = urlFrom`/my`.narrowing<{ "?query": { cour?: string } }>;
 
 const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   if (cour === null) {
@@ -209,17 +213,16 @@ export default function My() {
                       max={work.watchedEpisodesDenominator}
                       low={work.watchedEpisodesDenominator / 2}
                       value={work.complete}
-                      title={`完走率: ${
-                        work.episodes.filter(
-                          (episode) =>
-                            episode.WatchedEpisodesOnUser.length === 1
-                        ).length
-                      }/${work.watchedEpisodesDenominator}`}
+                      title={`完走率: ${work.episodes.filter(
+                        (episode) =>
+                          episode.WatchedEpisodesOnUser.length === 1
+                      ).length
+                        }/${work.watchedEpisodesDenominator}`}
                     >
                       {work.complete}/{work.watchedEpisodesDenominator}
                     </meter>
                     <div>{work.rating.toFixed(1)}</div>
-                    <Link to={`/works/${work.id}`}>{work.title}</Link>
+                    <Link to={bindUrlForWorks$WorkId({ workId: work.id })}>{work.title}</Link>
                   </li>
                 );
               })}
@@ -246,10 +249,10 @@ export default function My() {
                 <li className="flex gap-4" title={e.comment ?? ""}>
                   <div className="w-4">{e.rating}</div>
                   <div className="flex gap-2">
-                    <Link to={`/works/${e.episode.workId}`}>
+                    <Link to={bindUrlForWorks$WorkId({ workId: e.episode.workId })}>
                       {e.episode.work.title}
                     </Link>
-                    <Link to={`/works/${e.episode.workId}/${e.count}`}>
+                    <Link to={bindUrlForWorks$WorkId$Count({ workId: e.episode.workId, count: e.count })}>
                       #{e.episode.count}
                     </Link>
                   </div>

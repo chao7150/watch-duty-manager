@@ -2,15 +2,16 @@ import React from "react";
 import { Link } from "@remix-run/react";
 
 import * as WorkSubscribeForm from "../../components/Work/WorkSubscribeForm";
+import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
 
 export type Props = {
   loggedIn: boolean;
-  id: string;
+  id: number;
   title: string;
   subscribed: boolean;
 };
 
-export const Component: React.VFC<Props> = ({
+export const Component: React.FC<Props> = ({
   loggedIn,
   id,
   title,
@@ -19,9 +20,9 @@ export const Component: React.VFC<Props> = ({
   return (
     <div className="work">
       {loggedIn && (
-        <WorkSubscribeForm.Component givenClassName="work-work-subscribe-form" id={id} subscribing={subscribed} />
+        <WorkSubscribeForm.Component givenClassName="work-work-subscribe-form" id={`${id}`} subscribing={subscribed} />
       )}
-      <Link to={`/works/${id}`}>{title}</Link>
+      <Link to={bindUrlForWorks$WorkId({ workId: id })}>{title}</Link>
     </div>
   );
 };

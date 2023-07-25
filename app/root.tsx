@@ -21,6 +21,8 @@ import styles from "./tailwind.css";
 import { cour2symbol, date2cour } from "./domain/cour/util";
 import globalStylesUrl from "~/styles/global.css";
 import sharedStylesUrl from "~/styles/shared.css";
+import { bindUrl as bindUrlForMy } from "./routes/my";
+import { bindUrl as bindUrlForWorks } from "./routes/works._index";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
@@ -110,7 +112,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <Link to={`/works?cour=${cour2symbol(date2cour(new Date()))}`}>
+                <Link to={bindUrlForWorks({ "?query": { cour: cour2symbol(date2cour(new Date())) } })}>
                   Works
                 </Link>
               </li>
@@ -121,7 +123,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               {userId ? (
                 <>
                   <li>
-                    <Link to={`/my?cour=${cour2symbol(date2cour(new Date()))}`}>
+                    <Link to={bindUrlForMy({ "?query": { cour: cour2symbol(date2cour(new Date())) } })}>
                       My
                     </Link>
                   </li>

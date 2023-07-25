@@ -1,7 +1,6 @@
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
 import { json, LoaderArgs } from "@remix-run/node";
 
-import { Work } from "@prisma/client";
 import { useCallback, useState } from "react";
 import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
@@ -28,6 +27,9 @@ import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton"
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber } from "~/utils/type";
 import { MultipleDatePicker } from "~/components/WorkCreateForm";
+import urlFrom from "url-from";
+
+export const bindUrl = urlFrom`/works/${"workId:number"}`;
 
 export const loader = async ({ request, params }: LoaderArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
@@ -40,13 +42,13 @@ export const loader = async ({ request, params }: LoaderArgs) => {
         orderBy: { count: "asc" },
         ...(userId
           ? {
-              include: {
-                WatchedEpisodesOnUser: {
-                  where: { userId },
-                  select: { createdAt: true, rating: true },
-                },
+            include: {
+              WatchedEpisodesOnUser: {
+                where: { userId },
+                select: { createdAt: true, rating: true },
               },
-            }
+            },
+          }
           : {}),
       },
       DistributorsOnWorks: { include: { distributor: true } },
@@ -94,7 +96,7 @@ export const loader = async ({ request, params }: LoaderArgs) => {
       nonNullRatings.length === 0
         ? 0
         : nonNullRatings.reduce((acc, val) => acc + val, 0) /
-          nonNullRatings.length,
+        nonNullRatings.length,
     ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
       return { count: idx + 1, rating: map.get(idx + 1) ?? null };
     }),
@@ -197,7 +199,7 @@ export default function Component() {
     <div>
       <div className="flex">
         <h2 className="flex items-center">
-          <Link to={`/works/${work.id}`}>{work.title}</Link>
+          <Link to={bindUrl({workId: work.id})}>{work.title}</Link>
         </h2>
         {loggedIn && (
           <>
@@ -334,7 +336,7 @@ export default function Component() {
                                 // @ts-expect-error
                                 episode.WatchedEpisodesOnUser
                                   ? // @ts-expect-error
-                                    episode.WatchedEpisodesOnUser.length >= 1
+                                  episode.WatchedEpisodesOnUser.length >= 1
                                   : false
                               }
                             />

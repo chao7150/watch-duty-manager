@@ -7,13 +7,15 @@ import {
   cour2expression,
   cour2startDate,
   cour2symbol,
-  isCour,
   next,
   symbol2cour,
 } from "~/domain/cour/util";
 import { getCourList } from "~/domain/cour/db";
-import { Cour, Season } from "~/domain/cour/consts";
+import { Cour } from "~/domain/cour/consts";
 import * as CourSelect from "~/components/CourSelect";
+import urlFrom from "url-from";
+
+export const bindUrl = urlFrom`/works`.narrowing<{ "?query": { cour?: string } }>;
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
@@ -31,21 +33,21 @@ export const loader = async ({ request }: LoaderArgs) => {
   const worksPromise = db.work.findMany({
     ...(cour
       ? {
-          where: {
-            episodes: {
-              some: {
-                AND: [
-                  {
-                    publishedAt: {
-                      gte: cour2startDate(cour),
-                      lt: cour2startDate(next(cour)),
-                    },
+        where: {
+          episodes: {
+            some: {
+              AND: [
+                {
+                  publishedAt: {
+                    gte: cour2startDate(cour),
+                    lt: cour2startDate(next(cour)),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        }
+        },
+      }
       : {}),
     include: {
       // 非ログイン時は0件ヒットにするために空文字で検索
@@ -97,7 +99,7 @@ export default function Works() {
               <li key={work.id}>
                 <WorkUI.Component
                   loggedIn={loggedIn}
-                  id={work.id.toString()}
+                  id={work.id}
                   title={work.title}
                   subscribed={work.users.length === 1}
                 />

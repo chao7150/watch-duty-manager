@@ -29,7 +29,8 @@
     "react-dom": "^18.0.2",
     "react-multi-date-picker": "^3.3.4",
     "react-use": "^17.4.0",
-    "recharts": "^2.3.2"
+    "recharts": "^2.3.2",
+    "url-from": "^0.9.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.29.2",

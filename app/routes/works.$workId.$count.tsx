@@ -1,5 +1,5 @@
 import { useLoaderData } from "@remix-run/react";
-import { ActionArgs, LoaderArgs } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, nonEmptyStringOrUndefined } from "~/utils/type";
@@ -7,7 +7,7 @@ import urlFrom from "url-from";
 
 export const bindUrl = urlFrom`/works/${"workId:number"}/${"count:number"}`
 
-export const loader = async ({ request, params }: LoaderArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const userId = await getUserId(request);
   const { workId, count } = extractParams(params, ["workId", "count"]);
   const episode = await db.episode.findUnique({
@@ -40,7 +40,7 @@ export const loader = async ({ request, params }: LoaderArgs) => {
   };
 };
 
-export const action = async ({ request, params }: ActionArgs) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
   const { workId: _workId, count: _count } = extractParams(params, [
     "workId",
     "count",

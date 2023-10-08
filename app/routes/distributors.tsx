@@ -1,12 +1,5 @@
-import { Distributor } from "@prisma/client";
-import { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
-import { Serialized } from "~/utils/type";
-
-export type LoaderData = {
-  distributors: Distributor[];
-};
 
 export const createDistributorLinkHref = ({
   distributorId,
@@ -25,13 +18,13 @@ export const createDistributorLinkHref = ({
   }
 };
 
-export const loader: LoaderFunction = async ({}): Promise<LoaderData> => {
+export const loader = async ({ }) => {
   const distributors = await db.distributor.findMany();
   return { distributors };
 };
 
 export default function Distributors() {
-  const { distributors } = useLoaderData<Serialized<LoaderData>>();
+  const { distributors } = useLoaderData<typeof loader>();
 
   return (
     <div className="remix__page">

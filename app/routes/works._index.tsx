@@ -1,5 +1,5 @@
 import { useLoaderData } from "@remix-run/react";
-import { LoaderArgs } from "@remix-run/node";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import * as WorkUI from "~/components/Work/Work";
@@ -17,7 +17,7 @@ import urlFrom from "url-from";
 
 export const bindUrl = urlFrom`/works`.narrowing<{ "?query": { cour?: string } }>;
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const userId = await getUserId(request);
   const courString = url.searchParams.get("cour");

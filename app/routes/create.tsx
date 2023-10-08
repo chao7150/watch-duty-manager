@@ -4,12 +4,12 @@ import * as F from "fp-ts/function";
 import { json } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 import { useState } from "react";
-import { ActionArgs, redirect } from "@remix-run/server-runtime";
+import { ActionFunctionArgs, redirect } from "@remix-run/server-runtime";
 import * as WorkCreateForm from "../components/WorkCreateForm";
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
 import { db } from "~/utils/db.server";
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
     return await F.pipe(
@@ -64,7 +64,7 @@ export const action = async ({ request }: ActionArgs) => {
                         count: index + 1,
                         publishedAt: new Date(
                           combinedWork.publishedAt.getTime() +
-                            1000 * 60 * 60 * 24 * 7 * index
+                          1000 * 60 * 60 * 24 * 7 * index
                         ),
                       };
                     }

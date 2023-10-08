@@ -1,22 +1,21 @@
 import { useEffect } from "react";
 import { useFetcher } from "@remix-run/react";
-import type { LoaderData as DistributorsLoaderData } from "../../routes/distributors";
-import { Serialized } from "~/utils/type";
+import { loader } from "~/routes/distributors";
 
 export type Props = {
   defaultValue?: { [N: number]: string };
 };
 
 export const Component: React.FC<Props> = ({ defaultValue }) => {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof loader>();
 
   useEffect(() => {
-    if (fetcher.type === "init") {
+    if (fetcher.state === "idle" && fetcher.data == null) {
       fetcher.load("/distributors?index");
     }
   }, [fetcher]);
-  const { distributors: distributors }: Serialized<DistributorsLoaderData> =
-    fetcher.type === "done" ? fetcher.data : { distributors: [] };
+  const { distributors: distributors } =
+    (fetcher.state === "idle" && fetcher.data != null) ? fetcher.data : { distributors: [] };
 
   return (
     <div>

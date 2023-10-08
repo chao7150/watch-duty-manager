@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { LoaderArgs } from "@remix-run/node";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { addQuarters } from "date-fns";
 import { useState } from "react";
@@ -51,7 +51,7 @@ const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   };
 };
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
   const url = new URL(request.url);
   const courString = url.searchParams.get("cour");

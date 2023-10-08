@@ -2,9 +2,9 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect } from "react";
 import {
-  ActionArgs,
+  ActionFunctionArgs,
   LinksFunction,
-  LoaderArgs,
+  LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
 import {
@@ -25,7 +25,7 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId(request);
   if (userId) {
     return redirect("/");
@@ -33,7 +33,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   return null;
 };
 
-export const action = async ({ request }: ActionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const authorizationHeader = request.headers.get("Authorization");
   if (
     authorizationHeader === null ||

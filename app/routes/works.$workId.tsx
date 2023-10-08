@@ -1,5 +1,5 @@
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
-import { json, LoaderArgs } from "@remix-run/node";
+import { json, LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
 
 import { useCallback, useState } from "react";
 import * as E from "fp-ts/Either";
@@ -31,7 +31,7 @@ import urlFrom from "url-from";
 
 export const bindUrl = urlFrom`/works/${"workId:number"}`;
 
-export const loader = async ({ request, params }: LoaderArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
   const { workId } = extractParams(params, ["workId"]);
   const work = await db.work.findUnique({
@@ -105,7 +105,7 @@ export const loader = async ({ request, params }: LoaderArgs) => {
   };
 };
 
-export const action = async ({ request, params }: LoaderArgs) => {
+export const action = async ({ request, params }: LoaderFunctionArgs): Promise<TypedResponse<{ message: string }>> => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 
@@ -124,6 +124,7 @@ export const action = async ({ request, params }: LoaderArgs) => {
         data: { count: { decrement: 1 } },
       }),
     ]);
+    return json({ message: "success" }, { status: 200 });
   }
   if (formData.get("_action") === "addEpisodes") {
     const { episodeDate: _episodeDate, offset: _offset } = extractParams(
@@ -139,14 +140,14 @@ export const action = async ({ request, params }: LoaderArgs) => {
         publishedAt: date,
       })),
     });
-    return null;
+    return json({ message: "success" }, { status: 200 });
   }
   if (formData.get("_action") === "unsubscribe") {
     const userId = await requireUserId(request);
     await db.subscribedWorksOnUser.delete({
       where: { userId_workId: { userId, workId } },
     });
-    return json({}, { status: 200 });
+    return json({ message: "success" }, { status: 200 });
   }
   if (formData.get("_action") === "subscribe") {
     const userId = await requireUserId(request);
@@ -158,9 +159,9 @@ export const action = async ({ request, params }: LoaderArgs) => {
           workId,
         },
       });
-      return json(rel, { status: 200 });
+      return json({ message: `${rel.userId} ${rel.workId} ok` }, { status: 200 });
     } catch (e) {
-      return json({ errorMessage: "db error" }, { status: 400 });
+      return json({ message: "db error" }, { status: 400 });
     }
   }
   return F.pipe(
@@ -199,7 +200,7 @@ export default function Component() {
     <div>
       <div className="flex">
         <h2 className="flex items-center">
-          <Link to={bindUrl({workId: work.id})}>{work.title}</Link>
+          <Link to={bindUrl({ workId: work.id })}>{work.title}</Link>
         </h2>
         {loggedIn && (
           <>

@@ -64,7 +64,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                         count: index + 1,
                         publishedAt: new Date(
                           combinedWork.publishedAt.getTime() +
-                          1000 * 60 * 60 * 24 * 7 * index
+                            1000 * 60 * 60 * 24 * 7 * index
                         ),
                       };
                     }

@@ -18,7 +18,7 @@ export const createDistributorLinkHref = ({
   }
 };
 
-export const loader = async ({ }) => {
+export const loader = async ({}) => {
   const distributors = await db.distributor.findMany();
   return { distributors };
 };

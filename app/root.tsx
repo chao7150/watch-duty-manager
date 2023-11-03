@@ -111,7 +111,11 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <Link to={bindUrlForWorks({ "?query": { cour: cour2symbol(date2cour(new Date())) } })}>
+                <Link
+                  to={bindUrlForWorks({
+                    "?query": { cour: cour2symbol(date2cour(new Date())) },
+                  })}
+                >
                   Works
                 </Link>
               </li>
@@ -122,7 +126,11 @@ function Layout({ children }: { children: React.ReactNode }) {
               {userId ? (
                 <>
                   <li>
-                    <Link to={bindUrlForMy({ "?query": { cour: cour2symbol(date2cour(new Date())) } })}>
+                    <Link
+                      to={bindUrlForMy({
+                        "?query": { cour: cour2symbol(date2cour(new Date())) },
+                      })}
+                    >
                       My
                     </Link>
                   </li>

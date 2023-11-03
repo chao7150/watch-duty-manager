@@ -15,7 +15,9 @@ export const Component: React.FC<Props> = ({ defaultValue }) => {
     }
   }, [fetcher]);
   const { distributors: distributors } =
-    (fetcher.state === "idle" && fetcher.data != null) ? fetcher.data : { distributors: [] };
+    fetcher.state === "idle" && fetcher.data != null
+      ? fetcher.data
+      : { distributors: [] };
 
   return (
     <div>

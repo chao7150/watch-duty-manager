@@ -5,7 +5,7 @@ import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, nonEmptyStringOrUndefined } from "~/utils/type";
 import urlFrom from "url-from";
 
-export const bindUrl = urlFrom`/works/${"workId:number"}/${"count:number"}`
+export const bindUrl = urlFrom`/works/${"workId:number"}/${"count:number"}`;
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const userId = await getUserId(request);

@@ -20,7 +20,11 @@ export const Component: React.FC<Props> = ({
   return (
     <div className="work">
       {loggedIn && (
-        <WorkSubscribeForm.Component givenClassName="work-work-subscribe-form" id={`${id}`} subscribing={subscribed} />
+        <WorkSubscribeForm.Component
+          givenClassName="work-work-subscribe-form"
+          id={`${id}`}
+          subscribing={subscribed}
+        />
       )}
       <Link to={bindUrlForWorks$WorkId({ workId: id })}>{title}</Link>
     </div>

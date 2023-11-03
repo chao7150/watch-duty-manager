@@ -50,7 +50,9 @@ const Information: React.FC<InformationProps> = ({
           <Link to={bindUrlForWorks$WorkId({ workId })}>{title}</Link>
         </div>
         <div className="hover:text-cadet-blue hover:underline">
-          <Link to={bindUrlForWorks$WorkId$Count({ workId, count })}>#{count}</Link>
+          <Link to={bindUrlForWorks$WorkId$Count({ workId, count })}>
+            #{count}
+          </Link>
         </div>
         {watchReady === false && (
           <div className="icon" title="まだ前の話数を見ていません">
@@ -62,7 +64,9 @@ const Information: React.FC<InformationProps> = ({
         <span className={timeStyle}>
           {new Date(publishedAt).toLocaleString()}
         </span>
-        {durationMin !== 30 && <span className="bg-accent-area px-0.5">{durationMin}分</span>}
+        {durationMin !== 30 && (
+          <span className="bg-accent-area px-0.5">{durationMin}分</span>
+        )}
         {hashtag !== undefined && hashtag !== "" && (
           <WorkHashtagCopyButton.Component hashtag={hashtag} />
         )}

@@ -3,7 +3,7 @@ import { useFetcher } from "@remix-run/react";
 import * as WorkInput from "./Work/Input";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
-import { action } from "../routes/works.$workId"
+import { action } from "../routes/works.$workId";
 import { json } from "@remix-run/node";
 
 export const serverAction = async (
@@ -39,7 +39,7 @@ export const serverAction = async (
         ...optionalWorkCreateInput,
         durationMin:
           optionalWorkCreateInput.durationMin &&
-            optionalWorkCreateInput.durationMin !== ""
+          optionalWorkCreateInput.durationMin !== ""
             ? Number(optionalWorkCreateInput.durationMin)
             : undefined,
       },
@@ -83,9 +83,7 @@ export const Component: React.FC<Props> = ({ workId, workInput }) => {
   const fetcher = useFetcher<typeof action>();
   return (
     <section>
-      {fetcher.data && (
-        <p>{fetcher.data.message}</p>
-      )}
+      {fetcher.data && <p>{fetcher.data.message}</p>}
       <fetcher.Form method="POST" action={`/works/${workId}`}>
         <WorkInput.Component {...workInput} />
         <button

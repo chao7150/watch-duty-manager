@@ -23,7 +23,6 @@ export const serverValidator = (
     officialSiteUrl?: string;
     twitterId?: string;
     hashtag?: string;
-    distributions?: { distributorId: number; workIdOnDistributor: string }[];
   }
 > => {
   return F.pipe(
@@ -38,26 +37,15 @@ export const serverValidator = (
       const episodeDate = formData.get("episodeDate");
       return isNonEmptyString(episodeDate)
         ? E.right({
-            formData,
-            episodeDate: episodeDate.split(",").map((d) => new Date(d)),
-            ...rest,
-          })
+          formData,
+          episodeDate: episodeDate.split(",").map((d) => new Date(d)),
+          ...rest,
+        })
         : E.left("episodeDate must not be empty");
-    }),
-    E.chain(({ formData, ...rest }) => {
-      const distributions = Object.entries(Object.fromEntries(formData))
-        .filter(([k, v]) => k.startsWith("distributor-"))
-        .map(([k, v]) => {
-          return {
-            distributorId: Number(k.replace("distributor-", "")),
-            workIdOnDistributor: v as string,
-          };
-        });
-      return E.right({ formData, distributions, ...rest });
     }),
     E.bimap(
       (l) => json({ errorMessage: l }, { status: 400 }),
-      ({ title, episodeDate, distributions, formData }) => {
+      ({ title, episodeDate, formData }) => {
         const optionals = nonEmptyStringOrUndefined(
           Object.fromEntries(formData),
           ["officialSiteUrl", "twitterId", "hashtag", "durationMin"]
@@ -65,7 +53,6 @@ export const serverValidator = (
         return {
           title,
           episodeDate,
-          distributions,
           ...optionals,
           durationMin:
             optionals.durationMin && optionals.durationMin !== ""

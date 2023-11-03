@@ -1,5 +1,4 @@
 import * as TextInput from "../../components/TextInput";
-import * as DistributorForm from "../../components/Distributor/Form";
 
 type TextInputOptionalProps = Pick<
   TextInput.Props,
@@ -12,7 +11,6 @@ export type Props = {
   officialSiteUrl?: TextInputOptionalProps;
   twitterId?: TextInputOptionalProps;
   hashtag?: TextInputOptionalProps;
-  distributorForm?: DistributorForm.Props;
 };
 
 export const Component: React.FC<Props> = ({
@@ -21,7 +19,6 @@ export const Component: React.FC<Props> = ({
   officialSiteUrl,
   twitterId,
   hashtag,
-  distributorForm,
 }) => {
   return (
     <ul className="flex flex-col gap-2">
@@ -66,9 +63,6 @@ export const Component: React.FC<Props> = ({
           name="hashtag"
           {...hashtag}
         />
-      </li>
-      <li>
-        <DistributorForm.Component {...distributorForm} />
       </li>
     </ul>
   );

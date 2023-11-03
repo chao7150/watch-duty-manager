@@ -64,7 +64,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                         count: index + 1,
                         publishedAt: new Date(
                           combinedWork.publishedAt.getTime() +
-                            1000 * 60 * 60 * 24 * 7 * index
+                          1000 * 60 * 60 * 24 * 7 * index
                         ),
                       };
                     }
@@ -85,16 +85,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     formData,
     WorkCreateForm.serverValidator,
     TE.fromEither,
-    TE.chain(({ episodeDate, distributions, ...work }) => {
+    TE.chain(({ episodeDate, ...work }) => {
       return TE.tryCatch(
         async () => ({
           returnedWork: await db.work.create({
             data: {
               ...work,
               publishedAt: episodeDate[0],
-              DistributorsOnWorks: {
-                createMany: { data: distributions ?? [] },
-              },
             },
           }),
           episodeDate,

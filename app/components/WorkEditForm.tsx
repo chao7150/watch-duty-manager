@@ -4,7 +4,6 @@ import * as WorkInput from "./Work/Input";
 import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 import { action } from "../routes/works.$workId";
-import { json } from "@remix-run/node";
 
 export const serverAction = async (
   workId: number,
@@ -23,14 +22,6 @@ export const serverAction = async (
     Object.fromEntries(formData),
     ["officialSiteUrl", "twitterId", "hashtag", "durationMin"]
   );
-  const distributions = Object.entries(Object.fromEntries(formData))
-    .filter(([k, v]) => k.startsWith("distributor-"))
-    .map(([k, v]) => {
-      return {
-        distributorId: Number(k.replace("distributor-", "")),
-        workIdOnDistributor: v as string,
-      };
-    });
   try {
     const work = await db.work.update({
       where: { id: workId },
@@ -39,31 +30,11 @@ export const serverAction = async (
         ...optionalWorkCreateInput,
         durationMin:
           optionalWorkCreateInput.durationMin &&
-          optionalWorkCreateInput.durationMin !== ""
+            optionalWorkCreateInput.durationMin !== ""
             ? Number(optionalWorkCreateInput.durationMin)
             : undefined,
       },
     });
-    await Promise.all(
-      distributions.map(async (d) => {
-        await db.distributorsOnWorks.upsert({
-          where: {
-            workId_distributorId: {
-              workId: work.id,
-              distributorId: d.distributorId,
-            },
-          },
-          create: {
-            workIdOnDistributor: d.workIdOnDistributor,
-            distributorId: d.distributorId,
-            workId: work.id,
-          },
-          update: {
-            workIdOnDistributor: d.workIdOnDistributor,
-          },
-        });
-      })
-    );
     return E.right({
       successMessage: `${work.title} is successfully updated`,
       status: 200,

@@ -16,33 +16,15 @@ generator dbml {
 
 // アニメ作品
 model Work {
-  id                  Int                     @id @default(autoincrement())
-  episodes            Episode[]
-  title               String                  @unique
-  publishedAt         DateTime
-  durationMin         Int                     @default(30)
-  officialSiteUrl     String?
-  twitterId           String?
-  hashtag             String?
-  users               SubscribedWorksOnUser[]
-  DistributorsOnWorks DistributorsOnWorks[]
-}
-
-model DistributorsOnWorks {
-  work                Work        @relation(fields: [workId], references: [id])
-  workId              Int
-  distributor         Distributor @relation(fields: [distributorId], references: [id])
-  distributorId       Int
-  workIdOnDistributor String
-
-  @@id(fields: [workId, distributorId])
-}
-
-model Distributor {
-  id                  Int                   @id @default(autoincrement())
-  name                String                @unique
-  domain              String
-  DistributorsOnWorks DistributorsOnWorks[]
+  id              Int                     @id @default(autoincrement())
+  episodes        Episode[]
+  title           String                  @unique
+  publishedAt     DateTime
+  durationMin     Int                     @default(30)
+  officialSiteUrl String?
+  twitterId       String?
+  hashtag         String?
+  users           SubscribedWorksOnUser[]
 }
 
 // アニメの単話

@@ -42,13 +42,13 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
         orderBy: { count: "asc" },
         ...(userId
           ? {
-            include: {
-              WatchedEpisodesOnUser: {
-                where: { userId },
-                select: { createdAt: true, rating: true },
+              include: {
+                WatchedEpisodesOnUser: {
+                  where: { userId },
+                  select: { createdAt: true, rating: true },
+                },
               },
-            },
-          }
+            }
           : {}),
       },
       DistributorsOnWorks: { include: { distributor: true } },
@@ -96,7 +96,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       nonNullRatings.length === 0
         ? 0
         : nonNullRatings.reduce((acc, val) => acc + val, 0) /
-        nonNullRatings.length,
+          nonNullRatings.length,
     ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
       return { count: idx + 1, rating: map.get(idx + 1) ?? null };
     }),
@@ -105,7 +105,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   };
 };
 
-export const action = async ({ request, params }: LoaderFunctionArgs): Promise<TypedResponse<{ message: string }>> => {
+export const action = async ({
+  request,
+  params,
+}: LoaderFunctionArgs): Promise<TypedResponse<{ message: string }>> => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 
@@ -159,7 +162,10 @@ export const action = async ({ request, params }: LoaderFunctionArgs): Promise<T
           workId,
         },
       });
-      return json({ message: `${rel.userId} ${rel.workId} ok` }, { status: 200 });
+      return json(
+        { message: `${rel.userId} ${rel.workId} ok` },
+        { status: 200 }
+      );
     } catch (e) {
       return json({ message: "db error" }, { status: 400 });
     }
@@ -258,24 +264,19 @@ export default function Component() {
                     )}
                   </dd>
                   <dt>配信サービス</dt>
-                  <dd>
-                    {work.DistributorsOnWorks.map((d) => {
-                      const href = createDistributorLinkHref({
-                        distributorId: d.distributorId,
-                        domain: d.distributor.domain,
-                        workIdOnDistributor: d.workIdOnDistributor,
-                      });
-                      return (
-                        <div>
-                          {href === undefined ? (
-                            <span>{d.distributor.name}</span>
-                          ) : (
-                            <a href={href}>{d.distributor.name}</a>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </dd>
+                  <div>
+                    <ul>
+                      <li className="list-disc list-inside">
+                        <Link
+                          to={`https://animestore.docomo.ne.jp/animestore/sch_pc?searchKey=${encodeURIComponent(
+                            work.title
+                          )}&vodTypeList=svod_tvod`}
+                        >
+                          dアニメストア
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
                 </dl>
               )}
             </section>
@@ -337,7 +338,7 @@ export default function Component() {
                                 // @ts-expect-error
                                 episode.WatchedEpisodesOnUser
                                   ? // @ts-expect-error
-                                  episode.WatchedEpisodesOnUser.length >= 1
+                                    episode.WatchedEpisodesOnUser.length >= 1
                                   : false
                               }
                             />

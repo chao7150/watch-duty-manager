@@ -122,6 +122,14 @@ function Layout({ children }: { children: React.ReactNode }) {
               <li>
                 <Link to="/create">Create</Link>
               </li>
+              <li>
+                <Link
+                  to="https://chao7150.notion.site/wdm-help-82a9677f1ae545e7be3ee110a2c40068?pvs=4"
+                  target="_blank"
+                >
+                  Help
+                </Link>
+              </li>
 
               {userId ? (
                 <>

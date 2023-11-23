@@ -50,7 +50,7 @@ model SubscribedWorksOnUser {
 
 model WatchedEpisodesOnUser {
   userId    String
-  episode   Episode  @relation(fields: [workId, count], references: [workId, count], onDelete: Cascade)
+  episode   Episode  @relation(fields: [workId, count], references: [workId, count], onDelete: Restrict, onUpdate: Cascade)
   workId    Int
   count     Int
   createdAt DateTime

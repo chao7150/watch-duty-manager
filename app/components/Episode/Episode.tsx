@@ -1,15 +1,11 @@
 import { Link } from "@remix-run/react";
 import { useMemo } from "react";
-import { addMinutes } from "date-fns";
-import { get4OriginDate } from "../../utils/date";
 
-import * as WorkHashtagCopyButton from "../Work/WorkHashtagCopyButton";
-import * as ExclamationCircleIcon from "../../components/Icons/ExclamationCircle";
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "../../routes/works.$workId.$count";
-
-type Status = "published" | "onair" | "today" | "tomorrow";
+import { Status } from "~/domain/episode/consts";
+import { getStatus } from "~/domain/episode/util";
 
 type InformationProps = {
   workId: number;
@@ -20,7 +16,6 @@ type InformationProps = {
    * ISO8601
    */
   publishedAt: string;
-  hashtag?: string;
   watchReady?: boolean;
   status: Status;
 };
@@ -38,8 +33,6 @@ const Information: React.FC<InformationProps> = ({
   durationMin,
   count,
   publishedAt,
-  hashtag,
-  watchReady,
   status,
 }) => {
   const timeStyle = timeStyles[status];
@@ -54,11 +47,6 @@ const Information: React.FC<InformationProps> = ({
             #{count}
           </Link>
         </div>
-        {watchReady === false && (
-          <div className="icon" title="まだ前の話数を見ていません">
-            <ExclamationCircleIcon.Component />
-          </div>
-        )}
       </h3>
       <div className="flex gap-1 items-center text-text-weak">
         <span className={timeStyle}>
@@ -67,28 +55,9 @@ const Information: React.FC<InformationProps> = ({
         {durationMin !== 30 && (
           <span className="bg-accent-area px-0.5">{durationMin}分</span>
         )}
-        {hashtag !== undefined && hashtag !== "" && (
-          <WorkHashtagCopyButton.Component hashtag={hashtag} />
-        )}
       </div>
     </div>
   );
-};
-
-const getStatus = (
-  publishedAt: Date,
-  now: Date
-): "published" | "onair" | "today" | "tomorrow" => {
-  if (addMinutes(publishedAt, 30) < now) {
-    return "published";
-  }
-  if (publishedAt < now) {
-    return "onair";
-  }
-  if (get4OriginDate(publishedAt) === get4OriginDate(now)) {
-    return "today";
-  }
-  return "tomorrow";
 };
 
 const statusStyles: { [K in Status]: string } = {
@@ -98,9 +67,13 @@ const statusStyles: { [K in Status]: string } = {
   tomorrow: "",
 };
 
-export type Props = Omit<InformationProps, "status"> & { watched: boolean };
+export type Props = Omit<
+  InformationProps & EpisodeActoinMenu.Props,
+  "status" | "published"
+>;
 const _Component: React.FC<Props> = ({
   workId,
+  officialSiteUrl,
   title,
   durationMin,
   count,
@@ -108,29 +81,31 @@ const _Component: React.FC<Props> = ({
   hashtag,
   watchReady,
   watched,
+  onClickWatchUnready,
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
-    <div className={`w-full grow ${statusStyles[status]} flex justify-between`}>
+    <div className={`w-full grow ${statusStyles[status]} flex justify-between hover:bg-accent-area`}>
       <Information
         workId={workId}
         title={title}
         durationMin={durationMin}
         count={count}
         publishedAt={publishedAt}
-        hashtag={hashtag}
         watchReady={watchReady}
         status={status}
       />
-      {["published", "onair"].includes(status) && (
-        <EpisodeActoinMenu.Component
-          {...{
-            workId,
-            count,
-            watched,
-          }}
-        />
-      )}
+      <EpisodeActoinMenu.Component
+        {...{
+          workId,
+          officialSiteUrl,
+          count,
+          watched,
+          hashtag,
+          onClickWatchUnready,
+          published: ["onair", "published"].includes(status),
+        }}
+      />
     </div>
   );
 };

@@ -23,6 +23,7 @@ export const Component = () => {
   );
 };
 
+
 export const AltComponent = () => {
   return (
     <svg

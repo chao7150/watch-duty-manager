@@ -41,13 +41,13 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
         orderBy: { count: "asc" },
         ...(userId
           ? {
-            include: {
-              WatchedEpisodesOnUser: {
-                where: { userId },
-                select: { createdAt: true, rating: true },
+              include: {
+                WatchedEpisodesOnUser: {
+                  where: { userId },
+                  select: { createdAt: true, rating: true },
+                },
               },
-            },
-          }
+            }
           : {}),
       },
     },
@@ -94,7 +94,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       nonNullRatings.length === 0
         ? 0
         : nonNullRatings.reduce((acc, val) => acc + val, 0) /
-        nonNullRatings.length,
+          nonNullRatings.length,
     ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
       return { count: idx + 1, rating: map.get(idx + 1) ?? null };
     }),
@@ -331,9 +331,10 @@ export default function Component() {
                                 // @ts-expect-error
                                 episode.WatchedEpisodesOnUser
                                   ? // @ts-expect-error
-                                  episode.WatchedEpisodesOnUser.length >= 1
+                                    episode.WatchedEpisodesOnUser.length >= 1
                                   : false
                               }
+                              published={true}
                             />
                           )}
                         </td>

@@ -67,7 +67,7 @@ const getTickets =
           },
         },
         include: {
-          work: { select: { title: true, hashtag: true, durationMin: true } },
+          work: { select: { title: true, hashtag: true, durationMin: true, officialSiteUrl: true } },
         },
         orderBy: { publishedAt: "desc" },
       });
@@ -157,7 +157,7 @@ const getRecentWatchAchievements =
       take,
       include: {
         episode: {
-          include: { work: { select: { title: true, durationMin: true } } },
+          include: { work: { select: { title: true, durationMin: true, officialSiteUrl: true } } },
         },
       },
     });
@@ -348,6 +348,7 @@ export default function Index() {
               hashtag: ticket.work.hashtag ?? undefined,
               watchReady: ticket.watchReady,
               watched: false,
+              officialSiteUrl: ticket.work.officialSiteUrl ?? "",
             };
           })}
         />
@@ -385,6 +386,8 @@ export default function Index() {
             count: a.count,
             publishedAt: a.createdAt,
             watched: true,
+            officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
+            published: true,
           }))}
         />
         <Link

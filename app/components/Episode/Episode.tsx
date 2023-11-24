@@ -85,7 +85,7 @@ const _Component: React.FC<Props> = ({
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
-    <div className={`w-full grow ${statusStyles[status]} flex justify-between hover:bg-accent-area`}>
+    <div className={`w-full grow ${statusStyles[status]} flex justify-between `}>
       <Information
         workId={workId}
         title={title}

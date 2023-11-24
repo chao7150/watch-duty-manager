@@ -6,7 +6,7 @@
   "scripts": {
     "build": "remix build",
     "commit": "cz",
-    "dev": "node -r dotenv/config node_modules/.bin/remix dev",
+    "dev": "node -r dotenv/config node_modules/.bin/remix dev --manual",
     "format": "prettier --write \"./**/*.{ts,tsx,js,json}\"",
     "lint": "eslint \"app/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",

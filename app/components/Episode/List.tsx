@@ -21,7 +21,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
           </button>
         </div>
       )}
-      <ul className="flex flex-col gap-4 episode-list mt-4">
+      <ul className="flex flex-col episode-list mt-4">
         {episodes
           .filter((e) => {
             if (filterWorkId === undefined) return true;
@@ -29,7 +29,10 @@ export const Component: React.FC<Props> = ({ episodes }) => {
           })
           .map((e) => {
             return (
-              <li key={`${e.workId}-${e.count}`}>
+              <li
+                key={`${e.workId}-${e.count}`}
+                className="pb-4 hover:bg-accent-area"
+              >
                 <Episode.Component
                   {...e}
                   onClickWatchUnready={

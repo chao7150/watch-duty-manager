@@ -17,7 +17,7 @@ import {
 import * as EditIcon from "../components/Icons/Edit";
 import * as CloseIcon from "../components/Icons/Close";
 import * as TrashIcon from "../components/Icons/Trash";
-import * as EpisodeActionMenu from "../components/Episode/EpisodeActionMenu";
+import * as EpisodeWatchForm from "../components/Episode/WatchForm";
 import { db } from "~/utils/db.server";
 
 import * as WorkEditForm from "~/components/WorkEditForm";
@@ -324,7 +324,7 @@ export default function Component() {
                         </td>
                         <td className="ml-2">
                           {new Date(episode.publishedAt) < new Date() && (
-                            <EpisodeActionMenu.Component
+                            <EpisodeWatchForm.Component
                               workId={episode.workId}
                               count={episode.count}
                               watched={
@@ -334,7 +334,6 @@ export default function Component() {
                                     episode.WatchedEpisodesOnUser.length >= 1
                                   : false
                               }
-                              published={true}
                             />
                           )}
                         </td>

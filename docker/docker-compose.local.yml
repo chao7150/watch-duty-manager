@@ -26,5 +26,10 @@ services:
       MYSQL_DATABASE: watch-duty-manager
       MYSQL_USER: masaki
       MYSQL_PASSWORD: tsuji
+    volumes:
+      - db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+
+volumes:
+  db-data:

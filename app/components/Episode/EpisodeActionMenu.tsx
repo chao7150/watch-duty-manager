@@ -3,6 +3,7 @@ import * as FilterIcon from "../Icons/Filter";
 import * as WatchForm from "./WatchForm";
 import * as MenuIcon from "../Icons/Menu";
 import * as ClipboardCopyIcon from "../Icons/ClipboardCopy";
+import { useRef } from "react";
 
 export type Props = {
   workId: number;
@@ -45,10 +46,11 @@ export const Component: React.FC<Props> = ({
   onClickWatchUnready,
   published,
 }) => {
+  const ref = useRef<HTMLDetailsElement>(null);
   return (
-    <div className="grid grid-cols-2">
+    <div className="grid grid-cols-2 gap-2">
       <div>
-        <details className="relative">
+        <details ref={ref} className="relative">
           <summary className="cursor-pointer list-none">
             <MenuIcon.Component />
           </summary>
@@ -57,7 +59,10 @@ export const Component: React.FC<Props> = ({
               <MenuItem
                 text="作品でフィルタ"
                 icon={<FilterIcon.Component />}
-                onClick={() => onClickWatchUnready(workId)}
+                onClick={() => {
+                  onClickWatchUnready(workId);
+                  ref.current?.removeAttribute("open");
+                }}
               />
             )}
             {officialSiteUrl !== undefined && officialSiteUrl !== "" && (
@@ -73,6 +78,7 @@ export const Component: React.FC<Props> = ({
                 icon={<ClipboardCopyIcon.Component />}
                 onClick={() => {
                   navigator.clipboard.writeText(`#${hashtag}`);
+                  ref.current?.removeAttribute("open");
                 }}
               />
             )}

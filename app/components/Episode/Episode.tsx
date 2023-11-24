@@ -1,6 +1,7 @@
 import { Link } from "@remix-run/react";
 import { useMemo } from "react";
 
+import * as ExclamationCircleIcon from "../../components/Icons/ExclamationCircle";
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "../../routes/works.$workId.$count";
@@ -34,6 +35,7 @@ const Information: React.FC<InformationProps> = ({
   count,
   publishedAt,
   status,
+  watchReady,
 }) => {
   const timeStyle = timeStyles[status];
   return (
@@ -47,6 +49,11 @@ const Information: React.FC<InformationProps> = ({
             #{count}
           </Link>
         </div>
+        {watchReady === false && (
+          <div className="icon" title="まだ前の話数を見ていません">
+            <ExclamationCircleIcon.Component />
+          </div>
+        )}
       </h3>
       <div className="flex gap-1 items-center text-text-weak">
         <span className={timeStyle}>
@@ -85,7 +92,9 @@ const _Component: React.FC<Props> = ({
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
-    <div className={`w-full grow ${statusStyles[status]} flex justify-between `}>
+    <div
+      className={`w-full grow ${statusStyles[status]} flex justify-between `}
+    >
       <Information
         workId={workId}
         title={title}

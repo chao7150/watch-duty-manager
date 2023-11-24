@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as Episode from "./Episode";
+import * as CloseIcon from "../Icons/Close";
 
 export type Props = {
   episodes: Episode.Props[];
@@ -14,34 +15,27 @@ export const Component: React.FC<Props> = ({ episodes }) => {
   return (
     <div>
       {filterWorkId !== undefined && (
-        <div>
-          <div>フィルタ: {filterTitle}</div>
-          <button onClick={() => setFilterWorkId(undefined)}>
-            フィルタをクリア
-          </button>
-        </div>
+        <button
+          className="bg-accent-area rounded-full py-1 px-3 flex gap-2"
+          onClick={() => setFilterWorkId(undefined)}
+        >
+          <p>タイトル: {filterTitle}</p>
+          <CloseIcon.Component />
+        </button>
       )}
       <ul className="flex flex-col episode-list mt-4">
-        {episodes
-          .filter((e) => {
-            if (filterWorkId === undefined) return true;
-            return e.workId === filterWorkId;
-          })
-          .map((e) => {
-            return (
-              <li
-                key={`${e.workId}-${e.count}`}
-                className="pb-4 hover:bg-accent-area"
-              >
-                <Episode.Component
-                  {...e}
-                  onClickWatchUnready={
-                    e.watchReady === false ? setFilterWorkId : undefined
-                  }
-                />
-              </li>
-            );
-          })}
+        {episodes.map((e) => {
+          const hidden =
+            filterWorkId !== undefined && e.workId !== filterWorkId;
+          return (
+            <li
+              key={`${e.workId}-${e.count}`}
+              className={`pb-4 hover:bg-accent-area ${hidden ? "hidden" : ""}`}
+            >
+              <Episode.Component {...e} onClickWatchUnready={setFilterWorkId} />
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

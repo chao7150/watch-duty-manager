@@ -3,7 +3,7 @@ import * as Episode from "./Episode";
 import * as CloseIcon from "../Icons/Close";
 
 export type Props = {
-  episodes: Episode.Props[];
+  episodes: Omit<Episode.Props, "onClickWatchUnready">[];
 };
 
 export const Component: React.FC<Props> = ({ episodes }) => {

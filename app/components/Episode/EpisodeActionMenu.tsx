@@ -55,6 +55,16 @@ export const Component: React.FC<Props> = ({
             <MenuIcon.Component />
           </summary>
           <ul className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2 flex flex-col">
+            {hashtag !== undefined && hashtag !== "" && (
+              <MenuItem
+                text="ハッシュタグをコピー"
+                icon={<ClipboardCopyIcon.Component />}
+                onClick={() => {
+                  navigator.clipboard.writeText(`#${hashtag}`);
+                  ref.current?.removeAttribute("open");
+                }}
+              />
+            )}
             {onClickWatchUnready && (
               <MenuItem
                 text="作品でフィルタ"
@@ -70,16 +80,6 @@ export const Component: React.FC<Props> = ({
                 text="公式サイト（外部）"
                 icon={<ExternalLinkIcon.Component />}
                 href={officialSiteUrl}
-              />
-            )}
-            {hashtag !== undefined && hashtag !== "" && (
-              <MenuItem
-                text="ハッシュタグをコピー"
-                icon={<ClipboardCopyIcon.Component />}
-                onClick={() => {
-                  navigator.clipboard.writeText(`#${hashtag}`);
-                  ref.current?.removeAttribute("open");
-                }}
               />
             )}
           </ul>

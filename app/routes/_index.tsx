@@ -67,7 +67,14 @@ const getTickets =
           },
         },
         include: {
-          work: { select: { title: true, hashtag: true, durationMin: true, officialSiteUrl: true } },
+          work: {
+            select: {
+              title: true,
+              hashtag: true,
+              durationMin: true,
+              officialSiteUrl: true,
+            },
+          },
         },
         orderBy: { publishedAt: "desc" },
       });
@@ -157,7 +164,11 @@ const getRecentWatchAchievements =
       take,
       include: {
         episode: {
-          include: { work: { select: { title: true, durationMin: true, officialSiteUrl: true } } },
+          include: {
+            work: {
+              select: { title: true, durationMin: true, officialSiteUrl: true },
+            },
+          },
         },
       },
     });

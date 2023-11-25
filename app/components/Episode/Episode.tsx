@@ -19,6 +19,7 @@ type InformationProps = {
   publishedAt: string;
   watchReady?: boolean;
   status: Status;
+  onClickWatchUnready: (workId: number) => void;
 };
 
 const timeStyles: { [K in Status]: string } = {
@@ -36,6 +37,7 @@ const Information: React.FC<InformationProps> = ({
   publishedAt,
   status,
   watchReady,
+  onClickWatchUnready,
 }) => {
   const timeStyle = timeStyles[status];
   return (
@@ -50,9 +52,12 @@ const Information: React.FC<InformationProps> = ({
           </Link>
         </div>
         {watchReady === false && (
-          <div className="icon" title="まだ前の話数を見ていません">
+          <button
+            title="まだ前の話数を見ていません"
+            onClick={() => onClickWatchUnready(workId)}
+          >
             <ExclamationCircleIcon.Component />
-          </div>
+          </button>
         )}
       </h3>
       <div className="flex gap-1 items-center text-text-weak">
@@ -103,6 +108,7 @@ const _Component: React.FC<Props> = ({
         publishedAt={publishedAt}
         watchReady={watchReady}
         status={status}
+        onClickWatchUnready={onClickWatchUnready}
       />
       <EpisodeActoinMenu.Component
         {...{

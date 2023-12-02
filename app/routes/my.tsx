@@ -26,6 +26,8 @@ import {
   Tooltip,
   Legend,
   Line,
+  BarChart,
+  Bar,
 } from "recharts";
 import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
@@ -94,21 +96,49 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     orderBy: { rating: "desc" },
     take: 30,
   });
+  const episodeRatingDistributionPromise = db.watchedEpisodesOnUser.groupBy({
+    by: ["rating"],
+    where: {
+      userId,
+      episode: {
+        ...(cour === null ? {} : generateStartDateQuery(cour).episodes?.some),
+      },
+    },
+    _count: { rating: true },
+  });
 
-  const [cours, watchingWorks, bestEpisodesOnUser, quarterMetrics] =
-    await Promise.all([
-      getCourList(db),
-      watchingWorksPromise,
-      bestEpisodesOnUserPromise,
-      getQuarterMetrics({
-        db,
-        now:
-          cour === null
-            ? new Date()
-            : new Date(cour2startDate(next(cour)).getTime() - 1),
-        userId,
-      })(),
-    ]);
+  const [
+    cours,
+    watchingWorks,
+    bestEpisodesOnUser,
+    quarterMetrics,
+    episodeRatingDistribution,
+  ] = await Promise.all([
+    getCourList(db),
+    watchingWorksPromise,
+    bestEpisodesOnUserPromise,
+    getQuarterMetrics({
+      db,
+      now:
+        cour === null
+          ? new Date()
+          : new Date(cour2startDate(next(cour)).getTime() - 1),
+      userId,
+    })(),
+    episodeRatingDistributionPromise,
+  ]);
+  const filledEpisodeRatingDistribution: Array<{
+    rating: number;
+    count: number;
+  }> = [];
+  Array.from({ length: 11 }).forEach((_, i) => {
+    filledEpisodeRatingDistribution.push({
+      rating: i,
+      count:
+        episodeRatingDistribution.find((e) => e.rating === i)?._count.rating ??
+        0,
+    });
+  });
   return {
     selectedCourDate: cour && cour2symbol(cour),
     courList: cours.map(
@@ -130,6 +160,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     })),
     bestEpisodesOnUser,
     quarterMetrics,
+    filledEpisodeRatingDistribution,
   };
 };
 
@@ -142,6 +173,7 @@ export default function My() {
     works: _w,
     bestEpisodesOnUser,
     quarterMetrics,
+    filledEpisodeRatingDistribution,
   } = useLoaderData<typeof loader>();
   const works = _w.map((w) => {
     const watchedEpisodesDenominator = completeByPublished
@@ -244,6 +276,28 @@ export default function My() {
               <Line type="monotone" dataKey="watchAchievements" />
               <Line type="monotone" stroke="red" dataKey="dutyAccumulation" />
             </LineChart>
+          </ResponsiveContainer>
+          <h3>
+            各点数をつけたエピソード数(平均:{" "}
+            {(
+              filledEpisodeRatingDistribution.reduce((acc, val) => {
+                return acc + val.count * val.rating;
+              }, 0) /
+              filledEpisodeRatingDistribution.reduce((acc, val) => {
+                return acc + val.count;
+              }, 0)
+            ).toFixed(2)}
+            )
+          </h3>
+          <ResponsiveContainer height={300}>
+            <BarChart data={filledEpisodeRatingDistribution}>
+              <CartesianGrid />
+              <XAxis dataKey="rating" stroke="#bdc1c6" domain={[0, 10]} />
+              <YAxis stroke="#bdc1c6" />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#81c995" />
+            </BarChart>
           </ResponsiveContainer>
           <h3>ベストエピソード</h3>
           <ul className="flex flex-col gap-1">

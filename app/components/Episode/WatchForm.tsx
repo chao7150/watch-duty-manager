@@ -80,7 +80,7 @@ export const Component: React.FC<Props> = ({ workId, count, watched }) => {
               name="_action"
               value="watch"
             >
-              watch with comment
+              {fetcher.state === "idle" ? "視聴した" : "送信中"}
             </button>
           </fetcher.Form>
         )}

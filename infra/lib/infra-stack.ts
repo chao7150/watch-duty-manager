@@ -32,6 +32,7 @@ export class InfraStack extends Stack {
 
     const repository = new aws_ecr.Repository(this, "watch-duty-manager", {
       repositoryName: "watch-duty-manager",
+      lifecycleRules: [{ maxImageCount: 5 }],
     });
 
     const deployPolicy = new aws_iam.Policy(this, "policy-github-com", {});

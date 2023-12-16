@@ -37,5 +37,11 @@ export class InfraStack extends Stack {
     const deployPolicy = new aws_iam.Policy(this, "policy-github-com", {});
     repository.grantPullPush(deployPolicy);
     role.attachInlinePolicy(deployPolicy);
+
+    const user = new aws_iam.User(
+      this,
+      "watch-duty-manager-ecr-pull-machine-user"
+    );
+    repository.grantPull(user);
   }
 }

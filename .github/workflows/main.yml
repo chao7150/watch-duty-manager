@@ -35,4 +35,18 @@ jobs:
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f docker/Dockerfile .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+    - name: deploy
+      uses: appleboy/ssh-action@v1.0.0
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+      with:
+        host: chao.tokyo
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.PORT }}
+        envs: IMAGE_TAG
+        script: |
+          cd ~/watch-duty-manager
+          aws ecr get-login-password --region ap-northeast-1 --profile watch-duty-manager-ecr-pull | docker login --username AWS --password-stdin 559095527504.dkr.ecr.ap-northeast-1.amazonaws.com
+          docker compose -f docker/docker-compose.yml up -d --build app
 

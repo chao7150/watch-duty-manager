@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 import "firebase/compat/auth";
 import { PrismaClient } from "@prisma/client";
 import {
@@ -26,6 +26,7 @@ import {
 } from "~/utils/date";
 import { cour2startDate, date2cour } from "~/domain/cour/util";
 import { parseSearchParamAsNumber } from "~/utils/validator";
+import { useInterval } from "react-use";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
@@ -306,12 +307,8 @@ export const setOldestOfWork = <T extends { workId: number }>(
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
-  useEffect(() => {
-    const timerId = setInterval(() => {
-      window.location.reload();
-    }, 1000 * 60 * 15);
-    return () => clearInterval(timerId);
-  });
+  const revalidator = useRevalidator();
+  useInterval(() => revalidator.revalidate(), 1000 * 60 * 15);
   const {
     userId,
     tickets,

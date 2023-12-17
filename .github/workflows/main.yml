@@ -48,5 +48,6 @@ jobs:
         script: |
           cd ~/watch-duty-manager
           aws ecr get-login-password --region ap-northeast-1 --profile watch-duty-manager-ecr-pull | docker login --username AWS --password-stdin 559095527504.dkr.ecr.ap-northeast-1.amazonaws.com
-          docker compose -f docker/docker-compose.yml up -d --build app
+          docker compose -f docker/docker-compose.yml up -d --build app ; if [ $? -eq 0 ]; then MESSAGE="deploy success"; else MESSAGE="deploy failed"; fi
+          curl -X POST -H 'Content-type: application/json' --data "{\"content\":\"$MESSAGE\"}" ${{ secrets.DISCORD_WEBHOOK_URL }}
 

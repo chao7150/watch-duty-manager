@@ -23,7 +23,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
   return (
     <div>
       <div className="controller">
-        <ul className="flex flex-row items-center">
+        <ul className="h-8 flex flex-row items-center">
           <li>
             <button
               className="align-middle"

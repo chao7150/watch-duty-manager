@@ -6,7 +6,7 @@
     {
       "label": "docker compose up",
       "type": "shell",
-      "command": "sudo docker compose -f docker/docker-compose.local.yml up --build"
+      "command": "nerdctl compose -f docker/docker-compose.local.yml up --build"
     },
     {
       "label": "docker start dev db",
@@ -16,7 +16,7 @@
     {
       "label": "docker start test db",
       "type": "shell",
-      "command": "sudo docker compose -f docker/docker-compose.local.yml -p test up -d db"
+      "command": "nerdctl compose -f docker/docker-compose.local.yml -p test up -d db"
     }
   ]
 }

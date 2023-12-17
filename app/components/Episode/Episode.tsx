@@ -62,7 +62,7 @@ const Information: React.FC<InformationProps> = ({
       </h3>
       <div className="flex gap-1 items-center text-text-weak">
         <span className={timeStyle}>
-          {new Date(publishedAt).toLocaleString()}
+          {new Date(publishedAt).toLocaleString("ja")}
         </span>
         {durationMin !== 30 && (
           <span className="bg-accent-area px-0.5">{durationMin}分</span>

@@ -320,7 +320,7 @@ export default function Component() {
                           <Link to={`${episode.count}`}>{episode.count}</Link>
                         </td>
                         <td>
-                          {new Date(episode.publishedAt).toLocaleDateString()}
+                          {new Date(episode.publishedAt).toLocaleDateString("ja")}
                         </td>
                         <td className="ml-2">
                           {new Date(episode.publishedAt) < new Date() && (

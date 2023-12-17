@@ -124,7 +124,7 @@ export default function Component() {
       <h3>{episode.count}話</h3>
       <dl>
         <dt>放送日時</dt>
-        <dd>{new Date(episode.publishedAt).toLocaleString()}</dd>
+        <dd>{new Date(episode.publishedAt).toLocaleString("ja")}</dd>
         <dt>タイトル</dt>
         <dd>
           <p>{episode.title}</p>
@@ -136,7 +136,7 @@ export default function Component() {
         {myHistory && (
           <>
             <dt>視聴日時</dt>
-            <dd>{new Date(myHistory.createdAt).toLocaleString()}</dd>
+            <dd>{new Date(myHistory.createdAt).toLocaleString("ja")}</dd>
           </>
         )}
       </dl>

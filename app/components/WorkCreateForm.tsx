@@ -100,7 +100,7 @@ export const MultipleDatePicker: React.FC = () => {
       </div>
       <ul>
         {addedDates.map((d) => {
-          return <li>{d.toLocaleString()}</li>;
+          return <li>{d.toLocaleString("ja")}</li>;
         })}
       </ul>
     </>

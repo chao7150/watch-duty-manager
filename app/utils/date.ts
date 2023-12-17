@@ -46,12 +46,12 @@ export const getPast7DaysLocaleDateString = (now: Date): string[] => {
   return eachDayOfInterval({
     start: subDays(subHours(now, 4), 7),
     end: subHours(now, 4),
-  }).map((d) => d.toLocaleDateString());
+  }).map((d) => d.toLocaleDateString("ja"));
 };
 
 export const getQuarterEachLocaleDateString = (now: Date): string[] => {
   return eachDayOfInterval({
     start: startOfQuarter(subHours(now, 4)),
     end: subHours(now, 4),
-  }).map((d) => d.toLocaleDateString());
+  }).map((d) => d.toLocaleDateString("ja"));
 };

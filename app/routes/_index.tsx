@@ -97,7 +97,7 @@ const getWeekWatchAchievements =
           },
         },
       })
-    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString());
+    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString("ja"));
     return countOccurrence(occurrence);
   };
 
@@ -115,7 +115,7 @@ const getWeekDutyAccumulation =
           },
         },
       })
-    ).map((d) => subHours(d.publishedAt, 4).toLocaleDateString());
+    ).map((d) => subHours(d.publishedAt, 4).toLocaleDateString("ja"));
     return countOccurrence(occurrence);
   };
 
@@ -130,7 +130,7 @@ const getQuarterDuties =
           publishedAt: { gte: cour2startDate(date2cour(now)), lte: now },
         },
       })
-    ).map((e) => subHours(e.publishedAt, 4).toLocaleDateString());
+    ).map((e) => subHours(e.publishedAt, 4).toLocaleDateString("ja"));
     return countOccurrence(occurrence);
   };
 
@@ -151,7 +151,7 @@ const getQuarterWatchAchievements =
           userId,
         },
       })
-    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString());
+    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString("ja"));
     return countOccurrence(occurrence);
   };
 

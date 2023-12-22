@@ -42,7 +42,7 @@ const Information: React.FC<InformationProps> = ({
   const timeStyle = timeStyles[status];
   return (
     <div className="episode">
-      <h3 className="episode-heading">
+      <h3 className="flex items-center gap-1">
         <div className="hover:text-cadet-blue hover:underline">
           <Link to={bindUrlForWorks$WorkId({ workId })}>{title}</Link>
         </div>

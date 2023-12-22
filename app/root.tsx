@@ -19,7 +19,6 @@ import { getUserId } from "./utils/session.server";
 import styles from "./tailwind.css";
 import { cour2symbol, date2cour } from "./domain/cour/util";
 import globalStylesUrl from "~/styles/global.css";
-import sharedStylesUrl from "~/styles/shared.css";
 import { bindUrl as bindUrlForMy } from "./routes/my";
 import { bindUrl as bindUrlForWorks } from "./routes/works._index";
 
@@ -27,7 +26,6 @@ import { bindUrl as bindUrlForWorks } from "./routes/works._index";
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: globalStylesUrl },
-    { rel: "stylesheet", href: sharedStylesUrl },
     { rel: "stylesheet", href: styles },
   ];
 };

@@ -74,7 +74,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
       </div>
 
       <ul
-        className={`flex episode-list mt-4 ${
+        className={`flex mt-4 ${
           sortDesc ? "flex-col" : "flex-col-reverse"
         }`}
       >

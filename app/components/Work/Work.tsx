@@ -18,7 +18,7 @@ export const Component: React.FC<Props> = ({
   subscribed,
 }) => {
   return (
-    <div className="work">
+    <div className="flex flex-row items-center gap-1">
       {loggedIn && (
         <WorkSubscribeForm.Component
           givenClassName="work-work-subscribe-form"

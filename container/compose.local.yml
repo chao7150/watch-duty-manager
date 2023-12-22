@@ -4,9 +4,10 @@ name: watch-duty-manager
 services:
   app:
     container_name: watch-duty-manager-app
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    # build:
+    #   context: ..
+    #   dockerfile: container/Containerfile
+    image: wdm-multi-node-alpine
     env_file: ../.env
     environment:
       DATABASE_URL: mysql://masaki:tsuji@db:3306/watch-duty-manager?schema=public
@@ -17,7 +18,7 @@ services:
       db:
         condition: service_healthy
   db:
-    container_name: watch-duty-manager-db
+    container_name: watch-duty-manager-db-with-app
     image: mysql:8.0.27
     ports:
       - "3307:3306"

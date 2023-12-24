@@ -1,8 +1,4 @@
-node_modules
-
 /.cache
-/build
-/public/build
 /prisma/dbml
 infra
 

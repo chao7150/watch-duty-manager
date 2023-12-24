@@ -26,13 +26,19 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
     
+    - name: Build
+      run: |
+        npm ci
+        npm run build
+        ./scripts/assets-upload.sh
+    
     - name: Build, tag, and push image to Amazon ECR
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         REPOSITORY: watch-duty-manager
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f container/Containerfile .
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f container/Containerfile.prebuilt .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
     - name: deploy

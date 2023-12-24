@@ -1,6 +1,6 @@
 import { Stack, type StackProps, aws_iam, aws_ecr } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Dist } from "./construct/dist";
+
 export class InfraStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -35,11 +35,8 @@ export class InfraStack extends Stack {
       lifecycleRules: [{ maxImageCount: 5 }],
     });
 
-    const dist = new Dist(this, "assets-distribution-construct");
-
     const deployPolicy = new aws_iam.Policy(this, "policy-github-com", {});
     repository.grantPullPush(deployPolicy);
-    dist.bucket.grantReadWrite(deployPolicy);
     role.attachInlinePolicy(deployPolicy);
 
     const user = new aws_iam.User(

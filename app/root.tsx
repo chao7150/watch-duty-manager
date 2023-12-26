@@ -1,5 +1,4 @@
-import type { LinksFunction } from "@remix-run/node";
-import { LoaderFunction } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
 import {
   Form,
@@ -21,6 +20,10 @@ import { cour2symbol, date2cour } from "./domain/cour/util";
 import globalStylesUrl from "~/styles/global.css";
 import { bindUrl as bindUrlForMy } from "./routes/my";
 import { bindUrl as bindUrlForWorks } from "./routes/works._index";
+
+import * as MenuIcon from "./components/Icons/Menu";
+import * as MobileNavigation from "./components/mobileNavigation";
+import { useState } from "react";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
@@ -86,24 +89,28 @@ function Document({
   );
 }
 
-export const loader: LoaderFunction = ({ request }) => {
+export const loader = ({ request }: LoaderFunctionArgs) => {
   const userId = getUserId(request);
   return userId;
 };
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const userId = useLoaderData();
+  const userId = useLoaderData<typeof loader>();
+  const [mobileMenuOpened, setMobileMenuOpened] = useState<boolean>(false);
 
   return (
     <div className="remix-app bg-dark text-text">
       <header className="remix-app__header">
-        <div className="remix-app__header-content w-11/12 mx-auto">
+        <div className="flex items-center justify-between flex-wrap w-11/12 mx-auto">
           <h1>
             <Link to="/" title="Watch Duty Manager">
               Watch Duty Manager
             </Link>
           </h1>
-          <nav aria-label="Main navigation" className="remix-app__header-nav">
+          <nav
+            aria-label="Main navigation"
+            className="remix-app__header-nav max-lg:hidden"
+          >
             <ul>
               <li>
                 <Link to="/">Home</Link>
@@ -153,6 +160,17 @@ function Layout({ children }: { children: React.ReactNode }) {
               )}
             </ul>
           </nav>
+          <button
+            className="lg:hidden"
+            onClick={() => setMobileMenuOpened((o) => !o)}
+          >
+            <MenuIcon.Component />
+          </button>
+          {mobileMenuOpened && (
+            <div className="lg:hidden w-full ">
+              <MobileNavigation.Component userId={userId ?? undefined} />
+            </div>
+          )}
         </div>
       </header>
       <div className="remix-app__main">

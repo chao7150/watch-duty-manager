@@ -15,6 +15,7 @@ module.exports = {
         "text-weak": "#9aa0a6",
         "text-strong": "#bcc0c3",
         "accent-area": "#303134",
+        outline: "#3c4043",
         red: "#f28b82",
         yellow: "#fdd663",
       },

@@ -17,8 +17,8 @@ const ListItem = ({
   target?: string;
 }) => {
   return (
-    <li className="py-1.5 hover:bg-accent-area">
-      <Link {...link} className="block">
+    <li className="hover:bg-accent-area">
+      <Link {...link} className="block py-1.5">
         {text}
       </Link>
     </li>
@@ -51,7 +51,7 @@ export const Component: React.FC<Props> = ({ userId }) => {
           />
           <li className="text-link py-1">
             <Form action="/logout" method="POST">
-              <button className="block hover:bg-accent-area" type="submit">
+              <button className="hover:bg-accent-area w-full" type="submit">
                 Logout
               </button>
             </Form>

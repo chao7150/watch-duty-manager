@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Calendar } from "react-multi-date-picker";
 import TimePicker from "react-multi-date-picker/plugins/time_picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
+import * as TabPanel from "./TabPanel";
 
 export const serverValidator = (
   formData: FormData
@@ -128,7 +129,7 @@ const SequentialDatePicker: React.FC<{
             <div>初回放送日時</div>
           </label>
           <input
-            className="w-2/3"
+            className="w-3/4"
             type="datetime-local"
             value={convertDateToIso(firstDate)}
             onChange={(e) => setFirstDate(new Date(`${e.target.value}+0900`))}
@@ -139,7 +140,7 @@ const SequentialDatePicker: React.FC<{
             <div>話数</div>
           </label>
           <input
-            className="w-2/3"
+            className="w-3/4"
             type="number"
             value={count}
             onChange={(e) => setCount(Number(e.target.value))}
@@ -151,44 +152,34 @@ const SequentialDatePicker: React.FC<{
 };
 
 export const EpisodeDateRegistrationTabPanel = () => {
-  const [tab, setTab] = useState<"sequential" | "multiple">("sequential");
   const [addedDates, setAddedDates] = useState<Date[]>([]);
 
   return (
     <div className="flex flex-col gap-4">
-      <ul className="flex gap-4 border-b border-outline">
-        <li
-          className={`${
-            tab === "sequential" && "text-link border-b-4 border-link"
-          } pb-2`}
-        >
-          <button type="button" onClick={() => setTab("sequential")}>
-            連番登録
-          </button>
-        </li>
-        <li
-          className={`${
-            tab === "multiple" && "text-link border-b-4 border-link"
-          } pb-2`}
-        >
-          <button type="button" onClick={() => setTab("multiple")}>
-            カレンダーから登録
-          </button>
-        </li>
-      </ul>
-      <div>
-        {tab === "sequential" ? (
-          <SequentialDatePicker
-            dates={addedDates}
-            onChangeDates={setAddedDates}
-          />
-        ) : (
-          <MultipleDatePicker
-            dates={addedDates}
-            onChangeDates={setAddedDates}
-          />
-        )}
-      </div>
+      <TabPanel.Component
+        items={[
+          {
+            id: "sequential",
+            tabText: "連番登録",
+            content: (
+              <SequentialDatePicker
+                dates={addedDates}
+                onChangeDates={setAddedDates}
+              />
+            ),
+          },
+          {
+            id: "multiple",
+            tabText: "カレンダーから登録",
+            content: (
+              <MultipleDatePicker
+                dates={addedDates}
+                onChangeDates={setAddedDates}
+              />
+            ),
+          },
+        ]}
+      />
       <div>
         登録しようとしているエピソード
         <ul>

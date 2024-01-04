@@ -35,7 +35,7 @@ export const Component: React.FC<Props> = ({
           <div>尺（分・未入力なら30分）</div>
           <input
             name="durationMin"
-            className="w-2/3"
+            className="w-3/4"
             type="number"
             min={1}
             step={1}

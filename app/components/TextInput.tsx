@@ -24,7 +24,7 @@ export const Component: React.FC<Props> = ({
         {labelText}
         {isRequired && <RequiredAbbreviation />}
       </div>
-      <input className="w-2/3" type="text" {...props} />
+      <input className="w-3/4" type="text" {...props} />
     </label>
   );
 };

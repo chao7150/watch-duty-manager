@@ -25,7 +25,7 @@ import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber } from "~/utils/type";
-import { MultipleDatePicker } from "~/components/WorkCreateForm";
+import { EpisodeDateRegistrationTabPanel } from "~/components/WorkCreateForm";
 import urlFrom from "url-from";
 
 export const bindUrl = urlFrom`/works/${"workId:number"}`;
@@ -320,7 +320,9 @@ export default function Component() {
                           <Link to={`${episode.count}`}>{episode.count}</Link>
                         </td>
                         <td>
-                          {new Date(episode.publishedAt).toLocaleDateString("ja")}
+                          {new Date(episode.publishedAt).toLocaleDateString(
+                            "ja"
+                          )}
                         </td>
                         <td className="ml-2">
                           {new Date(episode.publishedAt) < new Date() && (
@@ -381,7 +383,7 @@ export default function Component() {
                       </label>
                     </li>
                     <li>
-                      <MultipleDatePicker />
+                      <EpisodeDateRegistrationTabPanel />
                     </li>
                     <li>
                       <button

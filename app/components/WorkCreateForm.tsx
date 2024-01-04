@@ -150,7 +150,7 @@ const SequentialDatePicker: React.FC<{
   );
 };
 
-const EpisodeDateRegistrationTabPanel = () => {
+export const EpisodeDateRegistrationTabPanel = () => {
   const [tab, setTab] = useState<"sequential" | "multiple">("sequential");
   const [addedDates, setAddedDates] = useState<Date[]>([]);
 

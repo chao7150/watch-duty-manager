@@ -29,6 +29,8 @@ services:
       MYSQL_PASSWORD: tsuji
     volumes:
       - db-data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/log:/var/log/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
 

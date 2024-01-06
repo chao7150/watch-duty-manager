@@ -1,6 +1,6 @@
 import { Link, Form } from "@remix-run/react";
 import React from "react";
-import { bindUrl as bindUrlForMy } from "../routes/my";
+import { bindUrl as bindUrlForMy } from "../routes/my/route";
 import { bindUrl as bindUrlForWorks } from "../routes/works._index";
 import { cour2symbol, date2cour } from "../domain/cour/util";
 

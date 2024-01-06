@@ -1,4 +1,7 @@
+import { useFetcher } from "@remix-run/react";
 import * as TextInput from "../../components/TextInput";
+import { type loader as MyLoader } from "../../routes/my/route";
+import { useEffect } from "react";
 
 type TextInputOptionalProps = Pick<
   TextInput.Props,
@@ -11,6 +14,7 @@ export type Props = {
   officialSiteUrl?: TextInputOptionalProps;
   twitterId?: TextInputOptionalProps;
   hashtag?: TextInputOptionalProps;
+  personalTags?: number[];
 };
 
 export const Component: React.FC<Props> = ({
@@ -19,7 +23,13 @@ export const Component: React.FC<Props> = ({
   officialSiteUrl,
   twitterId,
   hashtag,
+  personalTags,
 }) => {
+  const personalTagsFetcher = useFetcher<typeof MyLoader>();
+  useEffect(() => {
+    personalTagsFetcher.load("/my");
+  }, []);
+
   return (
     <ul className="flex flex-col gap-2">
       <li>
@@ -57,6 +67,27 @@ export const Component: React.FC<Props> = ({
           {...twitterId}
         />
       </li>
+      {personalTags && (
+        <li>
+          <label>
+            <div>パーソナルタグ</div>
+            <ul>
+              {personalTagsFetcher.data?.tagsOnUser.map((t) => {
+                return (
+                  <li>
+                    <input
+                      type="checkbox"
+                      defaultChecked={personalTags.includes(t.id)}
+                      name={`personal-tag-${String(t.id)}`}
+                    ></input>
+                    {t.text}
+                  </li>
+                );
+              })}
+            </ul>
+          </label>
+        </li>
+      )}
       <li>
         <TextInput.Component
           labelText="ハッシュタグ（#は不要）"

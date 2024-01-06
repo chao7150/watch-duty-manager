@@ -1,4 +1,10 @@
-import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  Outlet,
+  useFetcher,
+  useLoaderData,
+} from "@remix-run/react";
 import { json, LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
 
 import { useCallback, useState } from "react";
@@ -23,6 +29,7 @@ import { db } from "~/utils/db.server";
 import * as WorkEditForm from "~/components/WorkEditForm";
 import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
+import * as Tag from "~/components/Tag";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber } from "~/utils/type";
 import { EpisodeDateRegistrationTabPanel } from "~/components/WorkCreateForm";
@@ -36,7 +43,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const work = await db.work.findUnique({
     where: { id: parseInt(workId, 10) },
     include: {
-      users: { where: { userId } },
+      users: {
+        where: { userId },
+        include: { TagsOnSubscription: { include: { tag: true } } },
+      },
       episodes: {
         orderBy: { count: "asc" },
         ...(userId
@@ -60,8 +70,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       work,
       rating: 0,
       ratings: [],
-      subscribed: work?.users.length === 1,
-      loggedIn: userId !== undefined,
+      subscribed: false,
+      loggedIn: false,
+      workTags: [],
+      userTags: [],
     };
   }
   const ratings = await db.watchedEpisodesOnUser.findMany({
@@ -88,8 +100,15 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     map.set(r.episode.count, r.rating);
   });
   const nonNullRatings = ratings.map((r) => r.rating).filter(isNumber);
+
+  const userTags = await db.tag.findMany({
+    where: {
+      userId,
+    },
+  });
   return {
-    work,
+    // usersを残すと誰が視聴しているかpublicに見えてしまうので消す
+    work: { ...work, users: undefined },
     rating:
       nonNullRatings.length === 0
         ? 0
@@ -100,6 +119,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
+    workTags: work.users[0].TagsOnSubscription.map((t) => t.tag),
+    userTags,
   };
 };
 
@@ -168,8 +189,30 @@ export const action = async ({
       return json({ message: "db error" }, { status: 400 });
     }
   }
+  if (formData.get("_action") === "addPersonalTag") {
+    const userId = await requireUserId(request);
+    const { tagId: _tagId } = extractParams(Object.fromEntries(formData), [
+      "tagId",
+    ]);
+    const tagId = parseInt(_tagId, 10);
+    try {
+      const rel = await db.tagsOnSubscription.create({
+        data: {
+          userId,
+          workId,
+          tagId,
+        },
+      });
+      return json(
+        { message: `${rel.userId} ${rel.tagId} ok` },
+        { status: 200 }
+      );
+    } catch (e) {
+      return json({ message: "db error" }, { status: 500 });
+    }
+  }
   return F.pipe(
-    await WorkEditForm.serverAction(workId, formData),
+    await WorkEditForm.serverAction(request, workId, formData),
     E.match(
       ({ errorMessage, status }) => json({ message: errorMessage }, { status }),
       ({ successMessage, status }) =>
@@ -182,7 +225,7 @@ export default function Component() {
   const [editMode, setEditMode] = useState(false);
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, work, subscribed, rating, ratings } =
+  const { loggedIn, work, subscribed, rating, ratings, workTags, userTags } =
     useLoaderData<typeof loader>();
   const defaultValueMap: WorkEditForm.Props = {
     workId: work.id,
@@ -192,8 +235,12 @@ export default function Component() {
       officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
       twitterId: { defaultValue: work.twitterId ?? "" },
       hashtag: { defaultValue: work.hashtag ?? "" },
+      personalTags: workTags
+        .flatMap((t) => (t !== null ? [t] : []))
+        .map((t) => t.id),
     },
   };
+  const fetcher = useFetcher<typeof action>();
 
   return (
     <div>
@@ -255,6 +302,21 @@ export default function Component() {
                         />
                       </div>
                     )}
+                  </dd>
+                  <dt>パーソナルタグ</dt>
+                  <dd>
+                    <ul className="flex gap-2">
+                      {workTags
+                        .flatMap((t) => (t !== null ? [t] : []))
+                        .map((t) => (
+                          <li>
+                            <Tag.Component
+                              text={t.text}
+                              href={`/my/personal-tags/${t.id}`}
+                            />
+                          </li>
+                        ))}
+                    </ul>
                   </dd>
                   <dt>配信サービス</dt>
                   <div>
@@ -405,4 +467,7 @@ export default function Component() {
       </div>
     </div>
   );
+}
+function userFetcher<T>() {
+  throw new Error("Function not implemented.");
 }

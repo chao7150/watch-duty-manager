@@ -68,6 +68,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         },
       },
       users: {
+        where: { userId },
         include: {
           TagsOnSubscription: { include: { tag: true } },
         },

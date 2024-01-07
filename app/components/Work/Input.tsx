@@ -27,7 +27,7 @@ export const Component: React.FC<Props> = ({
 }) => {
   const personalTagsFetcher = useFetcher<typeof MyLoader>();
   useEffect(() => {
-    personalTagsFetcher.load("/my");
+    personalTagsFetcher.load("/my/tag");
   }, []);
 
   return (

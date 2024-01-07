@@ -15,6 +15,7 @@ COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /usr/src/app/build ./build
 COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/prisma ./prisma
 
 HEALTHCHECK CMD curl -f http://localhost:3000/status || exit 1
 EXPOSE 3000

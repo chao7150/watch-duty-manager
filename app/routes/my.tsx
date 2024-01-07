@@ -1,6 +1,9 @@
 import { Outlet, useLocation } from "@remix-run/react";
 
 import urlFrom from "url-from";
+import { bindUrl as bindUrlForMy } from "~/routes/my";
+
+import { cour2symbol, date2cour } from "~/domain/cour/util";
 
 import * as TabList from "~/components/TabList";
 
@@ -19,7 +22,9 @@ const Component: React.FC = () => {
           {
             id: "dashboard",
             tabText: "ダッシュボード",
-            href: "/my",
+            href: bindUrlForMy({
+              "?query": { cour: cour2symbol(date2cour(new Date())) },
+            }),
           },
           {
             id: "tag",

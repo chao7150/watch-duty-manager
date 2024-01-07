@@ -1,3 +1,5 @@
+import { Link } from "@remix-run/react";
+
 export type Props =
   | {
       type: "button";
@@ -53,7 +55,7 @@ export const Component: React.FC<Props> = ({
                   "text-link border-b-4 border-link"
                 } pb-1`}
               >
-                <a href={item.href}>{item.tabText}</a>
+                <Link to={item.href}>{item.tabText}</Link>
               </li>
             );
           })}

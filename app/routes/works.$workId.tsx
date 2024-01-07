@@ -121,7 +121,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
-    workTags: work.users[0].TagsOnSubscription.map((t) => t.tag),
+    workTags: work.users[0]
+      ? work.users[0].TagsOnSubscription.map((t) => t.tag)
+      : undefined,
     userTags,
   };
 };
@@ -237,9 +239,9 @@ export default function Component() {
       officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
       twitterId: { defaultValue: work.twitterId ?? "" },
       hashtag: { defaultValue: work.hashtag ?? "" },
-      personalTags: workTags
-        .flatMap((t) => (t !== null ? [t] : []))
-        .map((t) => t.id),
+      personalTags:
+        workTags &&
+        workTags.flatMap((t) => (t !== null ? [t] : [])).map((t) => t.id),
     },
   };
   const fetcher = useFetcher<typeof action>();
@@ -308,16 +310,17 @@ export default function Component() {
                   <dt>パーソナルタグ</dt>
                   <dd>
                     <ul className="flex gap-2">
-                      {workTags
-                        .flatMap((t) => (t !== null ? [t] : []))
-                        .map((t) => (
-                          <li>
-                            <Tag.Component
-                              text={t.text}
-                              href={`/my/personal-tags/${t.id}`}
-                            />
-                          </li>
-                        ))}
+                      {workTags &&
+                        workTags
+                          .flatMap((t) => (t !== null ? [t] : []))
+                          .map((t) => (
+                            <li>
+                              <Tag.Component
+                                text={t.text}
+                                href={`/my/personal-tags/${t.id}`}
+                              />
+                            </li>
+                          ))}
                     </ul>
                   </dd>
                   <dt>配信サービス</dt>

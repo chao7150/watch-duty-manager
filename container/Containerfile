@@ -19,4 +19,4 @@ COPY --from=builder /usr/src/app/public ./public
 HEALTHCHECK CMD curl -f http://localhost:3000/status || exit 1
 EXPOSE 3000
 
-CMD npm run start
+CMD npx prisma migrate deploy && npm run start

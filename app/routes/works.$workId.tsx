@@ -23,10 +23,10 @@ import {
 } from "recharts";
 import urlFrom from "url-from";
 
-import * as EpisodeWatchForm from "../components/Episode/WatchForm";
-import * as CloseIcon from "../components/Icons/Close";
-import * as EditIcon from "../components/Icons/Edit";
-import * as TrashIcon from "../components/Icons/Trash";
+import * as EpisodeWatchForm from "~/components/Episode/WatchForm";
+import * as CloseIcon from "~/components/Icons/Close";
+import * as EditIcon from "~/components/Icons/Edit";
+import * as TrashIcon from "~/components/Icons/Trash";
 import * as Tag from "~/components/Tag";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";

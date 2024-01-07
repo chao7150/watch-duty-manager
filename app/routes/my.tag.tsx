@@ -3,10 +3,10 @@ import { useFetcher, useLoaderData } from "@remix-run/react";
 
 import urlFrom from "url-from";
 
-import * as Tag from "../components/Tag";
+import * as Tag from "~/components/Tag";
 
-import { db } from "../utils/db.server";
-import { requireUserId } from "../utils/session.server";
+import { db } from "~/utils/db.server";
+import { requireUserId } from "~/utils/session.server";
 
 export const bindUrl = urlFrom`/my/tag`;
 

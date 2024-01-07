@@ -2,9 +2,9 @@ import { useFetcher } from "@remix-run/react";
 
 import { useEffect } from "react";
 
-import * as TextInput from "../../components/TextInput";
+import { type loader as MyLoader } from "~/routes/my.tag";
 
-import { type loader as MyLoader } from "../../routes/my.tag";
+import * as TextInput from "~/components/TextInput";
 
 type TextInputOptionalProps = Pick<
   TextInput.Props,

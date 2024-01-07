@@ -2,9 +2,9 @@ import { Link } from "@remix-run/react";
 
 import React from "react";
 
-import * as WorkSubscribeForm from "../../components/Work/WorkSubscribeForm";
+import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId";
 
-import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
+import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 
 export type Props = {
   loggedIn: boolean;

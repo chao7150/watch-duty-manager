@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "@remix-run/react";
 
 import urlFrom from "url-from";
 
-import * as TabList from "app/components/TabList";
+import * as TabList from "~/components/TabList";
 
 export const bindUrl = urlFrom`/my`.narrowing<{ "?query": { cour?: string } }>;
 

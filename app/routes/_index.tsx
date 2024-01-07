@@ -21,7 +21,7 @@ import {
 
 import { cour2startDate, date2cour } from "~/domain/cour/util";
 
-import * as EpisodeList from "../components/Episode/List";
+import * as EpisodeList from "~/components/Episode/List";
 
 import {
   getPast7DaysLocaleDateString,

@@ -18,7 +18,6 @@ import {
   Bar,
 } from "recharts";
 
-import { getCourList } from "../domain/cour/db";
 import {
   cour2expression,
   cour2startDate,
@@ -27,13 +26,14 @@ import {
   symbol2cour,
 } from "../domain/cour/util";
 import { Cour } from "~/domain/cour/consts";
+import { getCourList } from "~/domain/cour/db";
 
-import * as CourSelect from "../components/CourSelect";
-import * as Tag from "../components/Tag";
+import * as CourSelect from "~/components/CourSelect";
+import * as Tag from "~/components/Tag";
 
-import { db } from "../utils/db.server";
-import { requireUserId } from "../utils/session.server";
-import { isNumber } from "../utils/type";
+import { db } from "~/utils/db.server";
+import { requireUserId } from "~/utils/session.server";
+import { isNumber } from "~/utils/type";
 
 import { getQuarterMetrics } from "./_index";
 import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";

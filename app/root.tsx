@@ -15,17 +15,17 @@ import {
 
 import { useState } from "react";
 
+import { bindUrl as bindUrlForMy } from "~/routes/my";
+import { bindUrl as bindUrlForWorks } from "~/routes/works._index";
 import globalStylesUrl from "~/styles/global.css";
 
-import { cour2symbol, date2cour } from "./domain/cour/util";
+import { cour2symbol, date2cour } from "~/domain/cour/util";
 
-import * as MenuIcon from "./components/Icons/Menu";
-import * as MobileNavigation from "./components/mobileNavigation";
+import * as MenuIcon from "~/components/Icons/Menu";
+import * as MobileNavigation from "~/components/mobileNavigation";
 
-import { getUserId } from "./utils/session.server";
+import { getUserId } from "~/utils/session.server";
 
-import { bindUrl as bindUrlForMy } from "./routes/my";
-import { bindUrl as bindUrlForWorks } from "./routes/works._index";
 import styles from "./tailwind.css";
 
 // https://remix.run/api/app#links

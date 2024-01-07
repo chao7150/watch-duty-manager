@@ -1,4 +1,4 @@
-import * as ClipboardCopyIcon from "../../components/Icons/ClipboardCopy";
+import * as ClipboardCopyIcon from "~/components/Icons/ClipboardCopy";
 
 export type Props = { hashtag: string };
 

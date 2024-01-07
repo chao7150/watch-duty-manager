@@ -8,8 +8,8 @@ import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as F from "fp-ts/function";
 
-import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
-import * as WorkCreateForm from "../components/WorkCreateForm";
+import * as WorkBulkCreateForm from "~/components/WorkBulkCreateForm";
+import * as WorkCreateForm from "~/components/WorkCreateForm";
 
 import { db } from "~/utils/db.server";
 

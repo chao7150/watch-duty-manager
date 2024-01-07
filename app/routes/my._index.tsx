@@ -1,4 +1,5 @@
-import { Link, type useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
+import React, { useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -11,26 +12,172 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { bindUrl as bindUrlForWorks$WorkId } from "../works.$workId";
-import { bindUrl as bindUrlForWorks$WorkId$Count } from "../works.$workId.$count";
-import type { loader } from "./route";
-import { useState } from "react";
-import * as Tag from "../../components/Tag";
 
-type Props = Pick<
-  ReturnType<typeof useLoaderData<ReturnType<typeof loader>>>,
-  | "works"
-  | "quarterMetrics"
-  | "filledEpisodeRatingDistribution"
-  | "bestEpisodesOnUser"
->;
+import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";
+import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
+import * as Tag from "../components/Tag";
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { requireUserId } from "../utils/session.server";
+import { Cour } from "../domain/cour/consts";
+import {
+  cour2expression,
+  cour2startDate,
+  cour2symbol,
+  next,
+  symbol2cour,
+} from "../domain/cour/util";
+import { Prisma } from "@prisma/client";
+import { addQuarters } from "date-fns";
+import { db } from "../utils/db.server";
+import { getCourList } from "../domain/cour/db";
+import { getQuarterMetrics } from "./_index";
+import { isNumber } from "../utils/type";
+import * as CourSelect from "../components/CourSelect";
 
-export const Component: React.FC<Props> = ({
-  works: _w,
-  quarterMetrics,
-  filledEpisodeRatingDistribution,
-  bestEpisodesOnUser,
-}) => {
+const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
+  if (cour === null) {
+    return {};
+  }
+  const searchDate = cour2startDate(cour);
+  return {
+    episodes: {
+      some: {
+        publishedAt: {
+          // 4時始まりは未検討
+          gte: searchDate,
+          lte: addQuarters(searchDate, 1),
+        },
+      },
+    },
+  };
+};
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await requireUserId(request);
+  const url = new URL(request.url);
+  const courString = url.searchParams.get("cour");
+  let cour: Cour | null;
+  if (courString === null) {
+    cour = null;
+  } else {
+    cour = symbol2cour(courString) ?? null;
+    if (cour === null) {
+      throw new Error("cour is invalid.");
+    }
+  }
+  const watchingWorksPromise = db.work.findMany({
+    where: {
+      users: { some: { userId } },
+      ...generateStartDateQuery(cour),
+    },
+    include: {
+      episodes: {
+        include: {
+          WatchedEpisodesOnUser: { where: { userId } },
+        },
+      },
+      users: {
+        where: { userId },
+        include: {
+          TagsOnSubscription: { include: { tag: true } },
+        },
+      },
+    },
+  });
+  const bestEpisodesOnUserPromise = db.watchedEpisodesOnUser.findMany({
+    where: {
+      userId,
+      episode: {
+        ...(cour === null ? {} : generateStartDateQuery(cour).episodes?.some),
+      },
+    },
+    include: {
+      episode: {
+        include: {
+          work: true,
+        },
+      },
+    },
+    orderBy: { rating: "desc" },
+    take: 30,
+  });
+  const episodeRatingDistributionPromise = db.watchedEpisodesOnUser.groupBy({
+    by: ["rating"],
+    where: {
+      userId,
+      episode: {
+        ...(cour === null ? {} : generateStartDateQuery(cour).episodes?.some),
+      },
+    },
+    _count: { rating: true },
+  });
+
+  const [
+    cours,
+    watchingWorks,
+    bestEpisodesOnUser,
+    quarterMetrics,
+    episodeRatingDistribution,
+  ] = await Promise.all([
+    getCourList(db),
+    watchingWorksPromise,
+    bestEpisodesOnUserPromise,
+    getQuarterMetrics({
+      db,
+      now:
+        cour === null
+          ? new Date()
+          : new Date(cour2startDate(next(cour)).getTime() - 1),
+      userId,
+    })(),
+    episodeRatingDistributionPromise,
+  ]);
+  const filledEpisodeRatingDistribution: Array<{
+    rating: number;
+    count: number;
+  }> = [];
+  Array.from({ length: 11 }).forEach((_, i) => {
+    filledEpisodeRatingDistribution.push({
+      rating: i,
+      count:
+        episodeRatingDistribution.find((e) => e.rating === i)?._count.rating ??
+        0,
+    });
+  });
+  return {
+    selectedCourDate: cour && cour2symbol(cour),
+    courList: cours.map(
+      (cour) =>
+        [cour2expression(cour), `${cour.year}${cour.season}`] as [
+          string,
+          string
+        ]
+    ),
+    works: watchingWorks.map((work) => ({
+      ...work,
+      rating: work.episodes
+        .map((episode) => episode.WatchedEpisodesOnUser[0]?.rating)
+        .filter(isNumber)
+        .reduce((acc, val, _, array) => acc + val / array.length, 0),
+      complete: work.episodes.filter(
+        (episode) => episode.WatchedEpisodesOnUser.length === 1
+      ).length,
+    })),
+    bestEpisodesOnUser,
+    quarterMetrics,
+    filledEpisodeRatingDistribution,
+  };
+};
+
+const Component = () => {
+  const {
+    courList,
+    selectedCourDate,
+    works: _w,
+    bestEpisodesOnUser,
+    quarterMetrics,
+    filledEpisodeRatingDistribution,
+  } = useLoaderData<typeof loader>();
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
   const works = _w.map((w) => {
@@ -47,10 +194,25 @@ export const Component: React.FC<Props> = ({
   return (
     <main className="grid grid-cols-2 gap-4">
       <section className="flex flex-col gap-2">
-        <h3>
-          作品(
-          {works.length})
-        </h3>
+        <div className="flex gap-2">
+          <h3>
+            作品(
+            {works.length})
+          </h3>
+          <CourSelect.Component
+            courList={[...courList].reverse()}
+            defaultSelectedValue={selectedCourDate ?? undefined}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "all") {
+                location.href = "/my";
+                return;
+              }
+              location.href = `/my?cour=${value}`;
+            }}
+          />
+        </div>
+
         <section className="flex gap-4">
           <select
             className="bg-accent-area"
@@ -183,3 +345,5 @@ export const Component: React.FC<Props> = ({
     </main>
   );
 };
+
+export default Component;

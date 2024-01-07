@@ -1,3 +1,4 @@
+import { json, LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
 import {
   Form,
   Link,
@@ -5,9 +6,9 @@ import {
   useFetcher,
   useLoaderData,
 } from "@remix-run/react";
-import { json, LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
 
 import { useCallback, useState } from "react";
+
 import * as E from "fp-ts/Either";
 import * as F from "fp-ts/function";
 import {
@@ -20,20 +21,21 @@ import {
   Legend,
   Line,
 } from "recharts";
-import * as EditIcon from "../components/Icons/Edit";
-import * as CloseIcon from "../components/Icons/Close";
-import * as TrashIcon from "../components/Icons/Trash";
-import * as EpisodeWatchForm from "../components/Episode/WatchForm";
-import { db } from "~/utils/db.server";
+import urlFrom from "url-from";
 
-import * as WorkEditForm from "~/components/WorkEditForm";
-import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
-import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
+import * as EpisodeWatchForm from "../components/Episode/WatchForm";
+import * as CloseIcon from "../components/Icons/Close";
+import * as EditIcon from "../components/Icons/Edit";
+import * as TrashIcon from "../components/Icons/Trash";
 import * as Tag from "~/components/Tag";
+import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
+import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
+import { EpisodeDateRegistrationTabPanel } from "~/components/WorkCreateForm";
+import * as WorkEditForm from "~/components/WorkEditForm";
+
+import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber } from "~/utils/type";
-import { EpisodeDateRegistrationTabPanel } from "~/components/WorkCreateForm";
-import urlFrom from "url-from";
 
 export const bindUrl = urlFrom`/works/${"workId:number"}`;
 

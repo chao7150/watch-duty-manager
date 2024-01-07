@@ -1,5 +1,5 @@
-import { applicationDefault } from "firebase-admin/app";
 import * as admin from "firebase-admin";
+import { applicationDefault } from "firebase-admin/app";
 
 export function getAdmin(): admin.app.App {
   if (admin.apps.length > 0) {

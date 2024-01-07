@@ -1,12 +1,16 @@
+import { json } from "@remix-run/node";
+import { useActionData } from "@remix-run/react";
+import { ActionFunctionArgs, redirect } from "@remix-run/server-runtime";
+
+import { useState } from "react";
+
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as F from "fp-ts/function";
-import { json } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
-import { useState } from "react";
-import { ActionFunctionArgs, redirect } from "@remix-run/server-runtime";
-import * as WorkCreateForm from "../components/WorkCreateForm";
+
 import * as WorkBulkCreateForm from "../components/WorkBulkCreateForm";
+import * as WorkCreateForm from "../components/WorkCreateForm";
+
 import { db } from "~/utils/db.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -64,7 +68,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                         count: index + 1,
                         publishedAt: new Date(
                           combinedWork.publishedAt.getTime() +
-                          1000 * 60 * 60 * 24 * 7 * index
+                            1000 * 60 * 60 * 24 * 7 * index
                         ),
                       };
                     }

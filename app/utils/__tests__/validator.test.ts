@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+
 import { isNonEmptyString } from "../validator";
 
 test("isNonEmptyString", () => {

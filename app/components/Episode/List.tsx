@@ -1,10 +1,11 @@
 import { useState } from "react";
-import * as Episode from "./Episode";
-import * as CloseIcon from "../Icons/Close";
+
 import * as ArrowDownIcon from "../Icons/ArrowDown";
 import * as ArrowUpIcon from "../Icons/ArrowUp";
-import * as Square2StackIcon from "../Icons/Square2Stack";
 import * as ClockIcon from "../Icons/Clock";
+import * as CloseIcon from "../Icons/Close";
+import * as Square2StackIcon from "../Icons/Square2Stack";
+import * as Episode from "./Episode";
 
 export type Props = {
   episodes: Omit<Episode.Props, "onClickWatchUnready">[];
@@ -73,11 +74,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
         </ul>
       </div>
 
-      <ul
-        className={`flex mt-4 ${
-          sortDesc ? "flex-col" : "flex-col-reverse"
-        }`}
-      >
+      <ul className={`flex mt-4 ${sortDesc ? "flex-col" : "flex-col-reverse"}`}>
         {episodes.map((e) => {
           const hidden =
             (filterWorkId !== undefined && e.workId !== filterWorkId) ||

@@ -1,8 +1,10 @@
-import { useLoaderData } from "@remix-run/react";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { db } from "~/utils/db.server";
-import { getUserId } from "~/utils/session.server";
-import * as WorkUI from "~/components/Work/Work";
+import { useLoaderData } from "@remix-run/react";
+
+import urlFrom from "url-from";
+
+import { Cour } from "~/domain/cour/consts";
+import { getCourList } from "~/domain/cour/db";
 import {
   cour2expression,
   cour2startDate,
@@ -10,10 +12,12 @@ import {
   next,
   symbol2cour,
 } from "~/domain/cour/util";
-import { getCourList } from "~/domain/cour/db";
-import { Cour } from "~/domain/cour/consts";
+
 import * as CourSelect from "~/components/CourSelect";
-import urlFrom from "url-from";
+import * as WorkUI from "~/components/Work/Work";
+
+import { db } from "~/utils/db.server";
+import { getUserId } from "~/utils/session.server";
 
 export const bindUrl = urlFrom`/works`.narrowing<{
   "?query": { cour?: string };

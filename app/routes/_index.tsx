@@ -1,7 +1,13 @@
 import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
-import "firebase/compat/auth";
+
+import { useInterval } from "react-use";
+
 import { PrismaClient } from "@prisma/client";
+import { addDays, addHours, subDays, subHours } from "date-fns";
+import "firebase/compat/auth";
+import * as A from "fp-ts/Apply";
+import * as T from "fp-ts/Task";
 import {
   CartesianGrid,
   Legend,
@@ -12,21 +18,19 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect } from "react";
-import { addDays, addHours, subDays, subHours } from "date-fns";
-import * as A from "fp-ts/Apply";
-import * as T from "fp-ts/Task";
+
+import { cour2startDate, date2cour } from "~/domain/cour/util";
+
 import * as EpisodeList from "../components/Episode/List";
-import { db } from "~/utils/db.server";
-import { getUserId } from "~/utils/session.server";
+
 import {
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,
   startOf4OriginDay,
 } from "~/utils/date";
-import { cour2startDate, date2cour } from "~/domain/cour/util";
+import { db } from "~/utils/db.server";
+import { getUserId } from "~/utils/session.server";
 import { parseSearchParamAsNumber } from "~/utils/validator";
-import { useInterval } from "react-use";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す

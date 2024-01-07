@@ -1,20 +1,24 @@
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import { useEffect } from "react";
 import {
   ActionFunctionArgs,
   LinksFunction,
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
+
+import { useEffect } from "react";
+
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+
+import StyledFirebaseAuth from "~/components/StylesFirebaseAuth";
+
+import { getAdmin } from "~/utils/firebase.server";
 import {
   commitSession,
   getSession,
   getUserId,
   ONE_WEEK_SEC,
 } from "~/utils/session.server";
-import { getAdmin } from "~/utils/firebase.server";
-import StyledFirebaseAuth from "~/components/StylesFirebaseAuth";
 
 export const links: LinksFunction = () => {
   return [

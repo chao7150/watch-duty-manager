@@ -1,4 +1,5 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
+
 import { db } from "~/utils/db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

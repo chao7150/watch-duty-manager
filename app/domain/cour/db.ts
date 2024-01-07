@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+
 import { Cour } from "./consts";
 import { eachCourOfInterval, date2cour } from "./util";
 

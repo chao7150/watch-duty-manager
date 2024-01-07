@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { eachCourOfInterval, date2cour, next, symbol2cour } from "../util";
 
 describe("date2cour", () => {

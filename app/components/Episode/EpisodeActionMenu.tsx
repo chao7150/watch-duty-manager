@@ -1,9 +1,10 @@
+import { useRef } from "react";
+
+import * as ClipboardCopyIcon from "../Icons/ClipboardCopy";
 import * as ExternalLinkIcon from "../Icons/ExternalLink";
 import * as FilterIcon from "../Icons/Filter";
-import * as WatchForm from "./WatchForm";
 import * as MenuIcon from "../Icons/Menu";
-import * as ClipboardCopyIcon from "../Icons/ClipboardCopy";
-import { useRef } from "react";
+import * as WatchForm from "./WatchForm";
 
 export type Props = {
   workId: number;

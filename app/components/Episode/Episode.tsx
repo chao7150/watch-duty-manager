@@ -1,12 +1,15 @@
 import { Link } from "@remix-run/react";
+
 import { useMemo } from "react";
 
-import * as ExclamationCircleIcon from "../../components/Icons/ExclamationCircle";
-import * as EpisodeActoinMenu from "./EpisodeActionMenu";
-import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
-import { bindUrl as bindUrlForWorks$WorkId$Count } from "../../routes/works.$workId.$count";
 import { Status } from "~/domain/episode/consts";
 import { getStatus } from "~/domain/episode/util";
+
+import * as ExclamationCircleIcon from "../../components/Icons/ExclamationCircle";
+
+import { bindUrl as bindUrlForWorks$WorkId } from "../../routes/works.$workId";
+import { bindUrl as bindUrlForWorks$WorkId$Count } from "../../routes/works.$workId.$count";
+import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 
 type InformationProps = {
   workId: number;

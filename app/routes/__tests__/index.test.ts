@@ -1,4 +1,5 @@
 import { describe, expect, it, test } from "vitest";
+
 import { countOccurrence, getNormalizedDate, setOldestOfWork } from "../_index";
 
 const possibleOldest = new Date("2022-06-01T22:00:00+0900"); // 入力の最小値

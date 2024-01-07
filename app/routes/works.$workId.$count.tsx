@@ -1,9 +1,11 @@
-import { useLoaderData } from "@remix-run/react";
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+
+import urlFrom from "url-from";
+
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, nonEmptyStringOrUndefined } from "~/utils/type";
-import urlFrom from "url-from";
 
 export const bindUrl = urlFrom`/works/${"workId:number"}/${"count:number"}`;
 

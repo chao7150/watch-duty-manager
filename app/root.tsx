@@ -1,5 +1,4 @@
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
-
 import {
   Form,
   isRouteErrorResponse,
@@ -14,16 +13,20 @@ import {
   useRouteError,
 } from "@remix-run/react";
 
-import { getUserId } from "./utils/session.server";
-import styles from "./tailwind.css";
-import { cour2symbol, date2cour } from "./domain/cour/util";
+import { useState } from "react";
+
 import globalStylesUrl from "~/styles/global.css";
-import { bindUrl as bindUrlForMy } from "./routes/my";
-import { bindUrl as bindUrlForWorks } from "./routes/works._index";
+
+import { cour2symbol, date2cour } from "./domain/cour/util";
 
 import * as MenuIcon from "./components/Icons/Menu";
 import * as MobileNavigation from "./components/mobileNavigation";
-import { useState } from "react";
+
+import { getUserId } from "./utils/session.server";
+
+import { bindUrl as bindUrlForMy } from "./routes/my";
+import { bindUrl as bindUrlForWorks } from "./routes/works._index";
+import styles from "./tailwind.css";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {

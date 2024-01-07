@@ -1,5 +1,10 @@
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import React, { useState } from "react";
+
+import { useState } from "react";
+
+import { Prisma } from "@prisma/client";
+import { addQuarters } from "date-fns";
 import {
   ResponsiveContainer,
   LineChart,
@@ -13,12 +18,7 @@ import {
   Bar,
 } from "recharts";
 
-import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";
-import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
-import * as Tag from "../components/Tag";
-import { LoaderFunctionArgs } from "@remix-run/node";
-import { requireUserId } from "../utils/session.server";
-import { Cour } from "../domain/cour/consts";
+import { getCourList } from "../domain/cour/db";
 import {
   cour2expression,
   cour2startDate,
@@ -26,13 +26,18 @@ import {
   next,
   symbol2cour,
 } from "../domain/cour/util";
-import { Prisma } from "@prisma/client";
-import { addQuarters } from "date-fns";
-import { db } from "../utils/db.server";
-import { getCourList } from "../domain/cour/db";
-import { getQuarterMetrics } from "./_index";
-import { isNumber } from "../utils/type";
+import { Cour } from "~/domain/cour/consts";
+
 import * as CourSelect from "../components/CourSelect";
+import * as Tag from "../components/Tag";
+
+import { db } from "../utils/db.server";
+import { requireUserId } from "../utils/session.server";
+import { isNumber } from "../utils/type";
+
+import { getQuarterMetrics } from "./_index";
+import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";
+import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
 
 const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   if (cour === null) {

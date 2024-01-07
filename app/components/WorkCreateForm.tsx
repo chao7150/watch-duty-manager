@@ -1,17 +1,19 @@
-import * as E from "fp-ts/Either";
-import * as F from "fp-ts/function";
 import { json } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 
-import * as WorkInput from "./Work/Input";
-import { nonEmptyStringOrUndefined } from "~/utils/type";
-
-import { isNonEmptyString } from "~/utils/validator";
 import { useEffect, useState } from "react";
 import { Calendar } from "react-multi-date-picker";
-import TimePicker from "react-multi-date-picker/plugins/time_picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
+import TimePicker from "react-multi-date-picker/plugins/time_picker";
+
+import * as E from "fp-ts/Either";
+import * as F from "fp-ts/function";
+
+import { nonEmptyStringOrUndefined } from "~/utils/type";
+import { isNonEmptyString } from "~/utils/validator";
+
 import * as TabPanel from "./TabPanel";
+import * as WorkInput from "./Work/Input";
 
 export const serverValidator = (
   formData: FormData

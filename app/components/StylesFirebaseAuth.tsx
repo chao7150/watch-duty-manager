@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "firebaseui";
+import type { auth } from "firebaseui";
 
 interface Props {
   // The Firebase UI Web UI Config object.
@@ -61,6 +61,7 @@ const StyledFirebaseAuth = ({
       unregisterAuthObserver();
       firebaseUiWidget.reset();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseui, uiConfig]);
 
   return <div className={className} ref={elementRef} />;

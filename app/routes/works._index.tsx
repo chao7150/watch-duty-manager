@@ -1,9 +1,9 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 import urlFrom from "url-from";
 
-import { Cour } from "~/domain/cour/consts";
+import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
 import {
   cour2expression,

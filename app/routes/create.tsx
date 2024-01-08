@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
-import { ActionFunctionArgs, redirect } from "@remix-run/server-runtime";
+import type { ActionFunctionArgs } from "@remix-run/server-runtime";
+import { redirect } from "@remix-run/server-runtime";
 
 import { useState } from "react";
 

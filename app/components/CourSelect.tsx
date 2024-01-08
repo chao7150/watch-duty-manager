@@ -20,7 +20,11 @@ export const Component: React.FC<Props> = ({
       <option value="all">全期間</option>
       {courList.map(([label, date]) => {
         return (
-          <option value={date} selected={date === defaultSelectedValue}>
+          <option
+            key={label}
+            value={date}
+            selected={date === defaultSelectedValue}
+          >
             {label}
           </option>
         );

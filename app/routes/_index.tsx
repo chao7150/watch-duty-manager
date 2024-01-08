@@ -1,9 +1,9 @@
-import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 
 import { useInterval } from "react-use";
 
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { addDays, addHours, subDays, subHours } from "date-fns";
 import "firebase/compat/auth";
 import * as A from "fp-ts/Apply";

@@ -1,9 +1,9 @@
-import {
+import type {
   ActionFunctionArgs,
   LinksFunction,
   LoaderFunctionArgs,
-  redirect,
 } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 
 import { useEffect } from "react";
 

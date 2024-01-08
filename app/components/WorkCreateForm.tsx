@@ -117,7 +117,7 @@ const SequentialDatePicker: React.FC<{
         return new Date(firstDate.getTime() + 1000 * 60 * 60 * 24 * 7 * index);
       })
     );
-  }, [firstDate, count]);
+  }, [onChangeDates, firstDate, count]);
   return (
     <>
       <input
@@ -186,7 +186,10 @@ export const EpisodeDateRegistrationTabPanel = () => {
         登録しようとしているエピソード
         <ul>
           {addedDates.map((d) => (
-            <li className="list-inside list-[decimal-leading-zero]">
+            <li
+              key={d.toUTCString()}
+              className="list-inside list-[decimal-leading-zero]"
+            >
               {d.toLocaleString("ja", {
                 year: "numeric",
                 month: "2-digit",

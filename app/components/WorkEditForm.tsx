@@ -1,7 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 
 import * as E from "fp-ts/Either";
-import { action } from "~/routes/works.$workId";
+import type { action } from "~/routes/works.$workId";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";

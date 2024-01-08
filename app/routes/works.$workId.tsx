@@ -1,11 +1,6 @@
-import { json, LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
-import {
-  Form,
-  Link,
-  Outlet,
-  useFetcher,
-  useLoaderData,
-} from "@remix-run/react";
+import type { LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
 
 import { useCallback, useState } from "react";
 
@@ -307,7 +302,7 @@ export default function Component() {
                         workTags
                           .flatMap((t) => (t !== null ? [t] : []))
                           .map((t) => (
-                            <li>
+                            <li key={t.id}>
                               <Tag.Component
                                 text={t.text}
                                 href={`/my/personal-tags/${t.id}`}

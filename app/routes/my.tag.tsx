@@ -1,4 +1,5 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 
 import urlFrom from "url-from";
@@ -70,7 +71,7 @@ const Component: React.FC = () => {
 
         <ul className="flex gap-2">
           {tagsOnUser.map((t) => (
-            <li>
+            <li key={t.id}>
               <Tag.Component text={t.text} />
             </li>
           ))}

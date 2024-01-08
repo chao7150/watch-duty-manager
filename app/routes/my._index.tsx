@@ -1,9 +1,9 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
 import { useState } from "react";
 
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { addQuarters } from "date-fns";
 import {
   ResponsiveContainer,
@@ -25,7 +25,7 @@ import {
   next,
   symbol2cour,
 } from "../domain/cour/util";
-import { Cour } from "~/domain/cour/consts";
+import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
 
 import * as CourSelect from "~/components/CourSelect";
@@ -269,7 +269,7 @@ const Component = () => {
                   <ul className="flex gap-2">
                     {work.users[0].TagsOnSubscription.map((tos) => {
                       return (
-                        <li>
+                        <li key={tos.tagId}>
                           <Tag.Component
                             text={tos.tag.text}
                             href={tos.tag.id.toString()}
@@ -323,7 +323,11 @@ const Component = () => {
         <ul className="flex flex-col gap-1">
           {bestEpisodesOnUser.map((e) => {
             return (
-              <li className="flex gap-4" title={e.comment ?? ""}>
+              <li
+                key={`${e.workId}-${e.episode.count}`}
+                className="flex gap-4"
+                title={e.comment ?? ""}
+              >
                 <div className="w-4">{e.rating}</div>
                 <div className="flex gap-2">
                   <Link

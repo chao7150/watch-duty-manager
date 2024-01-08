@@ -31,7 +31,7 @@ export const Component: React.FC<Props> = ({
   const personalTagsFetcher = useFetcher<typeof MyLoader>();
   useEffect(() => {
     personalTagsFetcher.load("/my/tag");
-  }, []);
+  }, [personalTagsFetcher]);
 
   return (
     <ul className="flex flex-col gap-2">
@@ -77,7 +77,7 @@ export const Component: React.FC<Props> = ({
             <ul>
               {personalTagsFetcher.data?.tagsOnUser.map((t) => {
                 return (
-                  <li>
+                  <li key={t.id}>
                     <input
                       type="checkbox"
                       defaultChecked={personalTags.includes(t.id)}

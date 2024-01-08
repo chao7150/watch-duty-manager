@@ -36,6 +36,7 @@ export const Component: React.FC<Props> = ({
         ? items.map((item) => {
             return (
               <li
+                key={item.id}
                 className={`${
                   selectedTabId === item.id &&
                   "text-link border-b-4 border-link"
@@ -50,6 +51,7 @@ export const Component: React.FC<Props> = ({
         : items.map((item) => {
             return (
               <li
+                key={item.id}
                 className={`${
                   selectedTabId === item.id &&
                   "text-link border-b-4 border-link"

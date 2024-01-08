@@ -78,7 +78,7 @@ const Information: React.FC<InformationProps> = ({
           <ul className="flex gap-1 items-center">
             {personalTags.map((t) => {
               return (
-                <li key={t.href} className="flex">
+                <li key={t.id} className="flex">
                   <Tag.Component {...t} />
                 </li>
               );

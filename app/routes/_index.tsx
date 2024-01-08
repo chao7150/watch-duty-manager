@@ -371,7 +371,7 @@ export default function Index() {
               watched: false,
               officialSiteUrl: ticket.work.officialSiteUrl ?? "",
               personalTags: ticket.work.users[0].TagsOnSubscription.map(
-                (t) => ({ text: t.tag.text })
+                (t) => ({ text: t.tag.text, id: t.tag.id })
               ),
             };
           })}
@@ -413,7 +413,7 @@ export default function Index() {
             officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
             published: true,
             personalTags: a.episode.work.users[0].TagsOnSubscription.map(
-              (t) => ({ text: t.tag.text })
+              (t) => ({ text: t.tag.text, id: t.tag.id })
             ),
           }))}
         />

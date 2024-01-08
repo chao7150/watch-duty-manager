@@ -1,6 +1,7 @@
 import * as TagIcon from "../Icons/Tag";
 
 export type Props = {
+  id: number;
   text: string;
   href?: string;
 };

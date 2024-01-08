@@ -116,6 +116,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     },
     _count: { rating: true },
   });
+  const tagsOnUserPromise = await db.tag.findMany({
+    where: {
+      userId,
+    },
+  });
 
   const [
     cours,
@@ -123,6 +128,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     bestEpisodesOnUser,
     quarterMetrics,
     episodeRatingDistribution,
+    tagsOnUser,
   ] = await Promise.all([
     getCourList(db),
     watchingWorksPromise,
@@ -136,6 +142,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       userId,
     })(),
     episodeRatingDistributionPromise,
+    tagsOnUserPromise,
   ]);
   const filledEpisodeRatingDistribution: Array<{
     rating: number;
@@ -171,6 +178,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     bestEpisodesOnUser,
     quarterMetrics,
     filledEpisodeRatingDistribution,
+    tagsOnUser,
   };
 };
 
@@ -182,9 +190,11 @@ const Component = () => {
     bestEpisodesOnUser,
     quarterMetrics,
     filledEpisodeRatingDistribution,
+    tagsOnUser,
   } = useLoaderData<typeof loader>();
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
+  const [filterTag, setFiterTag] = useState<number | "all" | "none">("all");
   const works = _w.map((w) => {
     const watchedEpisodesDenominator = completeByPublished
       ? w.episodes.filter((e) => new Date(e.publishedAt) < new Date()).length
@@ -216,6 +226,29 @@ const Component = () => {
               location.href = `/my?cour=${value}`;
             }}
           />
+          <select
+            className="bg-accent-area"
+            onChange={(e) =>
+              setFiterTag(
+                e.target.value === "all"
+                  ? "all"
+                  : e.target.value === "none"
+                  ? "none"
+                  : Number(e.target.value)
+              )
+            }
+            value={filterTag}
+          >
+            <option value="all">全てのタグ</option>
+            <option value="none">タグなし</option>
+            {tagsOnUser.map((t) => {
+              return (
+                <option key={t.id} value={t.id}>
+                  {t.text}
+                </option>
+              );
+            })}
+          </select>
         </div>
 
         <section className="flex gap-4">
@@ -246,8 +279,21 @@ const Component = () => {
               return b.sortKey - a.sortKey;
             })
             .map((work) => {
+              const hidden =
+                filterTag === "all"
+                  ? false
+                  : filterTag === "none"
+                  ? work.users[0].TagsOnSubscription.length !== 0
+                  : !work.users[0].TagsOnSubscription.map(
+                      (t) => t.tagId
+                    ).includes(filterTag ?? -1);
               return (
-                <li className="flex gap-4 items-center" key={work.id}>
+                <li
+                  className={`flex gap-4 items-center ${
+                    hidden ? "hidden" : ""
+                  }`}
+                  key={work.id}
+                >
                   <meter
                     className="shrink-0"
                     min={0}
@@ -271,6 +317,7 @@ const Component = () => {
                       return (
                         <li key={tos.tagId}>
                           <Tag.Component
+                            id={tos.tag.id}
                             text={tos.tag.text}
                             href={tos.tag.id.toString()}
                           />

@@ -304,6 +304,7 @@ export default function Component() {
                           .map((t) => (
                             <li key={t.id}>
                               <Tag.Component
+                                id={t.id}
                                 text={t.text}
                                 href={`/my/personal-tags/${t.id}`}
                               />

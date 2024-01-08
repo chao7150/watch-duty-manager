@@ -13,13 +13,13 @@ export const bindUrl = urlFrom`/my/tag`;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
-  const tagsOnUserPromise = await db.tag.findMany({
+  const tagsOnUser = await db.tag.findMany({
     where: {
       userId,
     },
   });
   return {
-    tagsOnUser: tagsOnUserPromise,
+    tagsOnUser: tagsOnUser,
   };
 };
 
@@ -72,7 +72,7 @@ const Component: React.FC = () => {
         <ul className="flex gap-2">
           {tagsOnUser.map((t) => (
             <li key={t.id}>
-              <Tag.Component text={t.text} />
+              <Tag.Component text={t.text} id={t.id} />
             </li>
           ))}
         </ul>

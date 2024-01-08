@@ -36,7 +36,7 @@ const UnsubscribeButton = () => {
       {hovered ? "切る？" : "見てる"}
     </button>
   );
-  const [hoverable, hovered] = useHover(element);
+  const [hoverable] = useHover(element);
   return hoverable;
 };
 
@@ -51,6 +51,6 @@ const SubscribeButton = () => {
       {hovered ? "見る？" : "見てない"}
     </button>
   );
-  const [hoverable, hovered] = useHover(element);
+  const [hoverable] = useHover(element);
   return hoverable;
 };

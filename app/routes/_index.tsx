@@ -286,7 +286,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 // https://remix.run/api/conventions#meta
-export const meta: MetaFunction = ({}) => {
+export const meta: MetaFunction = () => {
   return [
     { title: "Watch duty manager" },
     { description: "Just watch anime." },

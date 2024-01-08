@@ -103,11 +103,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   });
   const nonNullRatings = ratings.map((r) => r.rating).filter(isNumber);
 
-  const userTags = await db.tag.findMany({
-    where: {
-      userId,
-    },
-  });
   return {
     // usersを残すと誰が視聴しているかpublicに見えてしまうので消す
     work: { ...work, users: undefined },
@@ -124,7 +119,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     workTags: work.users[0]
       ? work.users[0].TagsOnSubscription.map((t) => t.tag)
       : undefined,
-    userTags,
   };
 };
 
@@ -229,7 +223,7 @@ export default function Component() {
   const [editMode, setEditMode] = useState(false);
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, work, subscribed, rating, ratings, workTags, userTags } =
+  const { loggedIn, work, subscribed, rating, ratings, workTags } =
     useLoaderData<typeof loader>();
   const defaultValueMap: WorkEditForm.Props = {
     workId: work.id,
@@ -244,7 +238,6 @@ export default function Component() {
         workTags.flatMap((t) => (t !== null ? [t] : [])).map((t) => t.id),
     },
   };
-  const fetcher = useFetcher<typeof action>();
 
   return (
     <div>
@@ -397,9 +390,9 @@ export default function Component() {
                               workId={episode.workId}
                               count={episode.count}
                               watched={
-                                // @ts-expect-error
+                                // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
                                 episode.WatchedEpisodesOnUser
-                                  ? // @ts-expect-error
+                                  ? // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
                                     episode.WatchedEpisodesOnUser.length >= 1
                                   : false
                               }
@@ -472,7 +465,4 @@ export default function Component() {
       </div>
     </div>
   );
-}
-function userFetcher<T>() {
-  throw new Error("Function not implemented.");
 }

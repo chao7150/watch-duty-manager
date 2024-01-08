@@ -31,6 +31,7 @@ const StyledFirebaseAuth = ({
   useEffect(() => {
     // Firebase UI only works on the Client. So we're loading the package only after
     // the component has mounted, so that this works when doing server-side rendering.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     setFirebaseui(require("firebaseui"));
   }, []);
 
@@ -53,14 +54,13 @@ const StyledFirebaseAuth = ({
     if (uiCallback) uiCallback(firebaseUiWidget);
 
     // Render the firebaseUi Widget.
-    // @ts-ignore
-    firebaseUiWidget.start(elementRef.current, uiConfig);
+    // currentはここでは必ずElement型だが型解決のためにas any
+    firebaseUiWidget.start(elementRef.current as any, uiConfig);
 
     return () => {
       unregisterAuthObserver();
       firebaseUiWidget.reset();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firebaseui, uiConfig]);
 
   return <div className={className} ref={elementRef} />;

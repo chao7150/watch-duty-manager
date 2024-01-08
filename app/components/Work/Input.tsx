@@ -31,7 +31,7 @@ export const Component: React.FC<Props> = ({
   const personalTagsFetcher = useFetcher<typeof MyLoader>();
   useEffect(() => {
     personalTagsFetcher.load("/my/tag");
-  }, [personalTagsFetcher]);
+  },[]);
 
   return (
     <ul className="flex flex-col gap-2">

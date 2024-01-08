@@ -9,6 +9,7 @@ import type { Status } from "~/domain/episode/consts";
 import { getStatus } from "~/domain/episode/util";
 
 import * as ExclamationCircleIcon from "~/components/Icons/ExclamationCircle";
+import * as Tag from "~/components/Tag";
 
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 
@@ -24,6 +25,7 @@ type InformationProps = {
   watchReady?: boolean;
   status: Status;
   onClickWatchUnready: (workId: number) => void;
+  personalTags: Tag.Props[];
 };
 
 const timeStyles: { [K in Status]: string } = {
@@ -42,6 +44,7 @@ const Information: React.FC<InformationProps> = ({
   status,
   watchReady,
   onClickWatchUnready,
+  personalTags,
 }) => {
   const timeStyle = timeStyles[status];
   return (
@@ -71,6 +74,17 @@ const Information: React.FC<InformationProps> = ({
         {durationMin !== 30 && (
           <span className="bg-accent-area px-0.5">{durationMin}分</span>
         )}
+        {personalTags.length > 0 && (
+          <ul className="flex gap-1 items-center">
+            {personalTags.map((t) => {
+              return (
+                <li key={t.href} className="flex">
+                  <Tag.Component {...t} />
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -98,6 +112,7 @@ const _Component: React.FC<Props> = ({
   watchReady,
   watched,
   onClickWatchUnready,
+  personalTags,
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
@@ -113,6 +128,7 @@ const _Component: React.FC<Props> = ({
         watchReady={watchReady}
         status={status}
         onClickWatchUnready={onClickWatchUnready}
+        personalTags={personalTags}
       />
       <EpisodeActoinMenu.Component
         {...{

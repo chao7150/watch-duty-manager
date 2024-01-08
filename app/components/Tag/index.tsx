@@ -9,9 +9,9 @@ export const Component: React.FC<Props> = ({ text, href = "#" }) => {
   return (
     <a
       href={href}
-      className="border border-tw-border rounded inline-flex p-2 text-text gap-1"
+      className="h-6 border border-tw-border rounded inline-flex p-1 text-xs text-text gap-0.5"
     >
-      <TagIcon.Component />
+      <TagIcon.SmallComponent />
       <span>{text}</span>
     </a>
   );

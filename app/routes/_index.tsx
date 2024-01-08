@@ -73,11 +73,13 @@ const getTickets =
         },
         include: {
           work: {
-            select: {
-              title: true,
-              hashtag: true,
-              durationMin: true,
-              officialSiteUrl: true,
+            include: {
+              users: {
+                where: { userId },
+                include: {
+                  TagsOnSubscription: { include: { tag: true } },
+                },
+              },
             },
           },
         },
@@ -171,7 +173,14 @@ const getRecentWatchAchievements =
         episode: {
           include: {
             work: {
-              select: { title: true, durationMin: true, officialSiteUrl: true },
+              include: {
+                users: {
+                  where: { userId },
+                  include: {
+                    TagsOnSubscription: { include: { tag: true } },
+                  },
+                },
+              },
             },
           },
         },
@@ -361,6 +370,9 @@ export default function Index() {
               watchReady: ticket.watchReady,
               watched: false,
               officialSiteUrl: ticket.work.officialSiteUrl ?? "",
+              personalTags: ticket.work.users[0].TagsOnSubscription.map(
+                (t) => ({ text: t.tag.text })
+              ),
             };
           })}
         />
@@ -400,6 +412,9 @@ export default function Index() {
             watched: true,
             officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
             published: true,
+            personalTags: a.episode.work.users[0].TagsOnSubscription.map(
+              (t) => ({ text: t.tag.text })
+            ),
           }))}
         />
         <Link

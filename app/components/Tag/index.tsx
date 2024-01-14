@@ -8,12 +8,14 @@ export type Props = {
 
 export const Component: React.FC<Props> = ({ text, href = "#" }) => {
   return (
-    <a
-      href={href}
-      className="h-6 border border-tw-border rounded inline-flex p-1 text-xs text-text gap-0.5"
-    >
-      <TagIcon.SmallComponent />
-      <span>{text}</span>
-    </a>
+    <div className="h-6">
+      <a
+        href={href}
+        className="border border-tw-border rounded inline-flex p-1 text-xs text-text gap-0.5"
+      >
+        <TagIcon.SmallComponent />
+        <span>{text}</span>
+      </a>
+    </div>
   );
 };

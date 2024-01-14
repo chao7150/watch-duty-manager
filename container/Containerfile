@@ -17,7 +17,7 @@ COPY --from=builder /usr/src/app/build ./build
 COPY --from=builder /usr/src/app/public ./public
 COPY --from=builder /usr/src/app/prisma ./prisma
 
-HEALTHCHECK CMD curl -f http://localhost:3000/status || exit 1
+HEALTHCHECK CMD wget --quiet --spider http://localhost:3000/status || exit 1
 EXPOSE 3000
 
 CMD npx prisma migrate deploy && npm run start

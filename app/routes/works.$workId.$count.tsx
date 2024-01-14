@@ -12,7 +12,7 @@ export const bindUrl = urlFrom`/works/${"workId:number"}/${"count:number"}`;
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const userId = await getUserId(request);
   const { workId, count } = extractParams(params, ["workId", "count"]);
-  const episode = await db.episode.findUnique({
+  const episodePromise = db.episode.findUnique({
     where: {
       workId_count: {
         workId: parseInt(workId, 10),
@@ -23,21 +23,30 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       work: { select: { title: true } },
     },
   });
-  const histories = await db.watchedEpisodesOnUser.findMany({
+  const historiesPromise = db.watchedEpisodesOnUser.findMany({
     where: {
       workId: parseInt(workId, 10),
       count: parseInt(count, 10),
     },
   });
+  const [episode, histories] = await Promise.all([
+    episodePromise,
+    historiesPromise,
+  ]);
   if (episode === null) {
     throw Error("episode not found");
   }
   return {
-    userId,
-    histories: histories.map((h) => ({
-      ...h,
-      createdAt: h.createdAt.getTime(),
-    })),
+    myHistory: userId && histories.find((w) => w.userId === userId),
+    // 他のユーザーの情報は必要以上に返さない
+    otherHistories: histories
+      .filter((h) => h.userId !== userId)
+      .map((h) => {
+        return {
+          comment: h.comment,
+          rating: h.rating,
+        };
+      }),
     episode,
   };
 };
@@ -117,9 +126,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function Component() {
-  const { userId, histories, episode } = useLoaderData<typeof loader>();
-  const myHistory = userId && histories.find((w) => w.userId === userId);
-  const otherHistories = histories.filter((h) => h.userId !== userId);
+  const { myHistory, otherHistories, episode } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -145,9 +152,9 @@ export default function Component() {
       {myHistory && (
         <section className="mt-4">
           <h4>あなたの感想</h4>
-          <div className="flex">
+          <div className="flex gap-4">
             <div>{myHistory.rating}点</div>
-            <p className="ml-4">{myHistory.comment}</p>
+            <p className="whitespace-pre-wrap">{myHistory.comment}</p>
           </div>
         </section>
       )}
@@ -158,9 +165,9 @@ export default function Component() {
             {otherHistories.map((w) => {
               return (
                 <li key={w.comment}>
-                  <div className="flex">
+                  <div className="flex gap-4">
                     <div>{w.rating}点</div>
-                    <p className="ml-4">{w.comment}</p>
+                    <p className="whitespace-pre-wrap">{w.comment}</p>
                   </div>
                 </li>
               );

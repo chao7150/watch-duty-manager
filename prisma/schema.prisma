@@ -54,8 +54,8 @@ model TagsOnSubscription {
   userId               String
   workId               Int
   tagId                Int
-  userWorkSubscription SubscribedWorksOnUser @relation(fields: [userId, workId], references: [userId, workId])
-  tag                  Tag                   @relation(fields: [tagId], references: [id])
+  userWorkSubscription SubscribedWorksOnUser @relation(fields: [userId, workId], references: [userId, workId], onDelete: Cascade, onUpdate: Cascade)
+  tag                  Tag                   @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id(fields: [userId, workId, tagId])
 }

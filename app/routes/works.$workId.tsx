@@ -37,7 +37,7 @@ export const bindUrl = urlFrom`/works/${"workId:number"}`;
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
   const { workId } = extractParams(params, ["workId"]);
-  const work = await db.work.findUnique({
+  const workPromise = db.work.findUnique({
     where: { id: parseInt(workId, 10) },
     include: {
       users: {
@@ -59,6 +59,29 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       },
     },
   });
+  const ratingsPromise =
+    userId !== undefined
+      ? db.watchedEpisodesOnUser.findMany({
+          select: {
+            episode: {
+              select: {
+                count: true,
+              },
+            },
+            rating: true,
+          },
+          where: {
+            workId: parseInt(workId, 10),
+            userId,
+          },
+          orderBy: {
+            episode: {
+              count: "asc",
+            },
+          },
+        })
+      : Promise.resolve([]);
+  const [work, ratings] = await Promise.all([workPromise, ratingsPromise]);
   if (work === null) {
     throw Error("work not found");
   }
@@ -73,25 +96,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       userTags: [],
     };
   }
-  const ratings = await db.watchedEpisodesOnUser.findMany({
-    select: {
-      episode: {
-        select: {
-          count: true,
-        },
-      },
-      rating: true,
-    },
-    where: {
-      workId: parseInt(workId, 10),
-      userId,
-    },
-    orderBy: {
-      episode: {
-        count: "asc",
-      },
-    },
-  });
   const map = new Map<number, number | null>();
   ratings.forEach((r) => {
     map.set(r.episode.count, r.rating);

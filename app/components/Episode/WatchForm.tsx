@@ -41,39 +41,44 @@ export const Component: React.FC<Props> = ({ workId, count, watched }) => {
             method="POST"
             action={`/works/${workId}/${count}?index`}
           >
-            <label className="flex justify-between">
-              <div className="hidden">rating</div>
-              <input
-                type="checkbox"
-                title="レーティングを登録する"
-                checked={ratingEnabled}
-                onChange={(e) => setRatingEnabled(e.target.checked)}
-              />
-              <input
-                disabled={!ratingEnabled}
-                name="rating"
-                type="range"
-                min="0"
-                max="10"
-                list="tickmarks"
-                defaultValue={5}
-              />
-              <datalist id="tickmarks">
-                <option value="0"></option>
-                <option value="1"></option>
-                <option value="2"></option>
-                <option value="3"></option>
-                <option value="4"></option>
-                <option value="5"></option>
-                <option value="6"></option>
-                <option value="7"></option>
-                <option value="8"></option>
-                <option value="9"></option>
-                <option value="10"></option>
-              </datalist>
-            </label>
+            <div className="flex justify-between">
+              <label className="flex justify-between">
+                <span className="hidden">rating enabled</span>
+                <input
+                  type="checkbox"
+                  title="レーティングを登録する"
+                  checked={ratingEnabled}
+                  onChange={(e) => setRatingEnabled(e.target.checked)}
+                />
+              </label>
+              <label>
+                <span className="hidden">rating</span>
+                <input
+                  disabled={!ratingEnabled}
+                  name="rating"
+                  type="range"
+                  min="0"
+                  max="10"
+                  list={`tickmarks-${workId}-${count}`}
+                  defaultValue={5}
+                />
+                <datalist id={`tickmarks-${workId}-${count}`}>
+                  <option value="0"></option>
+                  <option value="1"></option>
+                  <option value="2"></option>
+                  <option value="3"></option>
+                  <option value="4"></option>
+                  <option value="5"></option>
+                  <option value="6"></option>
+                  <option value="7"></option>
+                  <option value="8"></option>
+                  <option value="9"></option>
+                  <option value="10"></option>
+                </datalist>
+              </label>
+            </div>
             <label>
-              <div className="hidden">comment</div>
+              <span className="hidden">comment</span>
               <textarea name="comment"></textarea>
             </label>
             <button

@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 
 import { useInterval } from "react-use";
@@ -293,14 +293,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     quarterMetrics,
     recentWatchAchievements,
   };
-};
-
-// https://remix.run/api/conventions#meta
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Watch duty manager" },
-    { description: "Just watch anime." },
-  ];
 };
 
 export const setOldestOfWork = <T extends { workId: number }>(

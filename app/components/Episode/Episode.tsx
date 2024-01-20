@@ -50,14 +50,14 @@ const Information: React.FC<InformationProps> = ({
   return (
     <div className="episode">
       <h3 className="flex items-center gap-1">
-        <div className="hover:text-cadet-blue hover:underline">
+        <span className="hover:text-cadet-blue hover:underline">
           <Link to={bindUrlForWorks$WorkId({ workId })}>{title}</Link>
-        </div>
-        <div className="hover:text-cadet-blue hover:underline">
+        </span>
+        <span className="hover:text-cadet-blue hover:underline">
           <Link to={bindUrlForWorks$WorkId$Count({ workId, count })}>
             #{count}
           </Link>
-        </div>
+        </span>
         {watchReady === false && (
           <button
             title="まだ前の話数を見ていません"

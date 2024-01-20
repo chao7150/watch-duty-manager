@@ -1,4 +1,8 @@
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import {
   Form,
   isRouteErrorResponse,
@@ -33,6 +37,14 @@ export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: globalStylesUrl },
     { rel: "stylesheet", href: styles },
+  ];
+};
+
+// https://remix.run/api/conventions#meta
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Watch duty manager" },
+    { name: "description", content: "アニメの視聴管理をするwebサービスです" },
   ];
 };
 

@@ -32,7 +32,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ text, icon, onClick, href }) => {
         target={href ? "_blank" : undefined}
       >
         {icon}
-        <p className="whitespace-nowrap">{text}</p>
+        <span className="whitespace-nowrap">{text}</span>
       </OuterComponent>
     </li>
   );

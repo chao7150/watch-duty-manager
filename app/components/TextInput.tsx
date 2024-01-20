@@ -19,11 +19,11 @@ export const Component: React.FC<Props> = ({
   ...props
 }) => {
   return (
-    <label>
-      <div>
+    <label className="flex flex-col">
+      <span>
         {labelText}
         {isRequired && <RequiredAbbreviation />}
-      </div>
+      </span>
       <input className="w-3/4" type="text" {...props} />
     </label>
   );

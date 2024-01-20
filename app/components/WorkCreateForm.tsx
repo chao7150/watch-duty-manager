@@ -126,10 +126,8 @@ const SequentialDatePicker: React.FC<{
         value={dates.map((v) => v.toISOString()).join(",")}
       ></input>
       <ul className="flex flex-col gap-2">
-        <li>
-          <label>
-            <div>初回放送日時</div>
-          </label>
+        <li className="flex flex-col">
+          <label>初回放送日時</label>
           <input
             className="w-3/4"
             type="datetime-local"
@@ -137,10 +135,8 @@ const SequentialDatePicker: React.FC<{
             onChange={(e) => setFirstDate(new Date(`${e.target.value}+0900`))}
           ></input>
         </li>
-        <li>
-          <label>
-            <div>話数</div>
-          </label>
+        <li className="flex flex-col">
+          <label>話数</label>
           <input
             className="w-3/4"
             type="number"
@@ -221,19 +217,15 @@ export const Component: React.FC = () => {
       </p>
       <div className="grid grid-cols-2">
         <fieldset className="mt-4 flex flex-col gap-2" name="基本情報">
-          <div>
-            <legend>
-              <h3>基本情報</h3>
-            </legend>
-          </div>
+          <legend>
+            <h3>基本情報</h3>
+          </legend>
           <WorkInput.Component />
         </fieldset>
         <fieldset className="mt-4 flex flex-col gap-2" name="エピソード登録">
-          <div>
-            <legend>
-              <h3>エピソード登録</h3>
-            </legend>
-          </div>
+          <legend>
+            <h3>エピソード登録</h3>
+          </legend>
           <EpisodeDateRegistrationTabPanel />
         </fieldset>
       </div>

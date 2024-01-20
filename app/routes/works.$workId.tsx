@@ -290,14 +290,14 @@ export default function Component() {
                   <dt>ハッシュタグ</dt>
                   <dd>
                     {work.hashtag !== null && work.hashtag !== "" && (
-                      <div>
+                      <span>
                         <a href={`https://twitter.com/hashtag/${work.hashtag}`}>
                           <span>#{work.hashtag}</span>
                         </a>
                         <WorkHashtagCopyButton.Component
                           hashtag={work.hashtag}
                         />
-                      </div>
+                      </span>
                     )}
                   </dd>
                   <dt>パーソナルタグ</dt>
@@ -318,7 +318,7 @@ export default function Component() {
                     </ul>
                   </dd>
                   <dt>配信サービス</dt>
-                  <div>
+                  <dd>
                     <ul>
                       <li className="list-disc list-inside">
                         <Link
@@ -330,7 +330,7 @@ export default function Component() {
                         </Link>
                       </li>
                     </ul>
-                  </div>
+                  </dd>
                 </dl>
               )}
             </section>

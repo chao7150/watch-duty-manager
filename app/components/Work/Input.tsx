@@ -44,8 +44,8 @@ export const Component: React.FC<Props> = ({
         />
       </li>
       <li>
-        <label>
-          <div>尺（分・未入力なら30分）</div>
+        <label className="flex flex-col">
+          <span>尺（分・未入力なら30分）</span>
           <input
             name="durationMin"
             className="w-3/4"
@@ -65,7 +65,7 @@ export const Component: React.FC<Props> = ({
       </li>
       <li>
         <TextInput.Component
-          labelText="ツイッターID"
+          labelText="ツイッターID（@は不要）"
           name="twitterId"
           {...twitterId}
         />

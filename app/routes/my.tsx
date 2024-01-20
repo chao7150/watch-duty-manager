@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "@remix-run/react";
+import { Outlet, useLocation, useMatches, useParams } from "@remix-run/react";
 
 import urlFrom from "url-from";
 import { bindUrl as bindUrlForMy } from "~/routes/my";
@@ -11,6 +11,7 @@ export const bindUrl = urlFrom`/my`.narrowing<{ "?query": { cour?: string } }>;
 
 const Component: React.FC = () => {
   const location = useLocation();
+  const matches = useMatches();
   return (
     <div>
       <header className="flex gap-4">
@@ -32,7 +33,11 @@ const Component: React.FC = () => {
             href: "/my/tag",
           },
         ]}
-        selectedTabId={location.pathname.endsWith("/tag") ? "tag" : "dashboard"}
+        selectedTabId={
+          matches.some((match) => match.pathname === "/my/tag")
+            ? "tag"
+            : "dashboard"
+        }
       />
       <Outlet />
     </div>

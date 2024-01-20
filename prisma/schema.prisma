@@ -78,3 +78,17 @@ model WatchedEpisodesOnUser {
 
   @@id(fields: [userId, workId, count])
 }
+
+// model User {
+//   id        String   @id @default(uuid())
+//   name      String
+//   createdAt DateTime @default(now())
+//   posts     Post[]
+// }
+
+// model Post {
+//   id       Int     @id @default(autoincrement())
+//   content  String?
+//   author   User    @relation(fields: [authorId], references: [id])
+//   authorId String
+// }

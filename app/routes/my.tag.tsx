@@ -1,8 +1,9 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Outlet, useFetcher, useLoaderData } from "@remix-run/react";
 
 import urlFrom from "url-from";
+import * as My_Tag_$TagId from "~/routes/my.tag.$tagId";
 
 import * as Tag from "~/components/Tag";
 
@@ -63,7 +64,7 @@ const Component: React.FC = () => {
   const { tagsOnUser } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<ActionData>();
   return (
-    <main className="flex flex-col gap-4">
+    <header className="flex flex-col gap-4">
       <div>
         <div>
           <h3>登録済みのパーソナルタグ一覧</h3>
@@ -72,7 +73,11 @@ const Component: React.FC = () => {
         <ul className="flex gap-2">
           {tagsOnUser.map((t) => (
             <li key={t.id}>
-              <Tag.Component text={t.text} id={t.id} />
+              <Tag.Component
+                text={t.text}
+                id={t.id}
+                href={My_Tag_$TagId.bindUrl({ tagId: t.id })}
+              />
             </li>
           ))}
         </ul>
@@ -94,7 +99,10 @@ const Component: React.FC = () => {
           </div>
         </fetcher.Form>
       </div>
-    </main>
+      <div>
+        <Outlet />
+      </div>
+    </header>
   );
 };
 

@@ -17,6 +17,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import * as My_Tag_$TagId from "~/routes/my.tag.$tagId";
 
 import {
   cour2expression,
@@ -319,7 +320,7 @@ const Component = () => {
                           <Tag.Component
                             id={tos.tag.id}
                             text={tos.tag.text}
-                            href={tos.tag.id.toString()}
+                            href={My_Tag_$TagId.bindUrl({ tagId: tos.tag.id })}
                           />
                         </li>
                       );

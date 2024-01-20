@@ -17,6 +17,7 @@ import {
   Line,
 } from "recharts";
 import urlFrom from "url-from";
+import * as My_Tag_$TagId from "~/routes/my.tag.$tagId";
 
 import * as EpisodeWatchForm from "~/components/Episode/WatchForm";
 import * as CloseIcon from "~/components/Icons/Close";
@@ -310,7 +311,7 @@ export default function Component() {
                               <Tag.Component
                                 id={t.id}
                                 text={t.text}
-                                href={`/my/personal-tags/${t.id}`}
+                                href={My_Tag_$TagId.bindUrl({ tagId: t.id })}
                               />
                             </li>
                           ))}

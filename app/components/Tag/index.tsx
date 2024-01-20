@@ -3,10 +3,10 @@ import * as TagIcon from "../Icons/Tag";
 export type Props = {
   id: number;
   text: string;
-  href?: string;
+  href: string;
 };
 
-export const Component: React.FC<Props> = ({ text, href = "#" }) => {
+export const Component: React.FC<Props> = ({ text, href }) => {
   return (
     <div className="h-6">
       <a

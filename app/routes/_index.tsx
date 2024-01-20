@@ -18,6 +18,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import * as My_Tag_$TagId from "~/routes/my.tag.$tagId";
 
 import { cour2startDate, date2cour } from "~/domain/cour/util";
 
@@ -370,9 +371,13 @@ export default function Index() {
               watchReady: ticket.watchReady,
               watched: false,
               officialSiteUrl: ticket.work.officialSiteUrl ?? "",
-              personalTags: (ticket.work.users[0]?.TagsOnSubscription ?? []).map(
-                (t) => ({ text: t.tag.text, id: t.tag.id })
-              ),
+              personalTags: (
+                ticket.work.users[0]?.TagsOnSubscription ?? []
+              ).map((t) => ({
+                text: t.tag.text,
+                id: t.tag.id,
+                href: My_Tag_$TagId.bindUrl({ tagId: t.tag.id }),
+              })),
             };
           })}
         />
@@ -412,9 +417,13 @@ export default function Index() {
             watched: true,
             officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
             published: true,
-            personalTags: (a.episode.work.users[0]?.TagsOnSubscription ?? []).map(
-              (t) => ({ text: t.tag.text, id: t.tag.id })
-            ),
+            personalTags: (
+              a.episode.work.users[0]?.TagsOnSubscription ?? []
+            ).map((t) => ({
+              text: t.tag.text,
+              id: t.tag.id,
+              href: My_Tag_$TagId.bindUrl({ tagId: t.tag.id }),
+            })),
           }))}
         />
         <Link

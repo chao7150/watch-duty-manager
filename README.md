@@ -20,7 +20,7 @@
 
 ```
 npm i
-sudo docker-compose -f docker/docker-compose.local.yml up -d db
+sudo nerdctl compose -f container/compose.local.yml up -d db
 npx prisma generate
 npx prisma db push
 npm run dev

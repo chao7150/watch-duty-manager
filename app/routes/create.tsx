@@ -5,6 +5,7 @@ import { redirect } from "@remix-run/server-runtime";
 
 import { useState } from "react";
 
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
 import * as F from "fp-ts/function";
@@ -18,47 +19,85 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
     return await F.pipe(
-      formData,
-      WorkBulkCreateForm.serverValidator,
-      TE.fromEither,
-      TE.chain((works) => {
-        return TE.tryCatch(
+      TE.Do,
+      TE.bind("formData", () => TE.right(formData)),
+
+      TE.bind("insertingWorks", (ns) =>
+        TE.fromEither(WorkBulkCreateForm.serverValidator(ns.formData))
+      ),
+      TE.bindW("insertResult", ({ insertingWorks }) =>
+        TE.tryCatch(
           async () => {
-            await db.work.createMany({
-              data: works.map(({ episodeCount, ...rest }) => rest),
-            });
-            return works;
+            try {
+              await db.work.createMany({
+                data: insertingWorks.map(({ episodeCount, ...rest }) => rest),
+              });
+              return insertingWorks;
+            } catch (e) {
+              if (
+                !(e instanceof PrismaClientKnownRequestError) ||
+                e.code !== "P2002"
+              ) {
+                throw "unknownError";
+              }
+              try {
+                const duplicatedWorkTitles = (
+                  await db.work.findMany({
+                    where: {
+                      title: {
+                        in: insertingWorks.map((work) => work.title),
+                      },
+                    },
+                    select: { title: true },
+                  })
+                ).map((work) => work.title);
+                return {
+                  code: "uniqueConstraintFailed" as const,
+                  duplicatedWorkTitles,
+                };
+              } catch (e) {
+                throw "unknownError";
+              }
+            }
           },
           (e) => {
-            return json(
-              { errorMessage: "works create error" },
-              { status: 500 }
-            );
+            return { code: "unknownError" as const };
           }
-        );
+        )
+      ),
+      TE.bindW("_", ({ insertResult, insertingWorks }) => {
+        if ("code" in insertResult) {
+          return TE.left({
+            code: "uniqueConstraintFailed" as const,
+            duplicateWorkTitles: insertResult.duplicatedWorkTitles,
+          });
+        }
+        return TE.right(insertingWorks);
       }),
-      TE.chain((works) => {
-        return TE.tryCatch(
+      TE.bindW("insertedWorks", ({ insertingWorks }) =>
+        TE.tryCatch(
           async () => {
-            return {
-              works,
-              returnedWorks: await db.work.findMany({
-                where: { title: { in: works.map((work) => work.title) } },
-              }),
-            };
+            // mysqlではcreateManyAndReturnが使えないので今作ったWorkに振られたIDを知るためにselectする
+            return await db.work.findMany({
+              where: {
+                title: {
+                  in: insertingWorks.map((work) => work.title),
+                },
+              },
+            });
           },
-          () => json({ errorMessage: "works obtain error" }, { status: 500 })
-        );
-      }),
-      TE.chain(({ works, returnedWorks }) => {
-        return TE.tryCatch(
+          () => ({ code: "worksObtainError" as const })
+        )
+      ),
+      TE.bindW("createEpisodesResult", ({ insertingWorks, insertedWorks }) =>
+        TE.tryCatch(
           async () => {
             return await db.episode.createMany({
-              data: works
+              data: insertingWorks
                 .map((work) => ({
                   ...work,
-                  id: returnedWorks.find(
-                    (returnedWork) => returnedWork.title === work.title
+                  id: insertedWorks.find(
+                    (insertedWork) => insertedWork.title === work.title
                   )!.id,
                 }))
                 .flatMap((combinedWork) =>
@@ -77,12 +116,53 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                 ),
             });
           },
-          () => json({ errorMessage: "episode create error" }, { status: 500 })
-        );
-      }),
+          () => ({ code: "episodeCreateError" as const })
+        )
+      ),
       TE.foldW(
-        (e) => T.of(e),
-        (v) => T.of({ action: "bulkCreate" as const, count: v.count })
+        (e) => {
+          switch (e.code) {
+            case "uniqueConstraintFailed":
+              return T.of(
+                json(
+                  {
+                    errorMessage: `以下の作品はすでに登録されています: ${e.duplicateWorkTitles.join(
+                      ", "
+                    )}`,
+                  },
+                  { status: 409 }
+                )
+              );
+            case "episodeCreateError":
+              return T.of(
+                json(
+                  { errorMessage: "話数の登録に失敗しました" },
+                  { status: 500 }
+                )
+              );
+            case "empty":
+              return T.of(
+                json(
+                  { errorMessage: "登録しようとしている作品が0件です" },
+                  { status: 500 }
+                )
+              );
+            case "unknownError":
+            case "worksObtainError":
+              return T.of(
+                json(
+                  { errorMessage: "不明なエラーが発生しました" },
+                  { status: 500 }
+                )
+              );
+          }
+        },
+        (v) =>
+          T.of({
+            action: "bulkCreate" as const,
+            workCount: v.insertedWorks.length,
+            episodeCount: v.createEpisodesResult.count,
+          })
       )
     )();
   }

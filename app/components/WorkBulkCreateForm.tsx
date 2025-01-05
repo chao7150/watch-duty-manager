@@ -6,24 +6,14 @@ import * as F from "fp-ts/function";
 
 import { isNonEmptyString } from "~/utils/validator";
 
-export const serverValidator = (
-  formData: FormData
-): E.Either<
-  Response,
-  Array<{
-    title: string;
-    publishedAt: Date;
-    episodeCount: number;
-    officialSiteUrl?: string;
-    twitterId?: string;
-    hashtag?: string;
-  }>
-> => {
+export const serverValidator = (formData: FormData) => {
   return F.pipe(
     formData,
     (formData) => {
       const works = formData.get("works");
-      return isNonEmptyString(works) ? E.right(works) : E.left("empty");
+      return isNonEmptyString(works)
+        ? E.right(works)
+        : E.left({ code: "empty" as const });
     },
     E.chain((works) => {
       return E.right(
@@ -39,8 +29,7 @@ export const serverValidator = (
           };
         })
       );
-    }),
-    E.mapLeft((e) => json({ errorMessage: e }, { status: 400 }))
+    })
   );
 };
 
@@ -54,14 +43,20 @@ export const Component: React.VFC<Props> = () => {
           複数番組
           <textarea
             name="works"
-            defaultValue={
+            className="w-full p-2 border border-gray-300 rounded"
+            placeholder={
               "title,publishedAt(ISO8601),episodeCount,officialSiteUrl(optional),twitterId(optional),hashtag(optional without #)"
             }
           ></textarea>
         </label>
       </li>
       <li>
-        <button type="submit" name="_action" value="bulkCreate">
+        <button
+          className="mt-4 bg-accent-area rounded-full py-2 px-12"
+          type="submit"
+          name="_action"
+          value="bulkCreate"
+        >
           送信
         </button>
       </li>

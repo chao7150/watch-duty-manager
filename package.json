@@ -71,5 +71,8 @@
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "volta": {
+    "node": "22.12.0"
+  }
 }

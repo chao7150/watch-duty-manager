@@ -71,8 +71,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       (cour) =>
         [cour2expression(cour), `${cour.year}${cour.season}`] as [
           string,
-          string
-        ]
+          string,
+        ],
     ),
   };
 };

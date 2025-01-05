@@ -4,7 +4,7 @@ import { get4OriginDate } from "~/utils/date";
 
 export const getStatus = (
   publishedAt: Date,
-  now: Date
+  now: Date,
 ): "published" | "onair" | "today" | "tomorrow" => {
   if (addMinutes(publishedAt, 30) < now) {
     return "published";

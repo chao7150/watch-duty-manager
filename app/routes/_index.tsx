@@ -218,20 +218,27 @@ export const getQuarterMetrics =
           ...v,
         };
       })
-      .reduce((acc, val) => {
-        if (acc.length === 0) {
-          return [val];
-        }
-        const last = acc[acc.length - 1];
-        return [
-          ...acc,
-          {
-            date: val.date,
-            watchAchievements: last.watchAchievements + val.watchAchievements,
-            dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
-          },
-        ];
-      }, [] as Array<{ date: string; watchAchievements: number; dutyAccumulation: number }>);
+      .reduce(
+        (acc, val) => {
+          if (acc.length === 0) {
+            return [val];
+          }
+          const last = acc[acc.length - 1];
+          return [
+            ...acc,
+            {
+              date: val.date,
+              watchAchievements: last.watchAchievements + val.watchAchievements,
+              dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
+            },
+          ];
+        },
+        [] as Array<{
+          date: string;
+          watchAchievements: number;
+          dutyAccumulation: number;
+        }>,
+      );
   };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -248,7 +255,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const recentWatchAchievementCount = parseSearchParamAsNumber(
     request.url,
     "recentWatchAchievementCount",
-    10
+    10,
   );
   const now = new Date();
   const [
@@ -266,7 +273,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       userId,
       take: recentWatchAchievementCount,
     }),
-    getQuarterMetrics({ db, userId, now })
+    getQuarterMetrics({ db, userId, now }),
   )();
   const weekKeys = getPast7DaysLocaleDateString(now);
   const mergedWeekMetricsMap = new Map<
@@ -280,7 +287,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     });
   });
   const weekMetrics = Object.entries(
-    Object.fromEntries(mergedWeekMetricsMap)
+    Object.fromEntries(mergedWeekMetricsMap),
   ).map(([k, v]) => ({
     date: k,
     ...v,
@@ -296,7 +303,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const setOldestOfWork = <T extends { workId: number }>(
-  tickets: T[]
+  tickets: T[],
 ): Array<T & { watchReady: boolean }> => {
   const s = new Set<number>();
   return tickets

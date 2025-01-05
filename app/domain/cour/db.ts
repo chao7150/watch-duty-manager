@@ -4,7 +4,7 @@ import type { Cour } from "./consts";
 import { eachCourOfInterval, date2cour } from "./util";
 
 export const getCourList = async (
-  db: PrismaClient
+  db: PrismaClient,
 ): Promise<ReadonlyArray<Cour>> => {
   const oldestEpisode = await db.episode.findFirstOrThrow({
     select: { publishedAt: true },
@@ -13,6 +13,6 @@ export const getCourList = async (
   });
   return eachCourOfInterval(
     date2cour(oldestEpisode.publishedAt),
-    date2cour(new Date())
+    date2cour(new Date()),
   );
 };

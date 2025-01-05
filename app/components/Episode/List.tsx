@@ -16,7 +16,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
   const [stack, setStack] = useState<boolean>(false);
   const [shortOnly, setShortOnly] = useState<boolean>(false);
   const [filterWorkId, setFilterWorkId] = useState<number | undefined>(
-    undefined
+    undefined,
   );
 
   const filterTitle =

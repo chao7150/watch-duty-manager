@@ -163,8 +163,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       (cour) =>
         [cour2expression(cour), `${cour.year}${cour.season}`] as [
           string,
-          string
-        ]
+          string,
+        ],
     ),
     works: watchingWorks.map((work) => ({
       ...work,
@@ -173,7 +173,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         .filter(isNumber)
         .reduce((acc, val, _, array) => acc + val / array.length, 0),
       complete: work.episodes.filter(
-        (episode) => episode.WatchedEpisodesOnUser.length === 1
+        (episode) => episode.WatchedEpisodesOnUser.length === 1,
       ).length,
     })),
     bestEpisodesOnUser,
@@ -234,8 +234,8 @@ const Component = () => {
                 e.target.value === "all"
                   ? "all"
                   : e.target.value === "none"
-                  ? "none"
-                  : Number(e.target.value)
+                    ? "none"
+                    : Number(e.target.value),
               )
             }
             value={filterTag}
@@ -284,10 +284,10 @@ const Component = () => {
                 filterTag === "all"
                   ? false
                   : filterTag === "none"
-                  ? work.users[0].TagsOnSubscription.length !== 0
-                  : !work.users[0].TagsOnSubscription.map(
-                      (t) => t.tagId
-                    ).includes(filterTag ?? -1);
+                    ? work.users[0].TagsOnSubscription.length !== 0
+                    : !work.users[0].TagsOnSubscription.map(
+                        (t) => t.tagId,
+                      ).includes(filterTag ?? -1);
               return (
                 <li
                   className={`flex gap-4 items-center ${
@@ -303,7 +303,7 @@ const Component = () => {
                     value={work.complete}
                     title={`完走率: ${
                       work.episodes.filter(
-                        (episode) => episode.WatchedEpisodesOnUser.length === 1
+                        (episode) => episode.WatchedEpisodesOnUser.length === 1,
                       ).length
                     }/${work.watchedEpisodesDenominator}`}
                   >

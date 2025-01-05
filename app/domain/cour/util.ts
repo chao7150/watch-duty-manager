@@ -28,7 +28,7 @@ export const date2cour = (date: Date): Cour =>
         year: date.getFullYear(),
         season: Season[Math.floor(date.getMonth() / 3)],
       };
-    }
+    },
   );
 
 export const cour2startDate = (cour: Cour): Date => {
@@ -98,14 +98,14 @@ export const eachCourOfInterval = (first: Cour, last: Cour): Cour[] => {
         ...Season.slice(firstSeasonIndex).map((season) => ({
           year: firstYear,
           season,
-        }))
+        })),
       );
     } else if (y === lastYear) {
       ret.push(
         ...Season.slice(0, lastSeasonIndex + 1).map((season) => ({
           year: lastYear,
           season,
-        }))
+        })),
       );
     } else {
       ret.push(...Season.map((season) => ({ year: y, season })));

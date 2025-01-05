@@ -149,7 +149,7 @@ export const action = async ({
   if (formData.get("_action") === "addEpisodes") {
     const { episodeDate: _episodeDate, offset: _offset } = extractParams(
       Object.fromEntries(formData),
-      ["episodeDate", "offset"]
+      ["episodeDate", "offset"],
     );
     const episodeDate = _episodeDate.split(",").map((d) => new Date(d));
     const offset = parseInt(_offset, 10);
@@ -181,7 +181,7 @@ export const action = async ({
       });
       return json(
         { message: `${rel.userId} ${rel.workId} ok` },
-        { status: 200 }
+        { status: 200 },
       );
     } catch (e) {
       return json({ message: "db error" }, { status: 400 });
@@ -203,7 +203,7 @@ export const action = async ({
       });
       return json(
         { message: `${rel.userId} ${rel.tagId} ok` },
-        { status: 200 }
+        { status: 200 },
       );
     } catch (e) {
       return json({ message: "db error" }, { status: 500 });
@@ -214,8 +214,8 @@ export const action = async ({
     E.match(
       ({ errorMessage, status }) => json({ message: errorMessage }, { status }),
       ({ successMessage, status }) =>
-        json({ message: successMessage }, { status })
-    )
+        json({ message: successMessage }, { status }),
+    ),
   );
 };
 
@@ -323,7 +323,7 @@ export default function Component() {
                       <li className="list-disc list-inside">
                         <Link
                           to={`https://animestore.docomo.ne.jp/animestore/sch_pc?searchKey=${encodeURIComponent(
-                            work.title
+                            work.title,
                           )}&vodTypeList=svod_tvod`}
                         >
                           dアニメストア
@@ -382,7 +382,7 @@ export default function Component() {
                         </td>
                         <td>
                           {new Date(episode.publishedAt).toLocaleDateString(
-                            "ja"
+                            "ja",
                           )}
                         </td>
                         <td className="ml-2">

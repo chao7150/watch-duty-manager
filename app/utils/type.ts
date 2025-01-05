@@ -1,6 +1,6 @@
 export const extractParams = <Keys extends string>(
   params: { [key in string]: unknown },
-  keys: Array<Keys>
+  keys: Array<Keys>,
 ): { [Key in Keys]: string } => {
   if (checkParamsType(params, keys)) {
     return params;
@@ -10,7 +10,7 @@ export const extractParams = <Keys extends string>(
 
 const checkParamsType = <Keys extends string>(
   params: { [key in string]: unknown },
-  keys: Array<Keys>
+  keys: Array<Keys>,
 ): params is { [Key in Keys]: string } => {
   for (const k of keys) {
     const value = params[k];
@@ -23,16 +23,19 @@ const checkParamsType = <Keys extends string>(
 
 export const nonEmptyStringOrUndefined = <Keys extends string>(
   params: { [key in string]: unknown },
-  keys: Array<Keys>
+  keys: Array<Keys>,
 ): { [Key in Keys]: string | undefined } => {
-  return keys.reduce((acc, key) => {
-    return { ...acc, [key]: extractAsNonEmptyStringOrUndefined(params, key) };
-  }, {} as { [Key in Keys]: string | undefined });
+  return keys.reduce(
+    (acc, key) => {
+      return { ...acc, [key]: extractAsNonEmptyStringOrUndefined(params, key) };
+    },
+    {} as { [Key in Keys]: string | undefined },
+  );
 };
 
 export const extractAsNonEmptyStringOrUndefined = (
   obj: Record<string, unknown>,
-  key: string
+  key: string,
 ): string | undefined => {
   const value = obj[key];
   if (typeof value !== "string") {

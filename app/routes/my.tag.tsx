@@ -37,7 +37,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (typeof text !== "string" || text === "") {
       return json(
         { errorMessage: "text must not be empty" } satisfies ActionData,
-        { status: 400 }
+        { status: 400 },
       );
     }
     try {
@@ -54,7 +54,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       console.log(e);
       return json(
         { errorMessage: "不明なエラーが発生しました" } satisfies ActionData,
-        { status: 500 }
+        { status: 500 },
       );
     }
   }

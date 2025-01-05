@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useMatches, useParams } from "@remix-run/react";
+import { Outlet, useMatches } from "@remix-run/react";
 
 import urlFrom from "url-from";
 import { bindUrl as bindUrlForMy } from "~/routes/my";
@@ -10,7 +10,6 @@ import * as TabList from "~/components/TabList";
 export const bindUrl = urlFrom`/my`.narrowing<{ "?query": { cour?: string } }>;
 
 const Component: React.FC = () => {
-  const location = useLocation();
   const matches = useMatches();
   return (
     <div>

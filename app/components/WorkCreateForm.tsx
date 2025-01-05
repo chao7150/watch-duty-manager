@@ -16,7 +16,7 @@ import * as TabPanel from "./TabPanel";
 import * as WorkInput from "./Work/Input";
 
 export const serverValidator = (
-  formData: FormData
+  formData: FormData,
 ): E.Either<
   Response,
   {
@@ -51,7 +51,7 @@ export const serverValidator = (
       ({ title, episodeDate, formData }) => {
         const optionals = nonEmptyStringOrUndefined(
           Object.fromEntries(formData),
-          ["officialSiteUrl", "twitterId", "hashtag", "durationMin"]
+          ["officialSiteUrl", "twitterId", "hashtag", "durationMin"],
         );
         return {
           title,
@@ -62,8 +62,8 @@ export const serverValidator = (
               ? Number(optionals.durationMin)
               : undefined,
         };
-      }
-    )
+      },
+    ),
   );
 };
 
@@ -115,7 +115,7 @@ const SequentialDatePicker: React.FC<{
     onChangeDates(
       Array.from({ length: count }).map((_, index) => {
         return new Date(firstDate.getTime() + 1000 * 60 * 60 * 24 * 7 * index);
-      })
+      }),
     );
   }, [onChangeDates, firstDate, count]);
   return (

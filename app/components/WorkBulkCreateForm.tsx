@@ -1,4 +1,3 @@
-import { json } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 
 import * as E from "fp-ts/Either";
@@ -27,9 +26,9 @@ export const serverValidator = (formData: FormData) => {
             twitterId: properties[4] || undefined,
             hashtag: properties[5] || undefined,
           };
-        })
+        }),
       );
-    })
+    }),
   );
 };
 

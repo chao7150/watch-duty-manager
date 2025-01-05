@@ -23,7 +23,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       TE.bind("formData", () => TE.right(formData)),
 
       TE.bind("insertingWorks", (ns) =>
-        TE.fromEither(WorkBulkCreateForm.serverValidator(ns.formData))
+        TE.fromEither(WorkBulkCreateForm.serverValidator(ns.formData)),
       ),
       TE.bindW("insertResult", ({ insertingWorks }) =>
         TE.tryCatch(
@@ -62,8 +62,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           },
           (e) => {
             return { code: "unknownError" as const };
-          }
-        )
+          },
+        ),
       ),
       TE.bindW("_", ({ insertResult, insertingWorks }) => {
         if ("code" in insertResult) {
@@ -86,8 +86,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               },
             });
           },
-          () => ({ code: "worksObtainError" as const })
-        )
+          () => ({ code: "worksObtainError" as const }),
+        ),
       ),
       TE.bindW("createEpisodesResult", ({ insertingWorks, insertedWorks }) =>
         TE.tryCatch(
@@ -97,7 +97,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                 .map((work) => ({
                   ...work,
                   id: insertedWorks.find(
-                    (insertedWork) => insertedWork.title === work.title
+                    (insertedWork) => insertedWork.title === work.title,
                   )!.id,
                 }))
                 .flatMap((combinedWork) =>
@@ -108,16 +108,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                         count: index + 1,
                         publishedAt: new Date(
                           combinedWork.publishedAt.getTime() +
-                            1000 * 60 * 60 * 24 * 7 * index
+                            1000 * 60 * 60 * 24 * 7 * index,
                         ),
                       };
-                    }
-                  )
+                    },
+                  ),
                 ),
             });
           },
-          () => ({ code: "episodeCreateError" as const })
-        )
+          () => ({ code: "episodeCreateError" as const }),
+        ),
       ),
       TE.foldW(
         (e) => {
@@ -127,33 +127,33 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                 json(
                   {
                     errorMessage: `以下の作品はすでに登録されています: ${e.duplicateWorkTitles.join(
-                      ", "
+                      ", ",
                     )}`,
                   },
-                  { status: 409 }
-                )
+                  { status: 409 },
+                ),
               );
             case "episodeCreateError":
               return T.of(
                 json(
                   { errorMessage: "話数の登録に失敗しました" },
-                  { status: 500 }
-                )
+                  { status: 500 },
+                ),
               );
             case "empty":
               return T.of(
                 json(
                   { errorMessage: "登録しようとしている作品が0件です" },
-                  { status: 500 }
-                )
+                  { status: 500 },
+                ),
               );
             case "unknownError":
             case "worksObtainError":
               return T.of(
                 json(
                   { errorMessage: "不明なエラーが発生しました" },
-                  { status: 500 }
-                )
+                  { status: 500 },
+                ),
               );
           }
         },
@@ -162,8 +162,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             action: "bulkCreate" as const,
             workCount: v.insertedWorks.length,
             episodeCount: v.createEpisodesResult.count,
-          })
-      )
+          }),
+      ),
     )();
   }
   return await F.pipe(
@@ -181,7 +181,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           }),
           episodeDate,
         }),
-        (e) => json({ errorMessage: e as string }, { status: 409 })
+        (e) => json({ errorMessage: e as string }, { status: 409 }),
       );
     }),
     TE.chain(({ returnedWork, episodeDate }) => {
@@ -198,13 +198,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           });
           return returnedWork;
         },
-        () => json({ errorMessage: "episode creation failed" }, { status: 500 })
+        () =>
+          json({ errorMessage: "episode creation failed" }, { status: 500 }),
       );
     }),
     TE.foldW(
       (e) => T.of(e),
-      (v) => T.of(redirect(`/works/${v.id}`))
-    )
+      (v) => T.of(redirect(`/works/${v.id}`)),
+    ),
   )();
 };
 

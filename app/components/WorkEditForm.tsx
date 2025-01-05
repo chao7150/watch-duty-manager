@@ -12,7 +12,7 @@ import * as WorkInput from "./Work/Input";
 export const serverAction = async (
   request: Request,
   workId: number,
-  formData: FormData
+  formData: FormData,
 ): Promise<
   E.Either<
     { errorMessage: string; status: number },
@@ -25,7 +25,7 @@ export const serverAction = async (
   }
   const optionalWorkCreateInput = nonEmptyStringOrUndefined(
     Object.fromEntries(formData),
-    ["officialSiteUrl", "twitterId", "hashtag", "durationMin"]
+    ["officialSiteUrl", "twitterId", "hashtag", "durationMin"],
   );
   const tags = Object.keys(Object.fromEntries(formData)).flatMap((k) => {
     const match = k.match(/personal-tag-(\d+)$/)?.[1];
@@ -66,7 +66,7 @@ export const serverAction = async (
             tagId: tag,
           },
           update: {},
-        })
+        }),
       ),
       db.tagsOnSubscription.deleteMany({
         where: {

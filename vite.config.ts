@@ -1,7 +1,5 @@
 /// <reference types="vitest" />
-
 // Configure Vitest (https://vitest.dev/config/)
-
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -12,6 +10,7 @@ export default defineConfig({
     },
   },
   test: {
+    include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
     /* for example, use global to avoid globals imports (describe, test, expect): */
     // globals: true,
   },

@@ -50,7 +50,7 @@ describe("next", () => {
       next({
         year: 2022,
         season: "autumn",
-      })
+      }),
     ).toStrictEqual({
       year: 2023,
       season: "winter",
@@ -63,16 +63,16 @@ describe("eachCourOfInterval", () => {
     expect(
       eachCourOfInterval(
         { year: 2023, season: "winter" },
-        { year: 2023, season: "winter" }
-      )
+        { year: 2023, season: "winter" },
+      ),
     ).toStrictEqual([{ year: 2023, season: "winter" }]);
   });
   it("年だけ同じ", () => {
     expect(
       eachCourOfInterval(
         { year: 2023, season: "winter" },
-        { year: 2023, season: "summer" }
-      )
+        { year: 2023, season: "summer" },
+      ),
     ).toStrictEqual([
       { year: 2023, season: "winter" },
       { year: 2023, season: "spring" },
@@ -83,8 +83,8 @@ describe("eachCourOfInterval", () => {
     expect(
       eachCourOfInterval(
         { year: 2022, season: "autumn" },
-        { year: 2023, season: "summer" }
-      )
+        { year: 2023, season: "summer" },
+      ),
     ).toStrictEqual([
       { year: 2022, season: "autumn" },
       { year: 2023, season: "winter" },
@@ -96,8 +96,8 @@ describe("eachCourOfInterval", () => {
     expect(
       eachCourOfInterval(
         { year: 2022, season: "autumn" },
-        { year: 2024, season: "summer" }
-      )
+        { year: 2024, season: "summer" },
+      ),
     ).toStrictEqual([
       { year: 2022, season: "autumn" },
       { year: 2023, season: "winter" },

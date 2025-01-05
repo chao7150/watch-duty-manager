@@ -10,7 +10,7 @@ export type Props =
       selectedTabId: string;
       onClick: (
         clickedTabId: string,
-        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
       ) => void;
     }
   | {

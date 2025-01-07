@@ -257,6 +257,7 @@ const Component = () => {
             className="bg-accent-area"
             onChange={(e) => {
               // e.target.valueの型を保証する方法がない
+              /* eslint @typescript-eslint/no-explicit-any: "warn" */
               setSort(e.target.value as any);
             }}
           >

@@ -30,7 +30,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           async () => {
             try {
               await db.work.createMany({
-                data: insertingWorks.map(({ episodeCount, ...rest }) => rest),
+                data: insertingWorks.map(
+                  ({ episodeCount: _, ...rest }) => rest,
+                ),
               });
               return insertingWorks;
             } catch (e) {
@@ -55,12 +57,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                   code: "uniqueConstraintFailed" as const,
                   duplicatedWorkTitles,
                 };
-              } catch (e) {
+              } catch (_) {
                 throw "unknownError";
               }
             }
           },
-          (e) => {
+          (_) => {
             return { code: "unknownError" as const };
           },
         ),

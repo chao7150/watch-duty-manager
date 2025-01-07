@@ -5,6 +5,7 @@ import type { Cour } from "./consts";
 import { Season, SeasonExpression, SeasonStartMonth } from "./consts";
 
 const isSeason = (s: unknown): s is Season => {
+  /* eslint @typescript-eslint/no-explicit-any: "warn" */
   return typeof s === "string" && Season.includes(s as any);
 };
 

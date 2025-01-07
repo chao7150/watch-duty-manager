@@ -183,7 +183,7 @@ export const action = async ({
         { message: `${rel.userId} ${rel.workId} ok` },
         { status: 200 },
       );
-    } catch (e) {
+    } catch (_) {
       return json({ message: "db error" }, { status: 400 });
     }
   }
@@ -205,7 +205,7 @@ export const action = async ({
         { message: `${rel.userId} ${rel.tagId} ok` },
         { status: 200 },
       );
-    } catch (e) {
+    } catch (_) {
       return json({ message: "db error" }, { status: 500 });
     }
   }

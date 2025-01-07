@@ -22,13 +22,13 @@ test("interval2CourList", () => {
     interval2CourList(
       new Date("2022-01-01T00:00:00+0900"),
       new Date("2022-07-01T03:59:00+0900"),
-    ).map(([label, _]) => label),
+    ).map(([label]) => label),
   ).toStrictEqual(["2022秋", "2022夏", "2022春", "2022冬", "2021秋"]);
   expect(
     interval2CourList(
       new Date("2022-01-01T04:00:00+0900"),
       new Date("2022-07-01T04:00:00+0900"),
-    ).map(([label, _]) => label),
+    ).map(([label]) => label),
   ).toStrictEqual(["2022秋", "2022夏", "2022春", "2022冬"]);
 });
 test("startOf4OriginDay", () => {

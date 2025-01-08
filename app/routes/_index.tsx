@@ -6,8 +6,8 @@ import { useInterval } from "react-use";
 import type { PrismaClient } from "@prisma/client";
 import { addDays, addHours, subDays, subHours } from "date-fns";
 import "firebase/compat/auth";
-import * as A from "fp-ts/Apply";
-import * as T from "fp-ts/Task";
+import * as A from "fp-ts/lib/Apply.js";
+import * as T from "fp-ts/lib/Task.js";
 import {
   CartesianGrid,
   Legend,

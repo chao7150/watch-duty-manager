@@ -49,6 +49,7 @@ function isBotRequest(userAgent: string | null) {
 
   // isbot < 3.8.0
   if ("default" in isbotModule && typeof isbotModule.default === "function") {
+    // @ts-expect-error
     return isbotModule.default(userAgent);
   }
 

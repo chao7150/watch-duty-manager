@@ -9,7 +9,7 @@ import * as TabList from "~/components/TabList";
 
 export const bindUrl = urlFrom`/my`.narrowing<{ "?query": { cour?: string } }>;
 
-const Component: React.FC = () => {
+export default function Component() {
   const matches = useMatches();
   return (
     <div>
@@ -41,6 +41,4 @@ const Component: React.FC = () => {
       <Outlet />
     </div>
   );
-};
-
-export default Component;
+}

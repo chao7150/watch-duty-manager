@@ -1,5 +1,5 @@
 import { subHours } from "date-fns";
-import { pipe } from "fp-ts/function";
+import { pipe } from "fp-ts/lib/function.js";
 
 import type { Cour } from "./consts";
 import { Season, SeasonExpression, SeasonStartMonth } from "./consts";

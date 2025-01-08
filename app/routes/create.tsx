@@ -1,4 +1,4 @@
-import { json } from "@remix-run/node";
+import { data } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 import type { ActionFunctionArgs } from "@remix-run/server-runtime";
 import { redirect } from "@remix-run/server-runtime";
@@ -6,12 +6,13 @@ import { redirect } from "@remix-run/server-runtime";
 import { useState } from "react";
 
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import * as T from "fp-ts/Task";
-import * as TE from "fp-ts/TaskEither";
-import * as F from "fp-ts/function";
+import * as T from "fp-ts/lib/Task.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
+import * as F from "fp-ts/lib/function.js";
 
 import * as WorkBulkCreateForm from "~/components/WorkBulkCreateForm";
-import * as WorkCreateForm from "~/components/WorkCreateForm";
+import { serverValidator as WorkCreateFormServerValidator } from "~/components/work-create-form/action.server";
+import { Component as WorkCreateFormComponent } from "~/components/work-create-form/component";
 
 import { db } from "~/utils/db.server";
 
@@ -126,7 +127,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           switch (e.code) {
             case "uniqueConstraintFailed":
               return T.of(
-                json(
+                data(
                   {
                     errorMessage: `以下の作品はすでに登録されています: ${e.duplicateWorkTitles.join(
                       ", ",
@@ -137,14 +138,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               );
             case "episodeCreateError":
               return T.of(
-                json(
+                data(
                   { errorMessage: "話数の登録に失敗しました" },
                   { status: 500 },
                 ),
               );
             case "empty":
               return T.of(
-                json(
+                data(
                   { errorMessage: "登録しようとしている作品が0件です" },
                   { status: 500 },
                 ),
@@ -152,7 +153,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             case "unknownError":
             case "worksObtainError":
               return T.of(
-                json(
+                data(
                   { errorMessage: "不明なエラーが発生しました" },
                   { status: 500 },
                 ),
@@ -170,7 +171,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
   return await F.pipe(
     formData,
-    WorkCreateForm.serverValidator,
+    WorkCreateFormServerValidator,
     TE.fromEither,
     TE.chain(({ episodeDate, ...work }) => {
       return TE.tryCatch(
@@ -183,7 +184,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           }),
           episodeDate,
         }),
-        (e) => json({ errorMessage: e as string }, { status: 409 }),
+        (e) => data({ errorMessage: e as string }, { status: 409 }),
       );
     }),
     TE.chain(({ returnedWork, episodeDate }) => {
@@ -201,7 +202,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           return returnedWork;
         },
         () =>
-          json({ errorMessage: "episode creation failed" }, { status: 500 }),
+          data({ errorMessage: "episode creation failed" }, { status: 500 }),
       );
     }),
     TE.foldW(
@@ -228,7 +229,7 @@ export default function Create() {
           {bulkCreateMode ? (
             <WorkBulkCreateForm.Component />
           ) : (
-            <WorkCreateForm.Component />
+            <WorkCreateFormComponent />
           )}
         </div>
       </section>

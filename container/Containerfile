@@ -13,8 +13,8 @@ COPY --from=builder /usr/src/app/package.json ./package.json
 RUN npm install --omit=dev
 COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /usr/src/app/build ./build
-COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/build/server ./build/server
+COPY --from=builder /usr/src/app/build/client ./build/client
 COPY --from=builder /usr/src/app/prisma ./prisma
 
 HEALTHCHECK CMD wget --quiet --spider http://localhost:3000/status || exit 1

@@ -8,7 +8,6 @@ import {
   isRouteErrorResponse,
   Link,
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -21,7 +20,7 @@ import { useState } from "react";
 
 import { bindUrl as bindUrlForMy } from "~/routes/my";
 import { bindUrl as bindUrlForWorks } from "~/routes/works._index";
-import globalStylesUrl from "~/styles/global.css";
+import globalStylesUrl from "~/styles/global.css?url";
 
 import { cour2symbol, date2cour } from "~/domain/cour/util";
 
@@ -30,7 +29,7 @@ import * as MobileNavigation from "~/components/mobileNavigation";
 
 import { getUserId } from "~/utils/session.server";
 
-import styles from "./tailwind.css";
+import styles from "./tailwind.css?url";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
@@ -98,7 +97,6 @@ function Document({
         {children}
         <ScrollRestoration />
         <Scripts />
-        {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
     </html>
   );

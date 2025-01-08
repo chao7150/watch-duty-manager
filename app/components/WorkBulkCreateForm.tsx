@@ -1,7 +1,7 @@
 import { Form } from "@remix-run/react";
 
-import * as E from "fp-ts/Either";
-import * as F from "fp-ts/function";
+import * as E from "fp-ts/lib/Either.js";
+import * as F from "fp-ts/lib/function.js";
 
 import { isNonEmptyString } from "~/utils/validator";
 

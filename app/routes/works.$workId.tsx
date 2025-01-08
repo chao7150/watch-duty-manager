@@ -1,11 +1,11 @@
 import type { LoaderFunctionArgs, TypedResponse } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { data } from "@remix-run/node";
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
 
 import { useCallback, useState } from "react";
 
-import * as E from "fp-ts/Either";
-import * as F from "fp-ts/function";
+import * as E from "fp-ts/lib/Either.js";
+import * as F from "fp-ts/lib/function.js";
 import {
   ResponsiveContainer,
   LineChart,
@@ -26,8 +26,12 @@ import * as TrashIcon from "~/components/Icons/Trash";
 import * as Tag from "~/components/Tag";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
-import { EpisodeDateRegistrationTabPanel } from "~/components/WorkCreateForm";
-import * as WorkEditForm from "~/components/WorkEditForm";
+import { EpisodeDateRegistrationTabPanel } from "~/components/work-create-form/component";
+import { serverAction as WorkEditFormServerAction } from "~/components/work-edit-form/action.server";
+import {
+  Component as WorkEditFormComponent,
+  type Props as WorkEditFormProps,
+} from "~/components/work-edit-form/component";
 
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
@@ -122,10 +126,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   };
 };
 
-export const action = async ({
-  request,
-  params,
-}: LoaderFunctionArgs): Promise<TypedResponse<{ message: string }>> => {
+export const action = async ({ request, params }: LoaderFunctionArgs) => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 
@@ -144,7 +145,7 @@ export const action = async ({
         data: { count: { decrement: 1 } },
       }),
     ]);
-    return json({ message: "success" }, { status: 200 });
+    return data({ message: "success" }, { status: 200 });
   }
   if (formData.get("_action") === "addEpisodes") {
     const { episodeDate: _episodeDate, offset: _offset } = extractParams(
@@ -160,14 +161,14 @@ export const action = async ({
         publishedAt: date,
       })),
     });
-    return json({ message: "success" }, { status: 200 });
+    return data({ message: "success" }, { status: 200 });
   }
   if (formData.get("_action") === "unsubscribe") {
     const userId = await requireUserId(request);
     await db.subscribedWorksOnUser.delete({
       where: { userId_workId: { userId, workId } },
     });
-    return json({ message: "success" }, { status: 200 });
+    return data({ message: "success" }, { status: 200 });
   }
   if (formData.get("_action") === "subscribe") {
     const userId = await requireUserId(request);
@@ -179,12 +180,12 @@ export const action = async ({
           workId,
         },
       });
-      return json(
+      return data(
         { message: `${rel.userId} ${rel.workId} ok` },
         { status: 200 },
       );
     } catch (_) {
-      return json({ message: "db error" }, { status: 400 });
+      return data({ message: "db error" }, { status: 400 });
     }
   }
   if (formData.get("_action") === "addPersonalTag") {
@@ -201,20 +202,20 @@ export const action = async ({
           tagId,
         },
       });
-      return json(
+      return data(
         { message: `${rel.userId} ${rel.tagId} ok` },
         { status: 200 },
       );
     } catch (_) {
-      return json({ message: "db error" }, { status: 500 });
+      return data({ message: "db error" }, { status: 500 });
     }
   }
   return F.pipe(
-    await WorkEditForm.serverAction(request, workId, formData),
+    await WorkEditFormServerAction(request, workId, formData),
     E.match(
-      ({ errorMessage, status }) => json({ message: errorMessage }, { status }),
+      ({ errorMessage, status }) => data({ message: errorMessage }, { status }),
       ({ successMessage, status }) =>
-        json({ message: successMessage }, { status }),
+        data({ message: successMessage }, { status }),
     ),
   );
 };
@@ -225,7 +226,7 @@ export default function Component() {
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
   const { loggedIn, work, subscribed, rating, ratings, workTags } =
     useLoaderData<typeof loader>();
-  const defaultValueMap: WorkEditForm.Props = {
+  const defaultValueMap: WorkEditFormProps = {
     workId: work.id,
     workInput: {
       workTitle: { defaultValue: work.title ?? "" },
@@ -270,7 +271,7 @@ export default function Component() {
                 </button>
               </header>
               {editMode ? (
-                <WorkEditForm.Component {...defaultValueMap} />
+                <WorkEditFormComponent {...defaultValueMap} />
               ) : (
                 <dl className="mt-2">
                   <dt>尺</dt>

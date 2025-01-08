@@ -1,8 +1,23 @@
 /// <reference types="vitest" />
 // Configure Vitest (https://vitest.dev/config/)
 import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { installGlobals } from "@remix-run/node";
+import { vitePlugin as remix } from "@remix-run/dev";
+import { cjsInterop } from "vite-plugin-cjs-interop";
+
+installGlobals();
 
 export default defineConfig({
+  plugins: [
+    remix({
+      ignoredRouteFiles: ["**/*.test.ts"],
+    }),
+    tsconfigPaths(),
+    cjsInterop({
+      dependencies: ["url-from", "react-use", "firebase-admin"],
+    }),
+  ],
   resolve: {
     alias: {
       // tsconfigのpathと合わせている

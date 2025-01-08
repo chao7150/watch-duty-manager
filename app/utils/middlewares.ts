@@ -1,8 +1,8 @@
 import { redirect } from "@remix-run/node";
 import { type DataFunctionArgs } from "@remix-run/server-runtime";
 
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 
 import { getUserSession } from "./session.server";
 

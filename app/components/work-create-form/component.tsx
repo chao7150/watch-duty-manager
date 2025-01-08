@@ -1,4 +1,4 @@
-import { json } from "@remix-run/node";
+import { data } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 
 import { useEffect, useState } from "react";
@@ -6,66 +6,14 @@ import { Calendar } from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
 import TimePicker from "react-multi-date-picker/plugins/time_picker";
 
-import * as E from "fp-ts/Either";
-import * as F from "fp-ts/function";
+import * as E from "fp-ts/lib/Either.js";
+import * as F from "fp-ts/lib/function.js";
 
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 import { isNonEmptyString } from "~/utils/validator";
 
-import * as TabPanel from "./TabPanel";
-import * as WorkInput from "./Work/Input";
-
-export const serverValidator = (
-  formData: FormData,
-): E.Either<
-  Response,
-  {
-    title: string;
-    durationMin?: number;
-    episodeDate: Date[];
-    officialSiteUrl?: string;
-    twitterId?: string;
-    hashtag?: string;
-  }
-> => {
-  return F.pipe(
-    formData,
-    (formData) => {
-      const title = formData.get("title");
-      return isNonEmptyString(title)
-        ? E.right({ formData, title })
-        : E.left("title must not be empty");
-    },
-    E.chain(({ formData, ...rest }) => {
-      const episodeDate = formData.get("episodeDate");
-      return isNonEmptyString(episodeDate)
-        ? E.right({
-            formData,
-            episodeDate: episodeDate.split(",").map((d) => new Date(d)),
-            ...rest,
-          })
-        : E.left("episodeDate must not be empty");
-    }),
-    E.bimap(
-      (l) => json({ errorMessage: l }, { status: 400 }),
-      ({ title, episodeDate, formData }) => {
-        const optionals = nonEmptyStringOrUndefined(
-          Object.fromEntries(formData),
-          ["officialSiteUrl", "twitterId", "hashtag", "durationMin"],
-        );
-        return {
-          title,
-          episodeDate,
-          ...optionals,
-          durationMin:
-            optionals.durationMin && optionals.durationMin !== ""
-              ? Number(optionals.durationMin)
-              : undefined,
-        };
-      },
-    ),
-  );
-};
+import * as TabPanel from "../TabPanel";
+import * as WorkInput from "../Work/Input";
 
 export const MultipleDatePicker: React.FC<{
   dates: Date[];

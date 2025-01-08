@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { data } from "@remix-run/node";
 import { Outlet, useFetcher, useLoaderData } from "@remix-run/react";
 
 import urlFrom from "url-from";
@@ -35,7 +35,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const userId = await requireUserId(request);
     const text = formData.get("text");
     if (typeof text !== "string" || text === "") {
-      return json(
+      return data(
         { errorMessage: "text must not be empty" } satisfies ActionData,
         { status: 400 },
       );
@@ -47,12 +47,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           userId,
         },
       });
-      return json({
+      return data({
         successMessage: `${res.text}の登録に成功しました`,
       } satisfies ActionData);
     } catch (e) {
       console.log(e);
-      return json(
+      return data(
         { errorMessage: "不明なエラーが発生しました" } satisfies ActionData,
         { status: 500 },
       );

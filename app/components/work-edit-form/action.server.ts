@@ -1,13 +1,8 @@
-import { useFetcher } from "@remix-run/react";
-
-import * as E from "fp-ts/Either";
-import type { action } from "~/routes/works.$workId";
+import * as E from "fp-ts/lib/Either.js";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
-
-import * as WorkInput from "./Work/Input";
 
 export const serverAction = async (
   request: Request,
@@ -87,29 +82,4 @@ export const serverAction = async (
     console.log(e);
     return E.left({ errorMessage: "internal server error", status: 500 });
   }
-};
-
-export type Props = {
-  workId: string | number;
-  workInput: WorkInput.Props;
-};
-
-export const Component: React.FC<Props> = ({ workId, workInput }) => {
-  const fetcher = useFetcher<typeof action>();
-  return (
-    <section>
-      {fetcher.data && <p>{fetcher.data.message}</p>}
-      <fetcher.Form method="POST" action={`/works/${workId}`}>
-        <WorkInput.Component {...workInput} />
-        <button
-          className="mt-4 bg-accent-area rounded-full py-1 px-3 ml-auto"
-          type="submit"
-          name="_action"
-          value="edit"
-        >
-          送信
-        </button>
-      </fetcher.Form>
-    </section>
-  );
 };

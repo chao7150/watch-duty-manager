@@ -13,8 +13,8 @@
     "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
     "start": "remix-serve ./build/server/index.js",
     "test": "vitest run",
-    "test:tsc": "tsc -b",
-    "test:tsc:watch": "tsc -b --watch"
+    "test:tsc": "tsc --noEmit --incremental",
+    "test:tsc:watch": "tsc --noEmit --watch --incremental"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",

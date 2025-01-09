@@ -17,7 +17,6 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import * as My_Tag_$TagId from "~/routes/my.tag.$tagId";
 
 import {
   cour2expression,
@@ -30,7 +29,6 @@ import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
 
 import * as CourSelect from "~/components/CourSelect";
-import * as Tag from "~/components/Tag";
 
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -84,9 +82,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
       users: {
         where: { userId },
-        include: {
-          TagsOnSubscription: { include: { tag: true } },
-        },
       },
     },
   });
@@ -117,11 +112,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     },
     _count: { rating: true },
   });
-  const tagsOnUserPromise = await db.tag.findMany({
-    where: {
-      userId,
-    },
-  });
 
   const [
     cours,
@@ -129,7 +119,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     bestEpisodesOnUser,
     quarterMetrics,
     episodeRatingDistribution,
-    tagsOnUser,
   ] = await Promise.all([
     getCourList(db),
     watchingWorksPromise,
@@ -143,7 +132,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       userId,
     })(),
     episodeRatingDistributionPromise,
-    tagsOnUserPromise,
   ]);
   const filledEpisodeRatingDistribution: Array<{
     rating: number;
@@ -179,7 +167,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     bestEpisodesOnUser,
     quarterMetrics,
     filledEpisodeRatingDistribution,
-    tagsOnUser,
   };
 };
 
@@ -191,7 +178,6 @@ const Component = () => {
     bestEpisodesOnUser,
     quarterMetrics,
     filledEpisodeRatingDistribution,
-    tagsOnUser,
   } = useLoaderData<typeof loader>();
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
@@ -227,29 +213,6 @@ const Component = () => {
               location.href = `/my?cour=${value}`;
             }}
           />
-          <select
-            className="bg-accent-area"
-            onChange={(e) =>
-              setFiterTag(
-                e.target.value === "all"
-                  ? "all"
-                  : e.target.value === "none"
-                    ? "none"
-                    : Number(e.target.value),
-              )
-            }
-            value={filterTag}
-          >
-            <option value="all">全てのタグ</option>
-            <option value="none">タグなし</option>
-            {tagsOnUser.map((t) => {
-              return (
-                <option key={t.id} value={t.id}>
-                  {t.text}
-                </option>
-              );
-            })}
-          </select>
         </div>
 
         <section className="flex gap-4">
@@ -281,19 +244,9 @@ const Component = () => {
               return b.sortKey - a.sortKey;
             })
             .map((work) => {
-              const hidden =
-                filterTag === "all"
-                  ? false
-                  : filterTag === "none"
-                    ? work.users[0].TagsOnSubscription.length !== 0
-                    : !work.users[0].TagsOnSubscription.map(
-                        (t) => t.tagId,
-                      ).includes(filterTag ?? -1);
               return (
                 <li
-                  className={`flex gap-4 items-center ${
-                    hidden ? "hidden" : ""
-                  }`}
+                  className={`flex gap-4 items-center`}
                   key={work.id}
                 >
                   <meter
@@ -314,19 +267,6 @@ const Component = () => {
                   <Link to={bindUrlForWorks$WorkId({ workId: work.id })}>
                     {work.title}
                   </Link>
-                  <ul className="flex gap-2">
-                    {work.users[0].TagsOnSubscription.map((tos) => {
-                      return (
-                        <li key={tos.tagId}>
-                          <Tag.Component
-                            id={tos.tag.id}
-                            text={tos.tag.text}
-                            href={My_Tag_$TagId.bindUrl({ tagId: tos.tag.id })}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
                 </li>
               );
             })}

@@ -16,3 +16,4 @@ dump.sql
 /playwright-report/
 /playwright/.cache/
 /example
+*.tsbuildinfo

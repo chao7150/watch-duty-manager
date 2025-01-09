@@ -16,28 +16,6 @@ export default function Component() {
       <header className="flex gap-4">
         <h2>マイページ</h2>
       </header>
-      <TabList.Component
-        type="anchor"
-        items={[
-          {
-            id: "dashboard",
-            tabText: "ダッシュボード",
-            href: bindUrlForMy({
-              "?query": { cour: cour2symbol(date2cour(new Date())) },
-            }),
-          },
-          {
-            id: "tag",
-            tabText: "パーソナルタグ",
-            href: "/my/tag",
-          },
-        ]}
-        selectedTabId={
-          matches.some((match) => match.pathname === "/my/tag")
-            ? "tag"
-            : "dashboard"
-        }
-      />
       <Outlet />
     </div>
   );

@@ -45,26 +45,8 @@ model SubscribedWorksOnUser {
   userId             String
   work               Work                 @relation(fields: [workId], references: [id])
   workId             Int
-  TagsOnSubscription TagsOnSubscription[]
 
   @@id(fields: [userId, workId])
-}
-
-model TagsOnSubscription {
-  userId               String
-  workId               Int
-  tagId                Int
-  userWorkSubscription SubscribedWorksOnUser @relation(fields: [userId, workId], references: [userId, workId], onDelete: Cascade, onUpdate: Cascade)
-  tag                  Tag                   @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id(fields: [userId, workId, tagId])
-}
-
-model Tag {
-  id                 Int                  @id @default(autoincrement())
-  userId             String
-  text               String
-  TagsOnSubscription TagsOnSubscription[]
 }
 
 model WatchedEpisodesOnUser {
@@ -78,17 +60,3 @@ model WatchedEpisodesOnUser {
 
   @@id(fields: [userId, workId, count])
 }
-
-// model User {
-//   id        String   @id @default(uuid())
-//   name      String
-//   createdAt DateTime @default(now())
-//   posts     Post[]
-// }
-
-// model Post {
-//   id       Int     @id @default(autoincrement())
-//   content  String?
-//   author   User    @relation(fields: [authorId], references: [id])
-//   authorId String
-// }

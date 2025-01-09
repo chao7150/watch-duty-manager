@@ -17,13 +17,11 @@ import {
   Line,
 } from "recharts";
 import urlFrom from "url-from";
-import * as My_Tag_$TagId from "~/routes/my.tag.$tagId";
 
 import * as EpisodeWatchForm from "~/components/Episode/WatchForm";
 import * as CloseIcon from "~/components/Icons/Close";
 import * as EditIcon from "~/components/Icons/Edit";
 import * as TrashIcon from "~/components/Icons/Trash";
-import * as Tag from "~/components/Tag";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
 import { EpisodeDateRegistrationTabPanel } from "~/components/work-create-form/component";
@@ -47,7 +45,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     include: {
       users: {
         where: { userId },
-        include: { TagsOnSubscription: { include: { tag: true } } },
       },
       episodes: {
         orderBy: { count: "asc" },
@@ -120,9 +117,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
-    workTags: work.users[0]
-      ? work.users[0].TagsOnSubscription.map((t) => t.tag)
-      : undefined,
   };
 };
 
@@ -188,28 +182,6 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
       return data({ message: "db error" }, { status: 400 });
     }
   }
-  if (formData.get("_action") === "addPersonalTag") {
-    const userId = await requireUserId(request);
-    const { tagId: _tagId } = extractParams(Object.fromEntries(formData), [
-      "tagId",
-    ]);
-    const tagId = parseInt(_tagId, 10);
-    try {
-      const rel = await db.tagsOnSubscription.create({
-        data: {
-          userId,
-          workId,
-          tagId,
-        },
-      });
-      return data(
-        { message: `${rel.userId} ${rel.tagId} ok` },
-        { status: 200 },
-      );
-    } catch (_) {
-      return data({ message: "db error" }, { status: 500 });
-    }
-  }
   return F.pipe(
     await WorkEditFormServerAction(request, workId, formData),
     E.match(
@@ -224,7 +196,7 @@ export default function Component() {
   const [editMode, setEditMode] = useState(false);
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, work, subscribed, rating, ratings, workTags } =
+  const { loggedIn, work, subscribed, rating, ratings } =
     useLoaderData<typeof loader>();
   const defaultValueMap: WorkEditFormProps = {
     workId: work.id,
@@ -234,9 +206,6 @@ export default function Component() {
       officialSiteUrl: { defaultValue: work.officialSiteUrl ?? "" },
       twitterId: { defaultValue: work.twitterId ?? "" },
       hashtag: { defaultValue: work.hashtag ?? "" },
-      personalTags:
-        workTags &&
-        workTags.flatMap((t) => (t !== null ? [t] : [])).map((t) => t.id),
     },
   };
 
@@ -300,23 +269,6 @@ export default function Component() {
                         />
                       </span>
                     )}
-                  </dd>
-                  <dt>パーソナルタグ</dt>
-                  <dd>
-                    <ul className="flex gap-2">
-                      {workTags &&
-                        workTags
-                          .flatMap((t) => (t !== null ? [t] : []))
-                          .map((t) => (
-                            <li key={t.id}>
-                              <Tag.Component
-                                id={t.id}
-                                text={t.text}
-                                href={My_Tag_$TagId.bindUrl({ tagId: t.id })}
-                              />
-                            </li>
-                          ))}
-                    </ul>
                   </dd>
                   <dt>配信サービス</dt>
                   <dd>

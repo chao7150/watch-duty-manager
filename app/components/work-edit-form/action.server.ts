@@ -1,7 +1,6 @@
 import * as E from "fp-ts/lib/Either.js";
 
 import { db } from "~/utils/db.server";
-import { requireUserId } from "~/utils/session.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 export const serverAction = async (
@@ -22,13 +21,6 @@ export const serverAction = async (
     Object.fromEntries(formData),
     ["officialSiteUrl", "twitterId", "hashtag", "durationMin"],
   );
-  const tags = Object.keys(Object.fromEntries(formData)).flatMap((k) => {
-    const match = k.match(/personal-tag-(\d+)$/)?.[1];
-    if (match !== undefined) {
-      return [Number(match)];
-    }
-    return [];
-  });
 
   try {
     const work = await db.work.update({
@@ -43,36 +35,6 @@ export const serverAction = async (
             : undefined,
       },
     });
-
-    const userId = await requireUserId(request);
-    await db.$transaction([
-      ...tags.map((tag) =>
-        db.tagsOnSubscription.upsert({
-          where: {
-            userId_workId_tagId: {
-              userId,
-              workId,
-              tagId: tag,
-            },
-          },
-          create: {
-            userId,
-            workId,
-            tagId: tag,
-          },
-          update: {},
-        }),
-      ),
-      db.tagsOnSubscription.deleteMany({
-        where: {
-          tagId: {
-            notIn: tags,
-          },
-          userId,
-          workId,
-        },
-      }),
-    ]);
 
     return E.right({
       successMessage: `${work.title} is successfully updated`,

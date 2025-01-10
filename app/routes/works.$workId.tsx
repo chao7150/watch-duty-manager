@@ -242,47 +242,54 @@ export default function Component() {
               {editMode ? (
                 <WorkEditFormComponent {...defaultValueMap} />
               ) : (
-                <dl className="mt-2">
+                <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
                   <dt>尺</dt>
                   <dd>{work.durationMin}分</dd>
                   <dt>公式サイト</dt>
                   <dd>
-                    <a href={work.officialSiteUrl ?? undefined}>
+                    <a
+                      href={work.officialSiteUrl ?? undefined}
+                      className="hover:underline"
+                    >
                       {work.officialSiteUrl}
                     </a>
                   </dd>
                   <dt>公式ツイッター</dt>
                   <dd>
-                    <a href={`https://twitter.com/${work.twitterId}`}>
+                    <a
+                      href={`https://twitter.com/${work.twitterId}`}
+                      className="hover:underline"
+                    >
                       {work.twitterId}
                     </a>
                   </dd>
                   <dt>ハッシュタグ</dt>
                   <dd>
                     {work.hashtag !== null && work.hashtag !== "" && (
-                      <span>
-                        <a href={`https://twitter.com/hashtag/${work.hashtag}`}>
+                      <span className="flex items-center">
+                        <a
+                          href={`https://twitter.com/hashtag/${work.hashtag}`}
+                          className="hover:underline"
+                        >
                           <span>#{work.hashtag}</span>
                         </a>
-                        <WorkHashtagCopyButton.Component
-                          hashtag={work.hashtag}
-                        />
+                        <span className="w-5 h-6">
+                          <WorkHashtagCopyButton.Component
+                            hashtag={work.hashtag}
+                          />
+                        </span>
                       </span>
                     )}
                   </dd>
                   <dt>配信サービス</dt>
                   <dd>
-                    <ul>
-                      <li className="list-disc list-inside">
-                        <Link
-                          to={`https://animestore.docomo.ne.jp/animestore/sch_pc?searchKey=${encodeURIComponent(
-                            work.title,
-                          )}&vodTypeList=svod_tvod`}
-                        >
-                          dアニメストア
-                        </Link>
-                      </li>
-                    </ul>
+                    <Link
+                      to={`https://animestore.docomo.ne.jp/animestore/sch_pc?searchKey=${encodeURIComponent(
+                        work.title,
+                      )}&vodTypeList=svod_tvod`}
+                    >
+                      dアニメストア
+                    </Link>
                   </dd>
                 </dl>
               )}

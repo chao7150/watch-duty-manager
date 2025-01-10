@@ -2,7 +2,7 @@ import * as ClipboardCopyIcon from "~/components/Icons/ClipboardCopy";
 
 export type Props = { hashtag: string };
 
-export const Component: React.VFC<Props> = ({ hashtag }) => {
+export const Component: React.FC<Props> = ({ hashtag }) => {
   return (
     <button
       type="button"

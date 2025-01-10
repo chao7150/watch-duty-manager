@@ -28,12 +28,16 @@
     "firebaseui": "^6.1.0",
     "fp-ts": "^2.16.9",
     "isbot": "^5.1.19",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "18.3.0-canary-1dba980e1f-20241220",
+    "react-dom": "18.3.0-canary-1dba980e1f-20241220",
     "react-multi-date-picker": "^4.5.2",
     "react-use": "^17.6.0",
     "recharts": "^2.15.0",
     "url-from": "^1.0.0"
+  },
+  "overrides": {
+    "react": "18.3.0-canary-1dba980e1f-20241220",
+    "react-dom": "18.3.0-canary-1dba980e1f-20241220"
   },
   "devDependencies": {
     "@remix-run/dev": "2.15.2",

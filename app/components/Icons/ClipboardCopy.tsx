@@ -1,7 +1,7 @@
 export const Component = () => {
   return (
     <svg
-      className="w-6 h-6"
+      className="w-full h-full"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

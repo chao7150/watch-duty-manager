@@ -32,7 +32,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ text, icon, onClick, href }) => {
         className="w-full flex flex-row gap-1 hover:bg-accent-area py-1"
         target={href ? "_blank" : undefined}
       >
-        {icon}
+        <div className="w-6 h-6">{icon}</div>
         <span className="whitespace-nowrap">{text}</span>
       </OuterComponent>
     </li>

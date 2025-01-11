@@ -302,7 +302,6 @@ export default function Component() {
                 <XAxis dataKey="count" domain={[1, "dataMax"]} />
                 <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
                 <Tooltip />
-                <Legend />
                 <Line type="monotone" dataKey="rating" />
               </LineChart>
             </ResponsiveContainer>
@@ -345,7 +344,7 @@ export default function Component() {
                             "ja",
                           )}
                         </td>
-                        <td className="ml-2">
+                        <td className="pl-2">
                           {new Date(episode.publishedAt) < new Date() && (
                             <EpisodeWatchForm.Component
                               workId={episode.workId}

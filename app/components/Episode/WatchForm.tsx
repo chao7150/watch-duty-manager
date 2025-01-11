@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import * as EyeIcon from "../Icons/Eye";
 import * as EyeOffIcon from "../Icons/EyeOff";
+import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
 
 export type Props = {
   workId: number;
@@ -14,9 +15,10 @@ export type Props = {
 export const Component: React.FC<Props> = ({ workId, count, watched }) => {
   const fetcher = useFetcher();
   const [ratingEnabled, setRatingEnabled] = useState(true);
+  const { ref, onToggle } = useCloseDetailsOnClickAway();
 
   return (
-    <details className="relative">
+    <details ref={ref} onToggle={onToggle} className="relative">
       <summary className="cursor-pointer list-none">
         {watched ? <EyeOffIcon.Component /> : <EyeIcon.Component />}
       </summary>

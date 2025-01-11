@@ -52,7 +52,7 @@ hr {
   min-height: calc(100vh - env(safe-area-inset-bottom));
 }
 
-.remix-app>* {
+.remix-app > * {
   width: 100%;
 }
 
@@ -105,8 +105,7 @@ hr {
   padding-bottom: var(--space);
 }
 
-@media print,
-screen and (min-width: 640px) {
+@media print, screen and (min-width: 640px) {
   .remix__page {
     --gap: 2rem;
     grid-auto-rows: unset;
@@ -120,25 +119,25 @@ screen and (min-width: 640px) {
   }
 }
 
-.remix__page>main> :first-child {
+.remix__page > main > :first-child {
   margin-top: 0;
 }
 
-.remix__page>main> :last-child {
+.remix__page > main > :last-child {
   margin-bottom: 0;
 }
 
-.remix__page>aside {
+.remix__page > aside {
   margin: 0;
   padding: 1.5ch 2ch;
   border: solid 1px var(--color-border);
   border-radius: 0.5rem;
 }
 
-.remix__page>aside> :first-child {
+.remix__page > aside > :first-child {
   margin-top: 0;
 }
 
-.remix__page>aside> :last-child {
+.remix__page > aside > :last-child {
   margin-bottom: 0;
 }

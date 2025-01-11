@@ -4,6 +4,7 @@ import * as ClipboardCopyIcon from "../Icons/ClipboardCopy";
 import * as ExternalLinkIcon from "../Icons/ExternalLink";
 import * as FilterIcon from "../Icons/Filter";
 import * as MenuIcon from "../Icons/Menu";
+import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
 import * as WatchForm from "./WatchForm";
 
 export type Props = {
@@ -47,11 +48,11 @@ export const Component: React.FC<Props> = ({
   onClickWatchUnready,
   published,
 }) => {
-  const ref = useRef<HTMLDetailsElement>(null);
+  const { ref, onToggle } = useCloseDetailsOnClickAway();
   return (
     <div className="grid grid-cols-2 gap-2">
       <div>
-        <details ref={ref} className="relative">
+        <details ref={ref} onToggle={onToggle} className="relative">
           <summary className="cursor-pointer list-none">
             <MenuIcon.Component />
           </summary>

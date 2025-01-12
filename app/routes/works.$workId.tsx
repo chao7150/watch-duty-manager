@@ -200,7 +200,7 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
 
 export default function Component() {
   const [editMode, setEditMode] = useState(false);
-  const [episodesEditMode, setEpisodesEditMode] = useState(false);
+  const [_episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
   const { loggedIn, work, subscribed, rating, ratings } =
     useLoaderData<typeof loader>();
@@ -208,6 +208,7 @@ export default function Component() {
     (m) => m.id === "routes/works.$workId.$count",
   );
   const outletId = countMatch && Number(countMatch.params.count);
+  const episodesEditMode = _episodesEditMode && outletId === undefined;
   const defaultValueMap: WorkEditFormProps = {
     workId: work.id,
     workInput: {
@@ -332,86 +333,82 @@ export default function Component() {
               )}
             </button>
           </header>
-          <div className="flex flex-row gap-4 mt-4">
-            <div>
-              <table className="mt-2 border-spacing-2">
-                <thead>
-                  <tr>
-                    <th className="w-9">話数</th>
-                    <th className="w-[10ch]">公開日</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {work.episodes.map((episode) => {
-                    const linkTo =
-                      outletId === episode.count ? "." : `${episode.count}`;
-                    return (
-                      <Fragment key={`${episode.workId}-${episode.count}`}>
-                        <tr>
-                          <td>
-                            <Link to={linkTo} preventScrollReset={true}>
-                              {episode.count}
-                            </Link>
-                          </td>
-                          <td>
-                            <Link to={linkTo} preventScrollReset={true}>
-                              {new Date(episode.publishedAt).toLocaleDateString(
-                                "ja",
-                              )}
-                            </Link>
-                          </td>
-                          <td className="pl-2">
-                            {new Date(episode.publishedAt) < new Date() && (
-                              <EpisodeWatchForm.Component
-                                workId={episode.workId}
-                                count={episode.count}
-                                watched={
-                                  // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
-                                  episode.WatchedEpisodesOnUser
-                                    ? // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
-                                      episode.WatchedEpisodesOnUser.length >= 1
-                                    : false
-                                }
-                              />
+          <div className="flex flex-row gap-4 mt-4 relative">
+            <section>
+              <ul className="mt-2 grid grid-cols-[2.25rem_10ch_24px_auto] gap-x-1">
+                {/* ヘッダー */}
+                <li className="col-span-3 grid grid-cols-subgrid">
+                  <div>話数</div>
+                  <div>公開日</div>
+                  <div></div>
+                </li>
+
+                {work.episodes.map((episode) => {
+                  const linkTo =
+                    outletId === episode.count ? "." : `${episode.count}`;
+                  return (
+                    <Fragment key={`${episode.workId}-${episode.count}`}>
+                      <li
+                        className={`col-span-4 grid grid-cols-subgrid ${outletId === episode.count ? "bg-accent-area" : ""}`}
+                      >
+                        <div>
+                          <Link to={linkTo} preventScrollReset={true}>
+                            {episode.count}
+                          </Link>
+                        </div>
+                        <div>
+                          <Link to={linkTo} preventScrollReset={true}>
+                            {new Date(episode.publishedAt).toLocaleDateString(
+                              "ja",
                             )}
-                          </td>
-                          {episodesEditMode && (
-                            <td className="align-middle">
-                              <Form method="POST">
-                                <input
-                                  type="hidden"
-                                  name="count"
-                                  value={episode.count}
-                                />
-                                <button
-                                  className="align-middle"
-                                  type="submit"
-                                  name="_action"
-                                  value="delete"
-                                  title=""
-                                >
-                                  <TrashIcon.Component />
-                                </button>
-                              </Form>
-                            </td>
+                          </Link>
+                        </div>
+                        <div>
+                          {new Date(episode.publishedAt) < new Date() && (
+                            <EpisodeWatchForm.Component
+                              workId={episode.workId}
+                              count={episode.count}
+                              watched={
+                                // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
+                                episode.WatchedEpisodesOnUser
+                                  ? // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
+                                    episode.WatchedEpisodesOnUser.length >= 1
+                                  : false
+                              }
+                            />
                           )}
-                        </tr>
-                        {outletId === episode.count && (
-                          <tr className="">
-                            <td colSpan={3}>
-                              <div className="my-4 ml-4 max-w-full overflow-auto">
-                                <Outlet />
-                              </div>
-                            </td>
-                          </tr>
+                        </div>
+                        {episodesEditMode && (
+                          <div className="align-middle h-6">
+                            <Form method="POST">
+                              <input
+                                type="hidden"
+                                name="count"
+                                value={episode.count}
+                              />
+                              <button
+                                className="align-middle"
+                                type="submit"
+                                name="_action"
+                                value="delete"
+                                title=""
+                              >
+                                <TrashIcon.Component />
+                              </button>
+                            </Form>
+                          </div>
                         )}
-                      </Fragment>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      </li>
+                      {outletId === episode.count && (
+                        <div className="col-start-5 col-end-6 row-span-10">
+                          <Outlet />
+                        </div>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </ul>
+            </section>
             {episodesEditMode && (
               <section>
                 <h4>話数を追加する</h4>

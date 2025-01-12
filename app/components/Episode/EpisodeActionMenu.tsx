@@ -56,7 +56,7 @@ export const Component: React.FC<Props> = ({
           <summary className="cursor-pointer list-none">
             <MenuIcon.Component />
           </summary>
-          <ul className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2 flex flex-col">
+          <ul className="z-10 absolute left-10 -top-1 shadow-menu p-2 flex flex-col">
             {hashtag !== undefined && hashtag !== "" && (
               <MenuItem
                 text="ハッシュタグをコピー"

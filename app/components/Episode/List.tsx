@@ -83,7 +83,7 @@ export const Component: React.FC<Props> = ({ episodes }) => {
           return (
             <li
               key={`${e.workId}-${e.count}`}
-              className={`pb-4 hover:bg-accent-area ${hidden ? "hidden" : ""}`}
+              className={`rounded-lg pb-4 pt-1 px-1 hover:bg-accent-area ${hidden ? "hidden" : ""}`}
             >
               <Episode.Component
                 {...e}

@@ -130,7 +130,7 @@ export default function Component() {
 
   return (
     <div>
-      <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
+      <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 p-2 shadow-menu">
         <dt>放送日時</dt>
         <dd>{new Date(episode.publishedAt).toLocaleString("ja")}</dd>
         {episode.title && (
@@ -166,7 +166,7 @@ export default function Component() {
           <>
             <dt>あなたの感想</dt>
             <dd>
-              <p className="whitespace-pre-wrap break-words">
+              <p className="whitespace-pre-wrap break-all">
                 {myHistory.comment}
               </p>
             </dd>

@@ -1,18 +1,20 @@
 import { useCallback, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 
+const noOpCallback = () => {};
+
 /**
  * detailsが開かれたときに
  * そのdetailsのuseClickAwayのイベントハンドラをdetailsを閉じる処理に入れ替える
  */
 export const useCloseDetailsOnClickAway = () => {
   const ref = useRef<HTMLDetailsElement>(null);
-  const noOpCallback = useCallback(() => {}, []);
   const closeCallback = useCallback(() => {
     if (ref.current) {
       ref.current.removeAttribute("open");
     }
-  }, [ref]);
+  }, [ref.current]);
+  const [onClickAway, setOnClickAway] = useState({ f: noOpCallback });
   const onToggle = useCallback<React.ReactEventHandler<HTMLDetailsElement>>(
     (_) => {
       if (ref.current === null) {
@@ -26,7 +28,6 @@ export const useCloseDetailsOnClickAway = () => {
     },
     [],
   );
-  const [onClickAway, setOnClickAway] = useState({ f: noOpCallback });
   useClickAway(ref, onClickAway.f);
   return { ref, onToggle };
 };

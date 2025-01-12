@@ -16,19 +16,25 @@ export const Component: React.FC<Props> = ({
   onChange,
 }) => {
   return (
-    <select className="bg-accent-area" onChange={onChange}>
-      <option value="all">全期間</option>
-      {courList.map(([label, date]) => {
-        return (
-          <option
-            key={label}
-            value={date}
-            selected={date === defaultSelectedValue}
-          >
-            {label}
-          </option>
-        );
-      })}
-    </select>
+    <label>
+      <select
+        className="bg-accent-area"
+        onChange={onChange}
+        aria-label="放送クールを選択する"
+      >
+        <option value="all">全期間</option>
+        {courList.map(([label, date]) => {
+          return (
+            <option
+              key={label}
+              value={date}
+              selected={date === defaultSelectedValue}
+            >
+              {label}
+            </option>
+          );
+        })}
+      </select>
+    </label>
   );
 };

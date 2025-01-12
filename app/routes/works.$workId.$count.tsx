@@ -130,51 +130,71 @@ export default function Component() {
 
   return (
     <div>
-      <h3>{episode.count}話</h3>
-      <dl>
+      <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
         <dt>放送日時</dt>
         <dd>{new Date(episode.publishedAt).toLocaleString("ja")}</dd>
-        <dt>タイトル</dt>
-        <dd>
-          <p>{episode.title}</p>
-        </dd>
-        <dt>あらすじ</dt>
-        <dd>
-          <p>{episode.description}</p>
-        </dd>
+        {episode.title && (
+          <>
+            <dt>タイトル</dt>
+            <dd>
+              <p>{episode.title}</p>
+            </dd>
+          </>
+        )}
+        {episode.description && (
+          <>
+            <dt>あらすじ</dt>
+            <dd>
+              <p>{episode.description}</p>
+            </dd>
+          </>
+        )}
+
         {myHistory && (
           <>
             <dt>視聴日時</dt>
             <dd>{new Date(myHistory.createdAt).toLocaleString("ja")}</dd>
           </>
         )}
+        {myHistory && myHistory.rating !== null && (
+          <>
+            <dt>あなたの評価</dt>
+            <dd>{myHistory.rating}点</dd>
+          </>
+        )}
+        {myHistory && myHistory.comment && (
+          <>
+            <dt>あなたの感想</dt>
+            <dd>
+              <p className="whitespace-pre-wrap break-words">
+                {myHistory.comment}
+              </p>
+            </dd>
+          </>
+        )}
+        {otherHistories.map((otherHistory) => {
+          return (
+            <>
+              {otherHistory.rating !== null && (
+                <>
+                  <dt>他の視聴者の評価</dt>
+                  <dd>{otherHistory.rating}点</dd>
+                </>
+              )}
+              {otherHistory.comment && (
+                <>
+                  <dt>他の視聴者の感想</dt>
+                  <dd>
+                    <p className="whitespace-pre-wrap break-words">
+                      {otherHistory.comment}
+                    </p>
+                  </dd>
+                </>
+              )}
+            </>
+          );
+        })}
       </dl>
-      {myHistory && (
-        <section className="mt-4">
-          <h4>あなたの感想</h4>
-          <div className="flex gap-4">
-            <div>{myHistory.rating}点</div>
-            <p className="whitespace-pre-wrap">{myHistory.comment}</p>
-          </div>
-        </section>
-      )}
-      {otherHistories.length > 0 && (
-        <section className="mt-4">
-          <h4>他の視聴者の感想</h4>
-          <ul>
-            {otherHistories.map((w) => {
-              return (
-                <li key={w.comment}>
-                  <div className="flex gap-4">
-                    <div>{w.rating}点</div>
-                    <p className="whitespace-pre-wrap">{w.comment}</p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }

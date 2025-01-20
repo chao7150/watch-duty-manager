@@ -145,7 +145,7 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
         data: { count: { decrement: 1 } },
       }),
     ]);
-    return data({ message: "success" }, { status: 200 });
+    return data({ message: "success", hasError: false }, { status: 200 });
   }
   if (formData.get("_action") === "addEpisodes") {
     const { episodeDate: _episodeDate, offset: _offset } = extractParams(
@@ -161,14 +161,14 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
         publishedAt: date,
       })),
     });
-    return data({ message: "success" }, { status: 200 });
+    return data({ message: "success", hasError: false }, { status: 200 });
   }
   if (formData.get("_action") === "unsubscribe") {
     const userId = await requireUserId(request);
     await db.subscribedWorksOnUser.delete({
       where: { userId_workId: { userId, workId } },
     });
-    return data({ message: "success" }, { status: 200 });
+    return data({ message: "success", hasError: false }, { status: 200 });
   }
   if (formData.get("_action") === "subscribe") {
     const userId = await requireUserId(request);
@@ -181,19 +181,21 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
         },
       });
       return data(
-        { message: `${rel.userId} ${rel.workId} ok` },
+        { message: `${rel.userId} ${rel.workId} ok`, hasError: false },
         { status: 200 },
       );
     } catch (_) {
-      return data({ message: "db error" }, { status: 400 });
+      return data({ message: "db error", hasError: true }, { status: 400 });
     }
   }
+  // _action === "edit"
   return F.pipe(
     await WorkEditFormServerAction(request, workId, formData),
     E.match(
-      ({ errorMessage, status }) => data({ message: errorMessage }, { status }),
+      ({ errorMessage, status }) =>
+        data({ message: errorMessage, hasError: true }, { status }),
       ({ successMessage, status }) =>
-        data({ message: successMessage }, { status }),
+        data({ message: successMessage, hasError: false }, { status }),
     ),
   );
 };
@@ -218,6 +220,9 @@ export default function Component() {
       twitterId: { defaultValue: work.twitterId ?? "" },
       hashtag: { defaultValue: work.hashtag ?? "" },
     },
+    onSubmitSuccess: () => {
+      setEditMode(false);
+    }
   };
 
   return (

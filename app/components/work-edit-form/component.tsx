@@ -1,5 +1,7 @@
 import { useFetcher } from "@remix-run/react";
 
+import { useEffect } from "react";
+
 import type { action } from "~/routes/works.$workId";
 
 import * as WorkInput from "../Work/Input";
@@ -7,10 +9,26 @@ import * as WorkInput from "../Work/Input";
 export type Props = {
   workId: string | number;
   workInput: WorkInput.Props;
+  onSubmitSuccess: () => void;
 };
 
-export const Component: React.FC<Props> = ({ workId, workInput }) => {
+export const Component: React.FC<Props> = ({
+  workId,
+  workInput,
+  onSubmitSuccess,
+}) => {
   const fetcher = useFetcher<typeof action>();
+  useEffect(() => {
+    // TODO: hasErrorを使わずともstatusコードで判定できるようにする
+    // single fetchに対応しないとstatusが使えないかも？
+    if (
+      fetcher.state === "idle" &&
+      fetcher.data &&
+      !fetcher.data.data.hasError
+    ) {
+      onSubmitSuccess();
+    }
+  }, [fetcher.state, fetcher.data]);
   return (
     <section>
       {fetcher.data && <p>{fetcher.data.data.message}</p>}

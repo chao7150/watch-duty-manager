@@ -81,7 +81,7 @@ export const Component: React.FC<Props> = ({ workId, count, watched }) => {
             </div>
             <label>
               <span className="hidden">comment</span>
-              <textarea name="comment"></textarea>
+              <textarea className="resize" name="comment"></textarea>
             </label>
             <button
               className="bg-accent-area rounded-full py-1 px-3"

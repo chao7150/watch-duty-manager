@@ -19,19 +19,13 @@ export const Component: React.FC<Props> = ({
 }) => {
   const fetcher = useFetcher<typeof action>();
   useEffect(() => {
-    // TODO: hasErrorを使わずともstatusコードで判定できるようにする
-    // single fetchに対応しないとstatusが使えないかも？
-    if (
-      fetcher.state === "idle" &&
-      fetcher.data &&
-      !fetcher.data.data.hasError
-    ) {
+    if (fetcher.state === "idle" && fetcher.data && !fetcher.data.hasError) {
       onSubmitSuccess();
     }
   }, [fetcher.state, fetcher.data]);
   return (
     <section>
-      {fetcher.data && <p>{fetcher.data.data.message}</p>}
+      {fetcher.data && <p>{fetcher.data.message}</p>}
       <fetcher.Form method="POST" action={`/works/${workId}`}>
         <WorkInput.Component {...workInput} />
         <button

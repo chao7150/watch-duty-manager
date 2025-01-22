@@ -22,6 +22,7 @@ export default defineConfig({
       ignoredRouteFiles: ["**/*.test.ts"],
       future: {
         v3_singleFetch: true,
+        v3_fetcherPersist: true,
       },
     }),
     tsconfigPaths(),

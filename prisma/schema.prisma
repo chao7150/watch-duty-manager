@@ -42,9 +42,10 @@ model Episode {
 }
 
 model SubscribedWorksOnUser {
-  userId             String
-  work               Work                 @relation(fields: [workId], references: [id])
-  workId             Int
+  userId                   String
+  work                     Work   @relation(fields: [workId], references: [id])
+  workId                   Int
+  watchDelaySecFromPublish Int?
 
   @@id(fields: [userId, workId])
 }

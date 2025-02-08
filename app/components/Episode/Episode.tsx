@@ -9,6 +9,7 @@ import type { Status } from "~/domain/episode/consts";
 import { getStatus } from "~/domain/episode/util";
 
 import * as ExclamationCircleIcon from "~/components/Icons/ExclamationCircle";
+import * as InformationIcon from "~/components/Icons/Information";
 
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 
@@ -24,6 +25,7 @@ type InformationProps = {
   watchReady?: boolean;
   status: Status;
   onClickWatchUnready: (workId: number) => void;
+  delayed?: boolean;
 };
 
 const timeStyles: { [K in Status]: string } = {
@@ -42,6 +44,7 @@ const Information: React.FC<InformationProps> = ({
   status,
   watchReady,
   onClickWatchUnready,
+  delayed,
 }) => {
   const timeStyle = timeStyles[status];
   return (
@@ -68,6 +71,11 @@ const Information: React.FC<InformationProps> = ({
         <span className={timeStyle}>
           {new Date(publishedAt).toLocaleString("ja")}
         </span>
+        {delayed && (
+          <div title="視聴遅延設定があります" className="w-5 h-5">
+            <InformationIcon.Component />
+          </div>
+        )}
         {durationMin !== 30 && (
           <span className="bg-accent-area px-0.5">{durationMin}分</span>
         )}
@@ -98,6 +106,7 @@ const _Component: React.FC<Props> = ({
   watchReady,
   watched,
   onClickWatchUnready,
+  delayed,
 }) => {
   const status = getStatus(new Date(publishedAt), new Date());
   return (
@@ -113,6 +122,7 @@ const _Component: React.FC<Props> = ({
         watchReady={watchReady}
         status={status}
         onClickWatchUnready={onClickWatchUnready}
+        delayed={delayed}
       />
       <EpisodeActoinMenu.Component
         {...{

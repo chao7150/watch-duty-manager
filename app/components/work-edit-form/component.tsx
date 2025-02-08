@@ -25,7 +25,7 @@ export const Component: React.FC<Props> = ({
   }, [fetcher.state, fetcher.data]);
   return (
     <section>
-      {fetcher.data && <p>{fetcher.data.message}</p>}
+      {fetcher.data && fetcher.data.hasError && <p>{fetcher.data.message}</p>}
       <fetcher.Form method="POST" action={`/works/${workId}`}>
         <WorkInput.Component {...workInput} />
         <button

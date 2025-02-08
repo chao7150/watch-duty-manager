@@ -4,7 +4,6 @@ import { db } from "~/utils/db.server";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 export const serverAction = async (
-  request: Request,
   workId: number,
   formData: FormData,
 ): Promise<

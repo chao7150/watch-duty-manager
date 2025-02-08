@@ -28,6 +28,6 @@ export const useCloseDetailsOnClickAway = () => {
     },
     [],
   );
-  useClickAway(ref, onClickAway.f);
+  useClickAway(ref, onClickAway.f, ["click"]);
   return { ref, onToggle };
 };

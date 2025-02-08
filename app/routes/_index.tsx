@@ -286,12 +286,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     ...v,
   }));
 
+  const workIds = new Set(tickets.map((t) => t.workId));
+  const workWatchDelay = await db.subscribedWorksOnUser.findMany({
+    where: { userId, workId: { in: Array.from(workIds) } },
+    select: { watchDelaySecFromPublish: true, workId: true },
+  });
+
   return {
     userId,
     tickets,
     weekMetrics,
     quarterMetrics,
     recentWatchAchievements,
+    workWatchDelay,
   };
 };
 
@@ -321,6 +328,7 @@ export default function Index() {
     weekMetrics,
     quarterMetrics,
     recentWatchAchievements,
+    workWatchDelay,
   } = useLoaderData<typeof loader>();
   const now = new Date();
 
@@ -365,6 +373,10 @@ export default function Index() {
               officialSiteUrl: ticket.work.officialSiteUrl ?? "",
             };
           })}
+          workIdDelayMinList={workWatchDelay.map((d) => [
+            d.workId,
+            d.watchDelaySecFromPublish,
+          ])}
         />
       </section>
       <section>
@@ -402,6 +414,7 @@ export default function Index() {
             watched: true,
             officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
             published: true,
+            workIdDelayMinList: [],
           }))}
         />
         <Link

@@ -9,15 +9,21 @@ import * as Episode from "./Episode";
 
 export type Props = {
   episodes: Omit<Episode.Props, "onClickWatchUnready">[];
+  workIdDelayMinList: [number, number | null][];
 };
 
-export const Component: React.FC<Props> = ({ episodes }) => {
+export const Component: React.FC<Props> = ({
+  episodes,
+  workIdDelayMinList,
+}) => {
   const [sortDesc, setSortDesc] = useState<boolean>(true);
   const [stack, setStack] = useState<boolean>(false);
-  const [shortOnly, setShortOnly] = useState<boolean>(false);
   const [filterWorkId, setFilterWorkId] = useState<number | undefined>(
     undefined,
   );
+  const [ignoreDelay, setIgnoreDelay] = useState<boolean>(false);
+
+  const workIdDelayMinMap = new Map(workIdDelayMinList);
 
   const filterTitle =
     episodes.find((e) => e.workId === filterWorkId)?.title ?? undefined;
@@ -54,10 +60,18 @@ export const Component: React.FC<Props> = ({ episodes }) => {
           <li>
             <button
               className="align-middle"
-              onClick={() => setShortOnly((shortOnly) => !shortOnly)}
-              title={shortOnly ? "短編のみ表示中" : "通常表示"}
+              onClick={() => setIgnoreDelay((s) => !s)}
+              title={
+                ignoreDelay
+                  ? "視聴遅延設定を無視しています"
+                  : "視聴遅延設定が有効です"
+              }
             >
-              {shortOnly ? <ClockIcon.AltComponent /> : <ClockIcon.Component />}
+              {ignoreDelay ? (
+                <ClockIcon.AltComponent />
+              ) : (
+                <ClockIcon.Component />
+              )}
             </button>
           </li>
           {filterWorkId !== undefined && (
@@ -75,30 +89,53 @@ export const Component: React.FC<Props> = ({ episodes }) => {
       </div>
 
       <ul className={`flex mt-4 ${sortDesc ? "flex-col" : "flex-col-reverse"}`}>
-        {episodes.map((e) => {
-          const hidden =
-            (filterWorkId !== undefined && e.workId !== filterWorkId) ||
-            (stack && e.watchReady === false) ||
-            (shortOnly && e.durationMin >= 30);
-          return (
-            <li
-              key={`${e.workId}-${e.count}`}
-              className={`rounded-lg pb-4 pt-1 px-1 hover:bg-accent-area ${hidden ? "hidden" : ""}`}
-            >
-              <Episode.Component
-                {...e}
-                onClickWatchUnready={(workId: number) => {
-                  setFilterWorkId((current) => {
-                    if (current === undefined) {
-                      return workId;
-                    }
-                    return undefined;
-                  });
-                }}
-              />
-            </li>
-          );
-        })}
+        {episodes
+          .map((e) => {
+            if (ignoreDelay) {
+              return e;
+            }
+            const delay = workIdDelayMinMap.get(e.workId);
+            if (!delay) {
+              return e;
+            }
+            return {
+              ...e,
+              publishedAt: new Date(
+                new Date(e.publishedAt).getTime() + delay * 1000,
+              ).toISOString(),
+              delayed: true,
+            };
+          })
+          .sort((a, b) => {
+            return (
+              new Date(b.publishedAt).getTime() -
+              new Date(a.publishedAt).getTime()
+            );
+          })
+          .map((e) => {
+            const hidden =
+              (filterWorkId !== undefined && e.workId !== filterWorkId) ||
+              (stack && e.watchReady === false);
+
+            return (
+              <li
+                key={`${e.workId}-${e.count}`}
+                className={`rounded-lg pb-4 pt-1 px-1 hover:bg-accent-area ${hidden ? "hidden" : ""}`}
+              >
+                <Episode.Component
+                  {...e}
+                  onClickWatchUnready={(workId: number) => {
+                    setFilterWorkId((current) => {
+                      if (current === undefined) {
+                        return workId;
+                      }
+                      return undefined;
+                    });
+                  }}
+                />
+              </li>
+            );
+          })}
       </ul>
     </div>
   );

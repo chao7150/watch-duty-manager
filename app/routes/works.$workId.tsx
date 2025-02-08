@@ -11,6 +11,7 @@ import {
 import { Fragment, useCallback, useState } from "react";
 
 import * as E from "fp-ts/lib/Either.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 import * as F from "fp-ts/lib/function.js";
 import {
   ResponsiveContainer,
@@ -19,7 +20,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   Line,
 } from "recharts";
 import urlFrom from "url-from";
@@ -30,6 +30,8 @@ import * as EditIcon from "~/components/Icons/Edit";
 import * as TrashIcon from "~/components/Icons/Trash";
 import * as WorkHashtagCopyButton from "~/components/Work/WorkHashtagCopyButton";
 import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
+import { serverAction as WatchSettingsEditFormServerAction } from "~/components/watch-settings-edit-form/action.server";
+import { Component as WatchSettingsEditFormComponent } from "~/components/watch-settings-edit-form/component";
 import { EpisodeDateRegistrationTabPanel } from "~/components/work-create-form/component";
 import { serverAction as WorkEditFormServerAction } from "~/components/work-edit-form/action.server";
 import {
@@ -67,6 +69,13 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       },
     },
   });
+  const delayPromise =
+    userId !== undefined
+      ? db.subscribedWorksOnUser.findUnique({
+          where: { userId_workId: { userId, workId: parseInt(workId, 10) } },
+          select: { watchDelaySecFromPublish: true },
+        })
+      : Promise.resolve(undefined);
   const ratingsPromise =
     userId !== undefined
       ? db.watchedEpisodesOnUser.findMany({
@@ -89,7 +98,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
           },
         })
       : Promise.resolve([]);
-  const [work, ratings] = await Promise.all([workPromise, ratingsPromise]);
+  const [work, delay, ratings] = await Promise.all([
+    workPromise,
+    delayPromise,
+    ratingsPromise,
+  ]);
   if (work === null) {
     throw Error("work not found");
   }
@@ -123,6 +136,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
+    delay: delay?.watchDelaySecFromPublish ?? undefined,
   };
 };
 
@@ -188,9 +202,21 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
       return data({ message: "db error", hasError: true }, { status: 400 });
     }
   }
+  if (formData.get("_action") === "watch-settings-edit") {
+    const userId = await requireUserId(request);
+    return await F.pipe(
+      WatchSettingsEditFormServerAction(userId, workId, formData),
+      TE.match(
+        ({ errorMessage, status }) =>
+          data({ message: errorMessage, hasError: true }, { status }),
+        ({ successMessage, status }) =>
+          data({ message: successMessage, hasError: false }, { status }),
+      ),
+    )();
+  }
   // _action === "edit"
   return F.pipe(
-    await WorkEditFormServerAction(request, workId, formData),
+    await WorkEditFormServerAction(workId, formData),
     E.match(
       ({ errorMessage, status }) =>
         data({ message: errorMessage, hasError: true }, { status }),
@@ -204,7 +230,12 @@ export default function Component() {
   const [editMode, setEditMode] = useState(false);
   const [_episodesEditMode, setEpisodesEditMode] = useState(false);
   const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-  const { loggedIn, work, subscribed, rating, ratings } =
+  const [watchSettingsEditMode, setWatchSettingsEditMode] = useState(false);
+  const toggleWatchSettingsEditMode = useCallback(
+    () => setWatchSettingsEditMode((s) => !s),
+    [],
+  );
+  const { loggedIn, work, subscribed, rating, ratings, delay } =
     useLoaderData<typeof loader>();
   const countMatch = useMatches().find(
     (m) => m.id === "routes/works.$workId.$count",
@@ -222,7 +253,7 @@ export default function Component() {
     },
     onSubmitSuccess: () => {
       setEditMode(false);
-    }
+    },
   };
 
   return (
@@ -247,12 +278,20 @@ export default function Component() {
       </div>
       <div className="grid grid-cols-2 gap-8 pt-8">
         <div className="flex flex-col justify-between gap-4">
-          <div>
+          <div className="grid grid-cols-2 gap-4">
             <section>
               <header className="flex">
                 <h3>作品情報</h3>
                 <button className="ml-2" onClick={turnEditMode}>
-                  {editMode ? <CloseIcon.Component /> : <EditIcon.Component />}
+                  {editMode ? (
+                    <div title="編集をやめる">
+                      <CloseIcon.Component />
+                    </div>
+                  ) : (
+                    <div title="編集する">
+                      <EditIcon.Component />
+                    </div>
+                  )}
                 </button>
               </header>
               {editMode ? (
@@ -306,6 +345,45 @@ export default function Component() {
                     >
                       dアニメストア
                     </Link>
+                  </dd>
+                </dl>
+              )}
+            </section>
+            <section>
+              <header className="flex">
+                <h3>視聴設定</h3>
+                <button className="ml-2" onClick={toggleWatchSettingsEditMode}>
+                  {editMode ? (
+                    <div title="編集をやめる">
+                      <CloseIcon.Component />
+                    </div>
+                  ) : (
+                    <div title="編集する">
+                      <EditIcon.Component />
+                    </div>
+                  )}
+                </button>
+              </header>
+              {watchSettingsEditMode ? (
+                <WatchSettingsEditFormComponent
+                  workId={work.id}
+                  defaultValue={{ delayMin: delay && delay / 60 }}
+                  onSubmitSuccess={toggleWatchSettingsEditMode}
+                />
+              ) : (
+                <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
+                  <dt>視聴遅延</dt>
+                  <dd>
+                    {delay === undefined
+                      ? "なし"
+                      : `${Math.floor(delay / 86400)}日${Math.floor(
+                          (delay % 86400) / 3600,
+                        )
+                          .toString()
+                          .padStart(
+                            2,
+                            "0",
+                          )}時間${((delay / 60) % 60).toString().padStart(2, "0")}分`}
                   </dd>
                 </dl>
               )}

@@ -102,7 +102,7 @@ export const Component: React.FC<Props> = ({
               ...e,
               publishedAt: new Date(
                 new Date(e.publishedAt).getTime() + delay * 1000,
-              ).toISOString(),
+              ),
               delayed: true,
             };
           })

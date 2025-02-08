@@ -6,14 +6,8 @@ import { Calendar } from "react-multi-date-picker";
 import DatePanel from "react-multi-date-picker/plugins/date_panel";
 import TimePicker from "react-multi-date-picker/plugins/time_picker";
 
-import * as E from "fp-ts/lib/Either.js";
-import * as F from "fp-ts/lib/function.js";
-
-import { nonEmptyStringOrUndefined } from "~/utils/type";
-import { isNonEmptyString } from "~/utils/validator";
-
 import * as TabPanel from "../TabPanel";
-import * as WorkInput from "../Work/Input";
+import * as WorkInput from "../work/Input";
 
 export const MultipleDatePicker: React.FC<{
   dates: Date[];

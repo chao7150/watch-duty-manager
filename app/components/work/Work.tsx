@@ -4,7 +4,7 @@ import React from "react";
 
 import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId";
 
-import * as WorkSubscribeForm from "~/components/Work/WorkSubscribeForm";
+import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
 
 export type Props = {
   loggedIn: boolean;

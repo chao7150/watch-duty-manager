@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import type { action } from "~/routes/works.$workId";
 
-import * as WorkInput from "../Work/Input";
+import * as WorkInput from "../work/Input";
 
 export type Props = {
   workId: string | number;

@@ -14,7 +14,7 @@ import {
 } from "~/domain/cour/util";
 
 import * as CourSelect from "~/components/CourSelect";
-import * as WorkUI from "~/components/Work/Work";
+import * as WorkUI from "~/components/work/Work";
 
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";

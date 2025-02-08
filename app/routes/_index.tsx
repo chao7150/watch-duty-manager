@@ -414,8 +414,8 @@ export default function Index() {
             watched: true,
             officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
             published: true,
-            workIdDelayMinList: [],
           }))}
+          workIdDelayMinList={[]}
         />
         <Link
           className="mt-2 py-2 flex flex-row justify-center hover:bg-accent-area"

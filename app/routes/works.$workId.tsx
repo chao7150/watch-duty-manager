@@ -28,8 +28,6 @@ import * as EpisodeWatchForm from "~/components/Episode/WatchForm";
 import * as CloseIcon from "~/components/Icons/Close";
 import * as EditIcon from "~/components/Icons/Edit";
 import * as TrashIcon from "~/components/Icons/Trash";
-import * as WorkHashtagCopyButton from "~/components/work/WorkHashtagCopyButton";
-import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
 import { serverAction as WatchSettingsEditFormServerAction } from "~/components/watch-settings-edit-form/action.server";
 import { Component as WatchSettingsEditFormComponent } from "~/components/watch-settings-edit-form/component";
 import { EpisodeDateRegistrationTabPanel } from "~/components/work-create-form/component";
@@ -38,6 +36,8 @@ import {
   Component as WorkEditFormComponent,
   type Props as WorkEditFormProps,
 } from "~/components/work-edit-form/component";
+import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
+import * as Work from "~/components/work/component";
 
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
@@ -279,7 +279,7 @@ export default function Component() {
       <div className="grid grid-cols-2 gap-8 pt-8">
         <div className="flex flex-col justify-between gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <section>
+            <section className={`${editMode ? "col-span-2" : ""}`}>
               <header className="flex">
                 <h3>作品情報</h3>
                 <button className="ml-2" onClick={turnEditMode}>
@@ -297,63 +297,21 @@ export default function Component() {
               {editMode ? (
                 <WorkEditFormComponent {...defaultValueMap} />
               ) : (
-                <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
-                  <dt>尺</dt>
-                  <dd>{work.durationMin}分</dd>
-                  <dt>公式サイト</dt>
-                  <dd>
-                    <a
-                      href={work.officialSiteUrl ?? undefined}
-                      className="hover:underline"
-                    >
-                      {work.officialSiteUrl}
-                    </a>
-                  </dd>
-                  <dt>公式ツイッター</dt>
-                  <dd>
-                    <a
-                      href={`https://twitter.com/${work.twitterId}`}
-                      className="hover:underline"
-                    >
-                      {work.twitterId}
-                    </a>
-                  </dd>
-                  <dt>ハッシュタグ</dt>
-                  <dd>
-                    {work.hashtag !== null && work.hashtag !== "" && (
-                      <span className="flex items-center">
-                        <a
-                          href={`https://twitter.com/hashtag/${work.hashtag}`}
-                          className="hover:underline"
-                        >
-                          <span>#{work.hashtag}</span>
-                        </a>
-                        <span className="w-5 h-6">
-                          <WorkHashtagCopyButton.Component
-                            hashtag={work.hashtag}
-                          />
-                        </span>
-                      </span>
-                    )}
-                  </dd>
-                  <dt>配信サービス</dt>
-                  <dd>
-                    <Link
-                      to={`https://animestore.docomo.ne.jp/animestore/sch_pc?searchKey=${encodeURIComponent(
-                        work.title,
-                      )}&vodTypeList=svod_tvod`}
-                    >
-                      dアニメストア
-                    </Link>
-                  </dd>
-                </dl>
+                <Work.Component
+                  {...{
+                    ...work,
+                    officialSiteUrl: work.officialSiteUrl ?? undefined,
+                    twitterId: work.twitterId ?? undefined,
+                    hashtag: work.hashtag ?? undefined,
+                  }}
+                />
               )}
             </section>
-            <section>
+            <section className={`${editMode ? "hidden" : ""}`}>
               <header className="flex">
                 <h3>視聴設定</h3>
                 <button className="ml-2" onClick={toggleWatchSettingsEditMode}>
-                  {editMode ? (
+                  {watchSettingsEditMode ? (
                     <div title="編集をやめる">
                       <CloseIcon.Component />
                     </div>

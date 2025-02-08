@@ -1,7 +1,6 @@
 import * as E from "fp-ts/lib/Either.js";
 
 import { db } from "~/utils/db.server";
-import { nonEmptyStringOrUndefined } from "~/utils/type";
 
 export const serverAction = async (
   workId: number,
@@ -16,22 +15,39 @@ export const serverAction = async (
   if (typeof title !== "string" || title === "") {
     return E.left({ errorMessage: "title must not be empty", status: 400 });
   }
-  const optionalWorkCreateInput = nonEmptyStringOrUndefined(
-    Object.fromEntries(formData),
-    ["officialSiteUrl", "twitterId", "hashtag", "durationMin"],
+  const officialSiteUrl = resolveFormDataEntryValueToNonEmptyStringOrNull(
+    formData.get("officialSiteUrl"),
   );
+  const twitterId = resolveFormDataEntryValueToNonEmptyStringOrNull(
+    formData.get("twitterId"),
+  );
+  const hashtag = resolveFormDataEntryValueToNonEmptyStringOrNull(
+    formData.get("hashtag"),
+  );
+  const _durationMin = formData.get("durationMin");
+  if (typeof _durationMin !== "string") {
+    return E.left({
+      errorMessage: "durationMin must not be empty",
+      status: 400,
+    });
+  }
+  const durationMin = _durationMin === "" ? undefined : Number(_durationMin);
+  if (durationMin !== undefined && Number.isNaN(durationMin)) {
+    return E.left({
+      errorMessage: "durationMin must be a number",
+      status: 400,
+    });
+  }
 
   try {
     const work = await db.work.update({
       where: { id: workId },
       data: {
         title,
-        ...optionalWorkCreateInput,
-        durationMin:
-          optionalWorkCreateInput.durationMin &&
-          optionalWorkCreateInput.durationMin !== ""
-            ? Number(optionalWorkCreateInput.durationMin)
-            : undefined,
+        officialSiteUrl,
+        twitterId,
+        hashtag,
+        durationMin,
       },
     });
 
@@ -43,4 +59,16 @@ export const serverAction = async (
     console.log(e);
     return E.left({ errorMessage: "internal server error", status: 500 });
   }
+};
+
+const resolveFormDataEntryValueToNonEmptyStringOrNull = (
+  v: FormDataEntryValue | null,
+): string | null => {
+  if (typeof v !== "string") {
+    return null;
+  }
+  if (v === "") {
+    return null;
+  }
+  return v;
 };

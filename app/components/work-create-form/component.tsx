@@ -1,4 +1,3 @@
-import { data } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 
 import { useEffect, useState } from "react";

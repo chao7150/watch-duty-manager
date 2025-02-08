@@ -1,16 +1,9 @@
-import * as TextInput from "~/components/TextInput";
-
-type TextInputOptionalProps = Pick<
-  TextInput.Props,
-  "defaultValue" | "isRequired"
->;
-
 export type Props = {
-  workTitle?: TextInputOptionalProps;
+  workTitle?: { defaultValue: string };
   durationMin?: { defaultValue: number };
-  officialSiteUrl?: TextInputOptionalProps;
-  twitterId?: TextInputOptionalProps;
-  hashtag?: TextInputOptionalProps;
+  officialSiteUrl?: { defaultValue: string };
+  twitterId?: { defaultValue: string };
+  hashtag?: { defaultValue: string };
 };
 
 export const Component: React.FC<Props> = ({
@@ -21,49 +14,71 @@ export const Component: React.FC<Props> = ({
   hashtag,
 }) => {
   return (
-    <ul className="flex flex-col gap-2">
-      <li>
-        <TextInput.Component
-          labelText="タイトル"
-          name="title"
-          isRequired={true}
-          {...workTitle}
-        />
-      </li>
-      <li>
-        <label className="flex flex-col">
-          <span>尺（分・未入力なら30分）</span>
+    <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
+      <dt>
+        タイトル
+        <RequiredAbbreviation />
+      </dt>
+      <dd>
+        <label className="w-full">
           <input
-            name="durationMin"
-            className="w-3/4"
-            type="number"
-            min={1}
-            step={1}
-            defaultValue={durationMin?.defaultValue}
-          />
+            type="text"
+            name="title"
+            defaultValue={workTitle?.defaultValue}
+            className="w-full"
+          ></input>
         </label>
-      </li>
-      <li>
-        <TextInput.Component
-          labelText="公式サイトURL"
-          name="officialSiteUrl"
-          {...officialSiteUrl}
+      </dd>
+      <dt>尺（分・未入力なら30分）</dt>
+      <dd>
+        <input
+          name="durationMin"
+          type="number"
+          min={1}
+          step={1}
+          defaultValue={durationMin?.defaultValue}
+          className="w-full"
         />
-      </li>
-      <li>
-        <TextInput.Component
-          labelText="ツイッターID（@は不要）"
-          name="twitterId"
-          {...twitterId}
-        />
-      </li>
-      <li>
-        <TextInput.Component
-          labelText="ハッシュタグ（#は不要）"
-          name="hashtag"
-          {...hashtag}
-        />
-      </li>
-    </ul>
+      </dd>
+      <dt>公式サイトURL</dt>
+      <dd>
+        <label>
+          <input
+            type="text"
+            name="officialSiteUrl"
+            defaultValue={officialSiteUrl?.defaultValue}
+            className="w-full"
+          ></input>
+        </label>
+      </dd>
+      <dt>ツイッターID（@は不要）</dt>
+      <dd>
+        <label>
+          <input
+            type="text"
+            name="twitterId"
+            defaultValue={twitterId?.defaultValue}
+            className="w-full"
+          ></input>
+        </label>
+      </dd>
+      <dt>ハッシュタグ（#は不要）</dt>
+      <dd>
+        <label>
+          <input
+            type="text"
+            name="hashtag"
+            defaultValue={hashtag?.defaultValue}
+            className="w-full"
+          ></input>
+        </label>
+      </dd>
+    </dl>
   );
 };
+
+const RequiredAbbreviation: React.FC = () => (
+  <abbr title="required" aria-label="required">
+    *
+  </abbr>
+);

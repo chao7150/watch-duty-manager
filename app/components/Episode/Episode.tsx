@@ -65,9 +65,7 @@ const Information: React.FC<InformationProps> = ({
         )}
       </h3>
       <div className="flex gap-1 items-center text-text-weak">
-        <span className={timeStyle}>
-          {publishedAt.toLocaleString("ja")}
-        </span>
+        <span className={timeStyle}>{publishedAt.toLocaleString("ja")}</span>
         {delayed && (
           <div title="視聴遅延設定があります" className="w-5 h-5">
             <InformationIcon.Component />

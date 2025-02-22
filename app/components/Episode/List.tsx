@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useMatches } from "@remix-run/react";
+
+import { useEffect, useState } from "react";
 
 import * as ArrowDownIcon from "../Icons/ArrowDown";
 import * as ArrowUpIcon from "../Icons/ArrowUp";
@@ -12,16 +14,45 @@ export type Props = {
   workIdDelayMinList: [number, number | null][];
 };
 
+const useLocalStorageState = <T,>(name: string, defaultValue: T) => {
+  const [initialized, setInitialized] = useState(false);
+  const [state, setState] = useState<T>(defaultValue);
+  const namespace = useMatches().at(-1)?.id;
+  const key = `${namespace}_${name}`;
+
+  useEffect(() => {
+    const saved = localStorage.getItem(key);
+    if (saved !== null) {
+      setState(JSON.parse(saved));
+    }
+    setInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (initialized) {
+      localStorage.setItem(key, JSON.stringify(state));
+    }
+  }, [key, state]);
+
+  return [state, setState] as const;
+};
+
 export const Component: React.FC<Props> = ({
   episodes,
   workIdDelayMinList,
 }) => {
-  const [sortDesc, setSortDesc] = useState<boolean>(true);
-  const [stack, setStack] = useState<boolean>(false);
+  const [sortDesc, setSortDesc] = useLocalStorageState<boolean>(
+    "sortDesc",
+    true,
+  );
+  const [stack, setStack] = useLocalStorageState<boolean>("stack", false);
+  const [ignoreDelay, setIgnoreDelay] = useLocalStorageState<boolean>(
+    "ignoreDelay",
+    false,
+  );
   const [filterWorkId, setFilterWorkId] = useState<number | undefined>(
     undefined,
   );
-  const [ignoreDelay, setIgnoreDelay] = useState<boolean>(false);
 
   const workIdDelayMinMap = new Map(workIdDelayMinList);
 
@@ -92,11 +123,11 @@ export const Component: React.FC<Props> = ({
         {episodes
           .map((e) => {
             if (ignoreDelay) {
-              return e;
+              return { ...e, delayed: false };
             }
             const delay = workIdDelayMinMap.get(e.workId);
             if (!delay) {
-              return e;
+              return { ...e, delayed: false };
             }
             return {
               ...e,

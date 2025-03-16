@@ -93,6 +93,7 @@ export type Props = Omit<
 const _Component: React.FC<Props> = ({
   workId,
   officialSiteUrl,
+  watchUrl,
   title,
   durationMin,
   count,
@@ -123,6 +124,7 @@ const _Component: React.FC<Props> = ({
         {...{
           workId,
           officialSiteUrl,
+          watchUrl,
           count,
           watched,
           hashtag,

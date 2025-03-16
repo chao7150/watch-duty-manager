@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { isValidUrlString } from "~/utils/validator";
 
 import * as ClipboardCopyIcon from "../Icons/ClipboardCopy";
 import * as ExternalLinkIcon from "../Icons/ExternalLink";
@@ -10,6 +10,7 @@ import * as WatchForm from "./WatchForm";
 export type Props = {
   workId: number;
   officialSiteUrl?: string;
+  watchUrl: string | undefined;
   count: number;
   watched: boolean;
   hashtag?: string;
@@ -41,6 +42,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ text, icon, onClick, href }) => {
 
 export const Component: React.FC<Props> = ({
   workId,
+  watchUrl,
   officialSiteUrl,
   count,
   watched,
@@ -57,6 +59,13 @@ export const Component: React.FC<Props> = ({
             <MenuIcon.Component />
           </summary>
           <ul className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2 flex flex-col">
+            {isValidUrlString(watchUrl) && (
+              <MenuItem
+                text="視聴リンク（外部）"
+                icon={<ExternalLinkIcon.Component />}
+                href={watchUrl}
+              />
+            )}
             {hashtag !== undefined && hashtag !== "" && (
               <MenuItem
                 text="ハッシュタグをコピー"

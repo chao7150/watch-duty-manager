@@ -287,9 +287,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }));
 
   const workIds = new Set(tickets.map((t) => t.workId));
-  const workWatchDelay = await db.subscribedWorksOnUser.findMany({
+  const subscription = await db.subscribedWorksOnUser.findMany({
     where: { userId, workId: { in: Array.from(workIds) } },
-    select: { watchDelaySecFromPublish: true, workId: true },
+    select: { watchDelaySecFromPublish: true, workId: true, watchUrl: true },
   });
 
   return {
@@ -298,7 +298,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     weekMetrics,
     quarterMetrics,
     recentWatchAchievements,
-    workWatchDelay,
+    subscription,
   };
 };
 
@@ -328,7 +328,7 @@ export default function Index() {
     weekMetrics,
     quarterMetrics,
     recentWatchAchievements,
-    workWatchDelay,
+    subscription,
   } = useLoaderData<typeof loader>();
   const now = new Date();
 
@@ -371,9 +371,12 @@ export default function Index() {
               watchReady: ticket.watchReady,
               watched: false,
               officialSiteUrl: ticket.work.officialSiteUrl ?? "",
+              watchUrl:
+                subscription.find((s) => s.workId === ticket.workId)
+                  ?.watchUrl ?? undefined,
             };
           })}
-          workIdDelayMinList={workWatchDelay.map((d) => [
+          workIdDelayMinList={subscription.map((d) => [
             d.workId,
             d.watchDelaySecFromPublish,
           ])}
@@ -413,6 +416,9 @@ export default function Index() {
             publishedAt: a.createdAt,
             watched: true,
             officialSiteUrl: a.episode.work.officialSiteUrl ?? "",
+            watchUrl:
+              subscription.find((s) => s.workId === a.workId)?.watchUrl ??
+              undefined,
             published: true,
           }))}
           workIdDelayMinList={[]}

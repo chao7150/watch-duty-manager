@@ -1,6 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// このファイルを変更したときは npx prisma migrate dev --name hogehoge を実行する
+
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
@@ -43,9 +45,10 @@ model Episode {
 
 model SubscribedWorksOnUser {
   userId                   String
-  work                     Work   @relation(fields: [workId], references: [id])
+  work                     Work    @relation(fields: [workId], references: [id])
   workId                   Int
   watchDelaySecFromPublish Int?
+  watchUrl                 String?
 
   @@id(fields: [userId, workId])
 }

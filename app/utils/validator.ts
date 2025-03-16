@@ -18,3 +18,15 @@ export const parseSearchParamAsNumber = (
   }
   return parsed;
 };
+
+export const isValidUrlString = (s: unknown): s is string => {
+  try {
+    if (typeof s !== "string") {
+      return false;
+    }
+    new URL(s);
+    return true;
+  } catch (_) {
+    return false;
+  }
+};

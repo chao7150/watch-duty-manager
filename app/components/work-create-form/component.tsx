@@ -156,7 +156,7 @@ export const Component: React.FC = () => {
           <abbr title="required">*</abbr>は必須です。
         </small>
       </p>
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-2 gap-4">
         <fieldset className="mt-4 flex flex-col gap-2" name="基本情報">
           <legend>
             <h3>基本情報</h3>

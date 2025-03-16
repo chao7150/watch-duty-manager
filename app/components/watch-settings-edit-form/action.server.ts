@@ -11,7 +11,6 @@ export const serverAction = (
   { errorMessage: string; status: number },
   { successMessage: string; status: number }
 > => {
-  console.log(userId, workId, formData);
   return F.pipe(
     TE.Do,
     TE.bind("days", () => {
@@ -44,7 +43,17 @@ export const serverAction = (
       }
       return TE.right(hours * 60 + minutes);
     }),
-    TE.flatMap(({ days, min }) => {
+    TE.bindW("url", () => {
+      const url = formData.get("url");
+      if (url instanceof File) {
+        return TE.left({
+          errorMessage: "url must be a string",
+          status: 400,
+        });
+      }
+      return TE.right(url);
+    }),
+    TE.flatMap(({ days, min, url }) => {
       return TE.tryCatch(
         async () => {
           const watchDelaySecFromPublish = days * 24 * 60 * 60 + min * 60;
@@ -52,6 +61,7 @@ export const serverAction = (
             where: { userId_workId: { userId, workId } },
             data: {
               watchDelaySecFromPublish: watchDelaySecFromPublish || null,
+              watchUrl: url,
             },
           });
           return {

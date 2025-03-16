@@ -34,31 +34,33 @@ export const serverValidator = (formData: FormData) => {
 
 export type Props = Record<string, never>;
 
-export const Component: React.VFC<Props> = () => {
+export const Component: React.FC<Props> = () => {
   return (
     <Form method="POST">
-      <li>
-        <label>
-          複数番組
-          <textarea
-            name="works"
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder={
-              "title,publishedAt(ISO8601),episodeCount,officialSiteUrl(optional),twitterId(optional),hashtag(optional without #)"
-            }
-          ></textarea>
-        </label>
-      </li>
-      <li>
-        <button
-          className="mt-4 bg-accent-area rounded-full py-2 px-12"
-          type="submit"
-          name="_action"
-          value="bulkCreate"
-        >
-          送信
-        </button>
-      </li>
+      <ul>
+        <li>
+          <label>
+            複数番組
+            <textarea
+              name="works"
+              className="w-full p-2 border border-gray-300 rounded"
+              placeholder={
+                "title,publishedAt(ISO8601),episodeCount,officialSiteUrl(optional),twitterId(optional),hashtag(optional without #)"
+              }
+            ></textarea>
+          </label>
+        </li>
+        <li>
+          <button
+            className="mt-4 bg-accent-area rounded-full py-2 px-12"
+            type="submit"
+            name="_action"
+            value="bulkCreate"
+          >
+            送信
+          </button>
+        </li>
+      </ul>
     </Form>
   );
 };

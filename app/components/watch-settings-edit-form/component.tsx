@@ -8,6 +8,7 @@ export type Props = {
   workId: string | number;
   defaultValue: {
     delayMin?: number;
+    url?: string;
   };
   onSubmitSuccess: () => void;
 };
@@ -53,6 +54,12 @@ export const Component: React.FC<Props> = ({
                     "0",
                   )}:${(delayMin % 60).toString().padStart(2, "0")}`}
               ></input>
+            </label>
+          </dd>
+          <dt>視聴リンク</dt>
+          <dd>
+            <label>
+              <input name="url" type="text" defaultValue={defaultValue.url} />
             </label>
           </dd>
         </dl>

@@ -42,6 +42,7 @@ import * as Work from "~/components/work/component";
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, isNumber } from "~/utils/type";
+import { isValidUrlString } from "~/utils/validator";
 
 export const bindUrl = urlFrom`/works/${"workId:number"}`;
 
@@ -69,11 +70,11 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       },
     },
   });
-  const delayPromise =
+  const subscriptionPromise =
     userId !== undefined
       ? db.subscribedWorksOnUser.findUnique({
           where: { userId_workId: { userId, workId: parseInt(workId, 10) } },
-          select: { watchDelaySecFromPublish: true },
+          select: { watchDelaySecFromPublish: true, watchUrl: true },
         })
       : Promise.resolve(undefined);
   const ratingsPromise =
@@ -98,9 +99,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
           },
         })
       : Promise.resolve([]);
-  const [work, delay, ratings] = await Promise.all([
+  const [work, subscription, ratings] = await Promise.all([
     workPromise,
-    delayPromise,
+    subscriptionPromise,
     ratingsPromise,
   ]);
   if (work === null) {
@@ -136,7 +137,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     }),
     subscribed: work?.users.length === 1,
     loggedIn: userId !== undefined,
-    delay: delay?.watchDelaySecFromPublish ?? undefined,
+    delay: subscription?.watchDelaySecFromPublish ?? undefined,
+    url: subscription?.watchUrl ?? undefined,
   };
 };
 
@@ -235,7 +237,7 @@ export default function Component() {
     () => setWatchSettingsEditMode((s) => !s),
     [],
   );
-  const { loggedIn, work, subscribed, rating, ratings, delay } =
+  const { loggedIn, work, subscribed, rating, ratings, delay, url } =
     useLoaderData<typeof loader>();
   const countMatch = useMatches().find(
     (m) => m.id === "routes/works.$workId.$count",
@@ -307,45 +309,60 @@ export default function Component() {
                 />
               )}
             </section>
-            <section className={`${editMode ? "hidden" : ""}`}>
-              <header className="flex">
-                <h3>視聴設定</h3>
-                <button className="ml-2" onClick={toggleWatchSettingsEditMode}>
-                  {watchSettingsEditMode ? (
-                    <div title="編集をやめる">
-                      <CloseIcon.Component />
-                    </div>
-                  ) : (
-                    <div title="編集する">
-                      <EditIcon.Component />
-                    </div>
-                  )}
-                </button>
-              </header>
-              {watchSettingsEditMode ? (
-                <WatchSettingsEditFormComponent
-                  workId={work.id}
-                  defaultValue={{ delayMin: delay && delay / 60 }}
-                  onSubmitSuccess={toggleWatchSettingsEditMode}
-                />
-              ) : (
-                <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
-                  <dt>視聴遅延</dt>
-                  <dd>
-                    {delay === undefined
-                      ? "なし"
-                      : `${Math.floor(delay / 86400)}日${Math.floor(
-                          (delay % 86400) / 3600,
-                        )
-                          .toString()
-                          .padStart(
-                            2,
-                            "0",
-                          )}時間${((delay / 60) % 60).toString().padStart(2, "0")}分`}
-                  </dd>
-                </dl>
-              )}
-            </section>
+            {subscribed && (
+              <section className={`${editMode ? "hidden" : ""}`}>
+                <header className="flex">
+                  <h3>視聴設定</h3>
+                  <button
+                    className="ml-2"
+                    onClick={toggleWatchSettingsEditMode}
+                  >
+                    {watchSettingsEditMode ? (
+                      <div title="編集をやめる">
+                        <CloseIcon.Component />
+                      </div>
+                    ) : (
+                      <div title="編集する">
+                        <EditIcon.Component />
+                      </div>
+                    )}
+                  </button>
+                </header>
+                {watchSettingsEditMode ? (
+                  <WatchSettingsEditFormComponent
+                    workId={work.id}
+                    defaultValue={{ delayMin: delay && delay / 60, url }}
+                    onSubmitSuccess={toggleWatchSettingsEditMode}
+                  />
+                ) : (
+                  <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
+                    <dt>視聴遅延</dt>
+                    <dd>
+                      {delay === undefined
+                        ? "なし"
+                        : `${Math.floor(delay / 86400)}日${Math.floor(
+                            (delay % 86400) / 3600,
+                          )
+                            .toString()
+                            .padStart(
+                              2,
+                              "0",
+                            )}時間${((delay / 60) % 60).toString().padStart(2, "0")}分`}
+                    </dd>
+                    <dt>視聴リンク</dt>
+                    <dd>
+                      {isValidUrlString(url) ? (
+                        <Link to={url} target="_blank">
+                          {url}
+                        </Link>
+                      ) : (
+                        url
+                      )}
+                    </dd>
+                  </dl>
+                )}
+              </section>
+            )}
           </div>
           <section className="flex-1">
             <ResponsiveContainer height={300}>

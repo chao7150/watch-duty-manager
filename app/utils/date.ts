@@ -40,6 +40,12 @@ export const getCourExpression = (date: Date): string => {
   return `${date.getFullYear()}${monthSeasonNameMap[date.getMonth() + 1]}`;
 };
 
+export const getCourExpressionFromTemporal = (
+  zonedDate: Temporal.ZonedDateTime,
+): string => {
+  return `${zonedDate.year}${monthSeasonNameMap[zonedDate.month]}`;
+};
+
 export const interval2CourList = (start: Date, now: Date): [string, Date][] => {
   return eachQuarterOfInterval({
     start: subHours(start, 4),

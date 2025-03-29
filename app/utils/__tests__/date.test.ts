@@ -5,6 +5,7 @@ import {
   get4OriginDate,
   get4OriginDateFromTemporal,
   getCourExpression,
+  getCourExpressionFromTemporal,
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,
   interval2CourList,
@@ -192,6 +193,103 @@ describe("getCourExpression", () => {
     );
   });
 });
+describe("getCourExpressionFromTemporal", () => {
+  it("should return the correct year and season for winter months (1-3)", () => {
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-01-01T00:00:00+0900")),
+      ),
+    ).toBe("2022冬");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-02-15T12:30:00+0900")),
+      ),
+    ).toBe("2022冬");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-03-31T23:59:59+0900")),
+      ),
+    ).toBe("2022冬");
+  });
+
+  it("should return the correct year and season for spring months (4-6)", () => {
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-04-01T00:00:00+0900")),
+      ),
+    ).toBe("2022春");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-05-15T12:30:00+0900")),
+      ),
+    ).toBe("2022春");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-06-30T23:59:59+0900")),
+      ),
+    ).toBe("2022春");
+  });
+
+  it("should return the correct year and season for summer months (7-9)", () => {
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-07-01T00:00:00+0900")),
+      ),
+    ).toBe("2022夏");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-08-15T12:30:00+0900")),
+      ),
+    ).toBe("2022夏");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-09-30T23:59:59+0900")),
+      ),
+    ).toBe("2022夏");
+  });
+
+  it("should return the correct year and season for autumn months (10-12)", () => {
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-10-01T00:00:00+0900")),
+      ),
+    ).toBe("2022秋");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-11-15T12:30:00+0900")),
+      ),
+    ).toBe("2022秋");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2022-12-31T23:59:59+0900")),
+      ),
+    ).toBe("2022秋");
+  });
+
+  it("should handle different years correctly", () => {
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2021-01-01T00:00:00+0900")),
+      ),
+    ).toBe("2021冬");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2023-04-01T00:00:00+0900")),
+      ),
+    ).toBe("2023春");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2024-07-01T00:00:00+0900")),
+      ),
+    ).toBe("2024夏");
+    expect(
+      getCourExpressionFromTemporal(
+        date2ZonedDateTime(new Date("2025-10-01T00:00:00+0900")),
+      ),
+    ).toBe("2025秋");
+  });
+});
+
 describe("date2ZonedDateTime", () => {
   it("should convert a Date object to a Temporal.ZonedDateTime in Asia/Tokyo timezone", () => {
     const date = new Date("2022-08-20T04:00:00+0900");

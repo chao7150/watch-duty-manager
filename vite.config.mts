@@ -18,16 +18,17 @@ installGlobals();
 
 export default defineConfig({
   plugins: [
-    remix({
-      ignoredRouteFiles: ["**/*.test.ts"],
-      future: {
-        v3_singleFetch: true,
-        v3_fetcherPersist: true,
-        v3_lazyRouteDiscovery: true,
-        v3_relativeSplatPath: true,
-        v3_throwAbortReason: true,
-      },
-    }),
+    !process.env.VITEST &&
+      remix({
+        ignoredRouteFiles: ["**/*.test.ts"],
+        future: {
+          v3_singleFetch: true,
+          v3_fetcherPersist: true,
+          v3_lazyRouteDiscovery: true,
+          v3_relativeSplatPath: true,
+          v3_throwAbortReason: true,
+        },
+      }),
     tsconfigPaths(),
     cjsInterop({
       dependencies: ["url-from", "react-use", "firebase-admin"],

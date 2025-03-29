@@ -9,6 +9,7 @@ import {
   subDays,
   subHours,
 } from "date-fns";
+import { Temporal } from "temporal-polyfill";
 
 export const get4OriginDate = (date: Date): number => {
   return new Date(date.getTime() - 1000 * 60 * 60 * 4).getDate();
@@ -54,4 +55,10 @@ export const getQuarterEachLocaleDateString = (now: Date): string[] => {
     start: startOfQuarter(subHours(now, 4)),
     end: subHours(now, 4),
   }).map((d) => d.toLocaleDateString("ja"));
+};
+
+export const date2ZonedDateTime = (date: Date): Temporal.ZonedDateTime => {
+  return Temporal.Instant.fromEpochMilliseconds(
+    date.getTime(),
+  ).toZonedDateTimeISO("Asia/Tokyo");
 };

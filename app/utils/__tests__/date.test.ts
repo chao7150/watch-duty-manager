@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from "vitest";
 
 import {
+  date2ZonedDateTime,
   get4OriginDate,
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,
@@ -94,5 +95,48 @@ describe("getQuarterEachLocaleDateString", () => {
     expect(
       getQuarterEachLocaleDateString(new Date("2022-07-02T04:00:00")),
     ).toStrictEqual(["2022/7/1", "2022/7/2"]);
+  });
+});
+
+describe("date2ZonedDateTime", () => {
+  it("should convert a Date object to a Temporal.ZonedDateTime in Asia/Tokyo timezone", () => {
+    const date = new Date("2022-08-20T04:00:00+0900");
+    const zonedDateTime = date2ZonedDateTime(date);
+
+    expect(zonedDateTime.toString()).toBe(
+      "2022-08-20T04:00:00+09:00[Asia/Tokyo]",
+    );
+    expect(zonedDateTime.timeZoneId).toBe("Asia/Tokyo");
+    expect(zonedDateTime.year).toBe(2022);
+    expect(zonedDateTime.month).toBe(8);
+    expect(zonedDateTime.day).toBe(20);
+    expect(zonedDateTime.hour).toBe(4);
+    expect(zonedDateTime.minute).toBe(0);
+    expect(zonedDateTime.second).toBe(0);
+  });
+
+  it("should handle dates before the Unix epoch", () => {
+    const date = new Date("1969-12-31T23:59:59+0900");
+    const zonedDateTime = date2ZonedDateTime(date);
+
+    expect(zonedDateTime.toString()).toBe(
+      "1969-12-31T23:59:59+09:00[Asia/Tokyo]",
+    );
+    expect(zonedDateTime.year).toBe(1969);
+    expect(zonedDateTime.month).toBe(12);
+    expect(zonedDateTime.day).toBe(31);
+    expect(zonedDateTime.hour).toBe(23);
+  });
+
+  it("should handle leap years correctly", () => {
+    const date = new Date("2020-02-29T12:00:00+0900");
+    const zonedDateTime = date2ZonedDateTime(date);
+
+    expect(zonedDateTime.toString()).toBe(
+      "2020-02-29T12:00:00+09:00[Asia/Tokyo]",
+    );
+    expect(zonedDateTime.year).toBe(2020);
+    expect(zonedDateTime.month).toBe(2);
+    expect(zonedDateTime.day).toBe(29);
   });
 });

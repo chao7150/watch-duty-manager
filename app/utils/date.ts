@@ -23,9 +23,17 @@ export const get4OriginDateFromTemporal = (
 
 const monthSeasonNameMap: { [K: number]: string } = {
   1: "冬",
+  2: "冬",
+  3: "冬",
   4: "春",
+  5: "春",
+  6: "春",
   7: "夏",
+  8: "夏",
+  9: "夏",
   10: "秋",
+  11: "秋",
+  12: "秋",
 };
 
 export const getCourExpression = (date: Date): string => {

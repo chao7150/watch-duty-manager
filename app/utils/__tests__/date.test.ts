@@ -3,19 +3,48 @@ import { describe, expect, it, test } from "vitest";
 import {
   date2ZonedDateTime,
   get4OriginDate,
+  get4OriginDateFromTemporal,
   getPast7DaysLocaleDateString,
   getQuarterEachLocaleDateString,
   interval2CourList,
   startOf4OriginDay,
 } from "../date";
 
-test("get4OriginDate", () => {
+test("get4OriginDate with Date", () => {
   expect(get4OriginDate(new Date("2022-06-09T22:00:00+0900"))).toBe(9);
   expect(get4OriginDate(new Date("2022-06-10T00:00:00+0900"))).toBe(9);
   expect(get4OriginDate(new Date("2022-06-10T03:59:00+0900"))).toBe(9);
   expect(get4OriginDate(new Date("2022-06-10T04:00:00+0900"))).toBe(10);
   // 1日の場合は前月最終日に戻る
   expect(get4OriginDate(new Date("2022-06-01T03:59:00+0900"))).toBe(31);
+});
+
+test("get4OriginDateFromTemporal", () => {
+  expect(
+    get4OriginDateFromTemporal(
+      date2ZonedDateTime(new Date("2022-06-09T22:00:00+0900")),
+    ),
+  ).toBe(9);
+  expect(
+    get4OriginDateFromTemporal(
+      date2ZonedDateTime(new Date("2022-06-10T00:00:00+0900")),
+    ),
+  ).toBe(9);
+  expect(
+    get4OriginDateFromTemporal(
+      date2ZonedDateTime(new Date("2022-06-10T03:59:00+0900")),
+    ),
+  ).toBe(9);
+  expect(
+    get4OriginDateFromTemporal(
+      date2ZonedDateTime(new Date("2022-06-10T04:00:00+0900")),
+    ),
+  ).toBe(10);
+  expect(
+    get4OriginDateFromTemporal(
+      date2ZonedDateTime(new Date("2022-06-01T03:59:00+0900")),
+    ),
+  ).toBe(31);
 });
 
 test("interval2CourList", () => {

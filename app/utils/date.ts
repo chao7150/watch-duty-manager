@@ -15,6 +15,12 @@ export const get4OriginDate = (date: Date): number => {
   return new Date(date.getTime() - 1000 * 60 * 60 * 4).getDate();
 };
 
+export const get4OriginDateFromTemporal = (
+  zonedDate: Temporal.ZonedDateTime,
+): number => {
+  return zonedDate.subtract({ hours: 4 }).day;
+};
+
 const monthSeasonNameMap: { [K: number]: string } = {
   1: "冬",
   4: "春",

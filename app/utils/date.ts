@@ -177,6 +177,24 @@ export const startOf4OriginDay = (date: Date): Date => {
     : startOfHour(setHours(date, 4));
 };
 
+/**
+ * 指定された日付の「4時起点の日」の開始時刻をTemporal.ZonedDateTimeで返します。
+ * 4時より前の場合は前日の4時、4時以降の場合は当日の4時を返します。
+ *
+ * @param zonedDate - Temporal.ZonedDateTime
+ * @returns 4時起点の日の開始時刻
+ */
+export const startOf4OriginDayFromTemporal = (
+  zonedDate: Temporal.ZonedDateTime,
+): Temporal.ZonedDateTime => {
+  // 4時より前の場合は前日の4時、4時以降の場合は当日の4時
+  const baseDate =
+    zonedDate.hour < 4 ? zonedDate.subtract({ days: 1 }) : zonedDate;
+
+  // 指定された日の4時に設定
+  return baseDate.startOfDay().with({ hour: 4 });
+};
+
 export const getPast7DaysLocaleDateString = (now: Date): string[] => {
   return eachDayOfInterval({
     start: subDays(subHours(now, 4), 7),
@@ -184,11 +202,65 @@ export const getPast7DaysLocaleDateString = (now: Date): string[] => {
   }).map((d) => d.toLocaleDateString("ja"));
 };
 
+/**
+ * 指定された日付から過去7日間の日付文字列の配列を返します。
+ * 4時起点で計算します。
+ *
+ * @param now - Temporal.ZonedDateTime
+ * @returns 過去7日間の日付文字列の配列
+ */
+export const getPast7DaysLocaleDateStringFromTemporal = (
+  now: Temporal.ZonedDateTime,
+): string[] => {
+  // 4時間前の時間を計算
+  const nowMinus4Hours = now.subtract({ hours: 4 });
+
+  // 過去7日間の日付を生成（古い日付から新しい日付の順）
+  const dates: Temporal.ZonedDateTime[] = [];
+  for (let i = 7; i >= 0; i--) {
+    dates.push(nowMinus4Hours.subtract({ days: i }));
+  }
+
+  // 日付文字列に変換
+  return dates.map((d) => `${d.year}/${d.month}/${d.day}`);
+};
+
 export const getQuarterEachLocaleDateString = (now: Date): string[] => {
   return eachDayOfInterval({
     start: startOfQuarter(subHours(now, 4)),
     end: subHours(now, 4),
   }).map((d) => d.toLocaleDateString("ja"));
+};
+
+/**
+ * 指定された日付が属する四半期の各日の日付文字列の配列を返します。
+ * 4時起点で計算します。
+ *
+ * @param now - Temporal.ZonedDateTime
+ * @returns 四半期の各日の日付文字列の配列
+ */
+export const getQuarterEachLocaleDateStringFromTemporal = (
+  now: Temporal.ZonedDateTime,
+): string[] => {
+  // 4時間前の時間を計算
+  const nowMinus4Hours = now.subtract({ hours: 4 });
+
+  // 四半期の開始日を計算
+  const quarterStart = startOfQuarterTemporal(nowMinus4Hours);
+
+  // 四半期の開始日から現在日までの日数を計算
+  const daysDiff = nowMinus4Hours.since(quarterStart, {
+    largestUnit: "days",
+  }).days;
+
+  // 四半期の各日を生成（forループを使用）
+  const dates: Temporal.ZonedDateTime[] = [];
+  for (let i = 0; i <= daysDiff; i++) {
+    dates.push(quarterStart.add({ days: i }));
+  }
+
+  // 日付文字列に変換
+  return dates.map((d) => `${d.year}/${d.month}/${d.day}`);
 };
 
 export const date2ZonedDateTime = (date: Date): Temporal.ZonedDateTime => {

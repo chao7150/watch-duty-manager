@@ -18,3 +18,11 @@ export const SeasonStartMonth = {
   summer: "07-01T04:00:00+0900",
   autumn: "10-01T04:00:00+0900",
 } as const;
+
+// 季節から月へのマッピング
+export const SeasonMonth = {
+  winter: 1,
+  spring: 4,
+  summer: 7,
+  autumn: 10,
+} as const;

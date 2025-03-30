@@ -1,8 +1,14 @@
 import { subHours } from "date-fns";
 import { pipe } from "fp-ts/lib/function.js";
+import { Temporal } from "temporal-polyfill";
 
 import type { Cour } from "./consts";
-import { Season, SeasonExpression, SeasonStartMonth } from "./consts";
+import {
+  Season,
+  SeasonExpression,
+  SeasonStartMonth,
+  SeasonMonth,
+} from "./consts";
 
 const isSeason = (s: unknown): s is Season => {
   /* eslint @typescript-eslint/no-explicit-any: "warn" */
@@ -32,8 +38,47 @@ export const date2cour = (date: Date): Cour =>
     },
   );
 
+/**
+ * Temporal.ZonedDateTimeをCourオブジェクトに変換します。
+ * 4時間前の時間を基準にクールを判定します。
+ *
+ * @param zonedDate - Temporal.ZonedDateTime
+ * @returns Courオブジェクト
+ */
+export const zonedDateTime2cour = (zonedDate: Temporal.ZonedDateTime): Cour => {
+  // 4時間前の時間を計算
+  const zonedDateMinus4Hours = zonedDate.subtract({ hours: 4 });
+
+  // 月から季節を判定
+  const seasonIndex = Math.floor((zonedDateMinus4Hours.month - 1) / 3);
+
+  return {
+    year: zonedDateMinus4Hours.year,
+    season: Season[seasonIndex],
+  };
+};
+
 export const cour2startDate = (cour: Cour): Date => {
   return new Date(`${cour.year}-${SeasonStartMonth[cour.season]}`);
+};
+
+/**
+ * Courオブジェクトから対応するクールの開始日時をTemporal.ZonedDateTimeで返します。
+ *
+ * @param cour - Courオブジェクト
+ * @returns クールの開始日時
+ */
+export const cour2startZonedDateTime = (cour: Cour): Temporal.ZonedDateTime => {
+  return Temporal.ZonedDateTime.from({
+    year: cour.year,
+    month: SeasonMonth[cour.season],
+    day: 1,
+    hour: 4,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+    timeZone: "Asia/Tokyo",
+  });
 };
 
 export const cour2symbol = (cour: Cour): string => {

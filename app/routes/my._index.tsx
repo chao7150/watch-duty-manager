@@ -4,7 +4,6 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 
 import type { Prisma } from "@prisma/client";
-import { addQuarters } from "date-fns";
 import {
   ResponsiveContainer,
   LineChart,
@@ -17,19 +16,23 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { Temporal } from "temporal-polyfill";
 
 import {
   cour2expression,
   cour2startDate,
+  cour2startZonedDateTime,
   cour2symbol,
   next,
   symbol2cour,
+  zonedDateTime2cour,
 } from "../domain/cour/util";
 import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
 
 import * as CourSelect from "~/components/CourSelect";
 
+import { date2ZonedDateTime, zdt2Date } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
@@ -43,13 +46,19 @@ const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
     return {};
   }
   const searchDate = cour2startDate(cour);
+  // Date を Temporal.ZonedDateTime に変換し、3ヶ月後の日付を計算
+  const endDate = zdt2Date(
+    Temporal.Instant.fromEpochMilliseconds(searchDate.getTime())
+      .toZonedDateTimeISO("Asia/Tokyo")
+      .add({ months: 3 }),
+  );
   return {
     episodes: {
       some: {
         publishedAt: {
           // 4時始まりは未検討
           gte: searchDate,
-          lte: addQuarters(searchDate, 1),
+          lte: endDate,
         },
       },
     },
@@ -127,8 +136,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       db,
       now:
         cour === null
-          ? new Date()
-          : new Date(cour2startDate(next(cour)).getTime() - 1),
+          ? Temporal.Now.zonedDateTimeISO("Asia/Tokyo")
+          : cour2startZonedDateTime(next(cour)).subtract({ milliseconds: 1 }),
       userId,
     })(),
     episodeRatingDistributionPromise,
@@ -245,10 +254,7 @@ const Component = () => {
             })
             .map((work) => {
               return (
-                <li
-                  className={`flex gap-4 items-center`}
-                  key={work.id}
-                >
+                <li className={`flex gap-4 items-center`} key={work.id}>
                   <meter
                     className="shrink-0"
                     min={0}

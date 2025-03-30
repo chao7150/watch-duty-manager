@@ -4,7 +4,6 @@ import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 import { useInterval } from "react-use";
 
 import type { PrismaClient } from "@prisma/client";
-import { addDays, addHours, subDays, subHours } from "date-fns";
 import "firebase/compat/auth";
 import * as A from "fp-ts/lib/Apply.js";
 import * as T from "fp-ts/lib/Task.js";
@@ -18,15 +17,22 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Temporal } from "temporal-polyfill";
 
-import { cour2startDate, date2cour } from "~/domain/cour/util";
+import {
+  cour2startZonedDateTime,
+  zonedDateTime2cour,
+} from "~/domain/cour/util";
 
 import * as EpisodeList from "~/components/Episode/List";
 
 import {
-  getPast7DaysLocaleDateString,
-  getQuarterEachLocaleDateString,
-  startOf4OriginDay,
+  date2ZonedDateTime,
+  formatZDT,
+  getPast7DaysLocaleDateStringFromTemporal,
+  getQuarterEachLocaleDateStringFromTemporal,
+  startOf4OriginDayFromTemporal,
+  zdt2Date,
 } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
@@ -51,6 +57,18 @@ export const countOccurrence = (items: Array<string>): Map<string, number> => {
   }, new Map<string, number>());
 };
 
+/**
+ * Prisma から取得した Date オブジェクトを Temporal.ZonedDateTime に変換し、
+ * 4時間引いてフォーマットした文字列を返します。
+ * 
+ * @param prismaDate - Prisma から取得した Date オブジェクト
+ * @returns yyyy/MM/dd 形式の文字列
+ */
+const prismaDate2key = (prismaDate: Date): string => {
+  const date = date2ZonedDateTime(prismaDate).subtract({ hours: 4 });
+  return formatZDT(date);
+};
+
 const getTickets =
   ({
     db,
@@ -59,7 +77,7 @@ const getTickets =
   }: {
     db: PrismaClient;
     userId: string;
-    publishedUntilDate: Date;
+    publishedUntilDate: Temporal.ZonedDateTime;
   }) =>
   async () => {
     try {
@@ -68,7 +86,7 @@ const getTickets =
           work: { users: { some: { userId } } },
           WatchedEpisodesOnUser: { none: { userId } },
           publishedAt: {
-            lte: publishedUntilDate,
+            lte: zdt2Date(publishedUntilDate),
           },
         },
         include: {
@@ -89,73 +107,120 @@ const getTickets =
   };
 
 const getWeekWatchAchievements =
-  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  ({
+    db,
+    userId,
+    now,
+  }: {
+    db: PrismaClient;
+    userId: string;
+    now: Temporal.ZonedDateTime;
+  }) =>
   async () => {
+    const startDay = zdt2Date(
+      startOf4OriginDayFromTemporal(now).subtract({ days: 7 }),
+    );
     const occurrence = (
       await db.watchedEpisodesOnUser.findMany({
         select: { createdAt: true },
         where: {
           userId,
           createdAt: {
-            gte: subDays(startOf4OriginDay(now), 7),
+            gte: startDay,
           },
         },
       })
-    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString("ja"));
+    ).map((w) => prismaDate2key(w.createdAt));
     return countOccurrence(occurrence);
   };
 
 const getWeekDutyAccumulation =
-  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  ({
+    db,
+    userId,
+    now,
+  }: {
+    db: PrismaClient;
+    userId: string;
+    now: Temporal.ZonedDateTime;
+  }) =>
   async () => {
+    const dateNow = zdt2Date(now);
+    const startDay = zdt2Date(
+      startOf4OriginDayFromTemporal(now).subtract({ days: 7 }),
+    );
     const occurrence = (
       await db.episode.findMany({
         select: { publishedAt: true },
         where: {
           work: { users: { some: { userId } } },
           publishedAt: {
-            gte: subDays(startOf4OriginDay(now), 7),
-            lte: now,
+            gte: startDay,
+            lte: dateNow,
           },
         },
       })
-    ).map((d) => subHours(d.publishedAt, 4).toLocaleDateString("ja"));
+    ).map((d) => prismaDate2key(d.publishedAt));
     return countOccurrence(occurrence);
   };
 
 const getQuarterDuties =
-  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  ({
+    db,
+    userId,
+    now,
+  }: {
+    db: PrismaClient;
+    userId: string;
+    now: Temporal.ZonedDateTime;
+  }) =>
   async () => {
+    const dateNow = zdt2Date(now);
+    const startDate = zdt2Date(
+      cour2startZonedDateTime(zonedDateTime2cour(now)),
+    );
     const occurrence = (
       await db.episode.findMany({
         select: { publishedAt: true },
         where: {
           work: { users: { some: { userId } } },
-          publishedAt: { gte: cour2startDate(date2cour(now)), lte: now },
+          publishedAt: { gte: startDate, lte: dateNow },
         },
       })
-    ).map((e) => subHours(e.publishedAt, 4).toLocaleDateString("ja"));
+    ).map((e) => prismaDate2key(e.publishedAt));
     return countOccurrence(occurrence);
   };
 
 const getQuarterWatchAchievements =
-  ({ db, userId, now }: { db: PrismaClient; userId: string; now: Date }) =>
+  ({
+    db,
+    userId,
+    now,
+  }: {
+    db: PrismaClient;
+    userId: string;
+    now: Temporal.ZonedDateTime;
+  }) =>
   async () => {
+    const dateNow = zdt2Date(now);
+    const startDate = zdt2Date(
+      cour2startZonedDateTime(zonedDateTime2cour(now)).add({ hours: 4 }),
+    );
     const occurrence = (
       await db.watchedEpisodesOnUser.findMany({
         select: { createdAt: true },
         where: {
           episode: {
             publishedAt: {
-              gte: addHours(cour2startDate(date2cour(now)), 4),
-              lte: now,
+              gte: startDate,
+              lte: dateNow,
             },
             work: { users: { some: { userId } } },
           },
           userId,
         },
       })
-    ).map((w) => subHours(w.createdAt, 4).toLocaleDateString("ja"));
+    ).map((w) => prismaDate2key(w.createdAt));
     return countOccurrence(occurrence);
   };
 
@@ -183,7 +248,15 @@ const getRecentWatchAchievements =
   };
 
 export const getQuarterMetrics =
-  ({ db, now, userId }: { db: PrismaClient; now: Date; userId: string }) =>
+  ({
+    db,
+    now,
+    userId,
+  }: {
+    db: PrismaClient;
+    now: Temporal.ZonedDateTime;
+    userId: string;
+  }) =>
   async (): Promise<
     { date: string; watchAchievements: number; dutyAccumulation: number }[]
   > => {
@@ -193,7 +266,7 @@ export const getQuarterMetrics =
       now,
     })();
     const quarterDuties = await getQuarterDuties({ db, userId, now })();
-    const quarterKeys = getQuarterEachLocaleDateString(now);
+    const quarterKeys = getQuarterEachLocaleDateStringFromTemporal(now);
     const mergedQuarterMetricsMap = new Map<
       string,
       { watchAchievements: number; dutyAccumulation: number }
@@ -250,7 +323,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     "recentWatchAchievementCount",
     10,
   );
-  const now = new Date();
+  const now = Temporal.Now.zonedDateTimeISO("Asia/Tokyo");
   const [
     tickets,
     weekWatchAchievements,
@@ -258,7 +331,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     recentWatchAchievements,
     quarterMetrics,
   ] = await A.sequenceT(T.ApplyPar)(
-    getTickets({ db, userId, publishedUntilDate: addDays(now, 1) }),
+    getTickets({ db, userId, publishedUntilDate: now.add({ days: 1 }) }),
     getWeekWatchAchievements({ db, userId, now }),
     getWeekDutyAccumulation({ db, userId, now }),
     getRecentWatchAchievements({
@@ -268,7 +341,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
     getQuarterMetrics({ db, userId, now }),
   )();
-  const weekKeys = getPast7DaysLocaleDateString(now);
+  const weekKeys = getPast7DaysLocaleDateStringFromTemporal(now);
   const mergedWeekMetricsMap = new Map<
     string,
     { watchAchievements: number; dutyAccumulation: number }

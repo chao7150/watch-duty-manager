@@ -268,3 +268,24 @@ export const date2ZonedDateTime = (date: Date): Temporal.ZonedDateTime => {
     date.getTime(),
   ).toZonedDateTimeISO("Asia/Tokyo");
 };
+
+export const zdt2Date = (zdt: Temporal.ZonedDateTime): Date => {
+  return new Date(zdt.epochMilliseconds);
+};
+
+/**
+ * Date オブジェクトを Temporal.ZonedDateTime に変換し、指定した時間を引いた後、yyyy/MM/dd 形式の文字列に変換します。
+ *
+ * @param date - Date オブジェクト
+ * @param hours - 引く時間（デフォルト: 4）
+ * @returns yyyy/MM/dd 形式の文字列
+ */
+/**
+ * Temporal.ZonedDateTime を yyyy/MM/dd 形式の文字列に変換します。
+ *
+ * @param zdt - Temporal.ZonedDateTime
+ * @returns yyyy/MM/dd 形式の文字列
+ */
+export const formatZDT = (zdt: Temporal.ZonedDateTime): string => {
+  return `${zdt.year}/${zdt.month}/${zdt.day}`;
+};

@@ -2,6 +2,7 @@ import { Link } from "@remix-run/react";
 
 import { useMemo } from "react";
 
+import { Temporal } from "temporal-polyfill";
 import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "~/routes/works.$workId.$count";
 
@@ -10,6 +11,8 @@ import { getStatus } from "~/domain/episode/util";
 
 import * as ExclamationCircleIcon from "~/components/Icons/ExclamationCircle";
 import * as InformationIcon from "~/components/Icons/Information";
+
+import { date2ZonedDateTime } from "~/utils/date";
 
 import * as EpisodeActoinMenu from "./EpisodeActionMenu";
 
@@ -104,7 +107,11 @@ const _Component: React.FC<Props> = ({
   onClickWatchUnready,
   delayed,
 }) => {
-  const status = getStatus(new Date(publishedAt), new Date());
+  const status = getStatus(
+    // TODO: これでも同じじゃない？
+    date2ZonedDateTime(publishedAt),
+    Temporal.Now.zonedDateTimeISO("Asia/Tokyo")
+  );
   return (
     <div
       className={`w-full grow ${statusStyles[status]} flex justify-between `}

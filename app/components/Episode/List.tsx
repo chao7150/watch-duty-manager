@@ -12,27 +12,34 @@ import * as Episode from "./Episode";
 export type Props = {
   episodes: Omit<Episode.Props, "onClickWatchUnready">[];
   workIdDelayMinList: [number, number | null][];
+  useLocalStorage?: boolean;
 };
 
-const useLocalStorageState = <T,>(name: string, defaultValue: T) => {
+const useLocalStorageState = <T,>(
+  name: string,
+  defaultValue: T,
+  useLocalStorage = true
+) => {
   const [initialized, setInitialized] = useState(false);
   const [state, setState] = useState<T>(defaultValue);
   const namespace = useMatches().at(-1)?.id;
   const key = `${namespace}_${name}`;
 
   useEffect(() => {
-    const saved = localStorage.getItem(key);
-    if (saved !== null) {
-      setState(JSON.parse(saved));
+    if (useLocalStorage) {
+      const saved = localStorage.getItem(key);
+      if (saved !== null) {
+        setState(JSON.parse(saved));
+      }
     }
     setInitialized(true);
-  }, []);
+  }, [useLocalStorage]);
 
   useEffect(() => {
-    if (initialized) {
+    if (initialized && useLocalStorage) {
       localStorage.setItem(key, JSON.stringify(state));
     }
-  }, [key, state]);
+  }, [key, state, initialized, useLocalStorage]);
 
   return [state, setState] as const;
 };
@@ -40,15 +47,22 @@ const useLocalStorageState = <T,>(name: string, defaultValue: T) => {
 export const Component: React.FC<Props> = ({
   episodes,
   workIdDelayMinList,
+  useLocalStorage = true,
 }) => {
   const [sortDesc, setSortDesc] = useLocalStorageState<boolean>(
     "sortDesc",
     true,
+    useLocalStorage
   );
-  const [stack, setStack] = useLocalStorageState<boolean>("stack", false);
+  const [stack, setStack] = useLocalStorageState<boolean>(
+    "stack", 
+    false,
+    useLocalStorage
+  );
   const [ignoreDelay, setIgnoreDelay] = useLocalStorageState<boolean>(
     "ignoreDelay",
     false,
+    useLocalStorage
   );
   const [filterWorkId, setFilterWorkId] = useState<number | undefined>(
     undefined,

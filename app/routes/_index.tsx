@@ -495,6 +495,7 @@ export default function Index() {
             published: true,
           }))}
           workIdDelayMinList={[]}
+          useLocalStorage={false}
         />
         <Link
           className="mt-2 py-2 flex flex-row justify-center hover:bg-accent-area"

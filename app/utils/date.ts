@@ -1,14 +1,4 @@
-import {
-  eachDayOfInterval,
-  eachQuarterOfInterval,
-  endOfYear,
-  getHours,
-  setHours,
-  startOfHour,
-  startOfQuarter,
-  subDays,
-  subHours,
-} from "date-fns";
+// date-fns は非推奨です。代わりに Temporal API を使用してください。
 import { Temporal } from "temporal-polyfill";
 
 interface TemporalInterval {
@@ -160,23 +150,6 @@ export const getCourExpressionFromTemporal = (
   return `${zonedDate.year}${monthSeasonNameMap[zonedDate.month]}`;
 };
 
-export const interval2CourList = (start: Date, now: Date): [string, Date][] => {
-  return eachQuarterOfInterval({
-    start: subHours(start, 4),
-    end: endOfYear(subHours(now, 4)),
-  })
-    .reverse()
-    .map((q) => {
-      return [getCourExpression(q), q];
-    });
-};
-
-export const startOf4OriginDay = (date: Date): Date => {
-  return getHours(date) < 4
-    ? startOfHour(subDays(setHours(date, 4), 1))
-    : startOfHour(setHours(date, 4));
-};
-
 /**
  * 指定された日付の「4時起点の日」の開始時刻をTemporal.ZonedDateTimeで返します。
  * 4時より前の場合は前日の4時、4時以降の場合は当日の4時を返します。
@@ -193,13 +166,6 @@ export const startOf4OriginDayFromTemporal = (
 
   // 指定された日の4時に設定
   return baseDate.startOfDay().with({ hour: 4 });
-};
-
-export const getPast7DaysLocaleDateString = (now: Date): string[] => {
-  return eachDayOfInterval({
-    start: subDays(subHours(now, 4), 7),
-    end: subHours(now, 4),
-  }).map((d) => d.toLocaleDateString("ja"));
 };
 
 /**
@@ -223,13 +189,6 @@ export const getPast7DaysLocaleDateStringFromTemporal = (
 
   // 日付文字列に変換
   return dates.map((d) => `${d.year}/${d.month}/${d.day}`);
-};
-
-export const getQuarterEachLocaleDateString = (now: Date): string[] => {
-  return eachDayOfInterval({
-    start: startOfQuarter(subHours(now, 4)),
-    end: subHours(now, 4),
-  }).map((d) => d.toLocaleDateString("ja"));
 };
 
 /**

@@ -1,6 +1,7 @@
-import { subHours } from "date-fns";
 import { pipe } from "fp-ts/lib/function.js";
 import { Temporal } from "temporal-polyfill";
+
+import { date2ZonedDateTime } from "~/utils/date";
 
 import type { Cour } from "./consts";
 import {
@@ -29,11 +30,12 @@ export const isCour = (s: unknown): s is Cour => {
 export const date2cour = (date: Date): Cour =>
   pipe(
     date,
-    (date) => subHours(date, 4),
-    (date) => {
+    date2ZonedDateTime,
+    (zdt) => zdt.subtract({ hours: 4 }),
+    (zdt) => {
       return {
-        year: date.getFullYear(),
-        season: Season[Math.floor(date.getMonth() / 3)],
+        year: zdt.year,
+        season: Season[Math.floor((zdt.month - 1) / 3)],
       };
     },
   );

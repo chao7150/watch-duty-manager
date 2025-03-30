@@ -6,10 +6,6 @@ import {
   get4OriginDateFromTemporal,
   getCourExpression,
   getCourExpressionFromTemporal,
-  getPast7DaysLocaleDateString,
-  getQuarterEachLocaleDateString,
-  interval2CourList,
-  startOf4OriginDay,
   startOf4OriginDayFromTemporal,
   getPast7DaysLocaleDateStringFromTemporal,
   getQuarterEachLocaleDateStringFromTemporal,
@@ -52,38 +48,6 @@ test("get4OriginDateFromTemporal", () => {
   ).toBe(31);
 });
 
-test("interval2CourList", () => {
-  expect(
-    interval2CourList(
-      new Date("2022-01-01T00:00:00+0900"),
-      new Date("2022-07-01T03:59:00+0900"),
-    ).map(([label]) => label),
-  ).toStrictEqual(["2022秋", "2022夏", "2022春", "2022冬", "2021秋"]);
-  expect(
-    interval2CourList(
-      new Date("2022-01-01T04:00:00+0900"),
-      new Date("2022-07-01T04:00:00+0900"),
-    ).map(([label]) => label),
-  ).toStrictEqual(["2022秋", "2022夏", "2022春", "2022冬"]);
-});
-test("startOf4OriginDay", () => {
-  expect(startOf4OriginDay(new Date("2022-06-09T22:00:00+0900"))).toStrictEqual(
-    new Date("2022-06-09T04:00:00+0900"),
-  );
-  expect(startOf4OriginDay(new Date("2022-06-09T22:00:01+0900"))).toStrictEqual(
-    new Date("2022-06-09T04:00:00+0900"),
-  );
-  expect(startOf4OriginDay(new Date("2022-06-10T00:00:00+0900"))).toStrictEqual(
-    new Date("2022-06-09T04:00:00+0900"),
-  );
-  expect(startOf4OriginDay(new Date("2022-06-10T03:59:00+0900"))).toStrictEqual(
-    new Date("2022-06-09T04:00:00+0900"),
-  );
-  expect(startOf4OriginDay(new Date("2022-06-10T04:00:00+0900"))).toStrictEqual(
-    new Date("2022-06-10T04:00:00+0900"),
-  );
-});
-
 test("startOf4OriginDayFromTemporal", () => {
   expect(
     startOf4OriginDayFromTemporal(
@@ -110,35 +74,6 @@ test("startOf4OriginDayFromTemporal", () => {
       date2ZonedDateTime(new Date("2022-06-10T04:00:00+0900")),
     ).toString(),
   ).toBe("2022-06-10T04:00:00+09:00[Asia/Tokyo]");
-});
-
-describe("getPast7DaysLocaleDateString", () => {
-  it("", () => {
-    expect(
-      getPast7DaysLocaleDateString(new Date("2022-08-20T04:00:00+0900")),
-    ).toStrictEqual([
-      "2022/8/13",
-      "2022/8/14",
-      "2022/8/15",
-      "2022/8/16",
-      "2022/8/17",
-      "2022/8/18",
-      "2022/8/19",
-      "2022/8/20",
-    ]);
-    expect(
-      getPast7DaysLocaleDateString(new Date("2022-08-20T03:59:00+0900")),
-    ).toStrictEqual([
-      "2022/8/12",
-      "2022/8/13",
-      "2022/8/14",
-      "2022/8/15",
-      "2022/8/16",
-      "2022/8/17",
-      "2022/8/18",
-      "2022/8/19",
-    ]);
-  });
 });
 
 describe("getPast7DaysLocaleDateStringFromTemporal", () => {
@@ -171,25 +106,6 @@ describe("getPast7DaysLocaleDateStringFromTemporal", () => {
       "2022/8/18",
       "2022/8/19",
     ]);
-  });
-});
-
-describe("getQuarterEachLocaleDateString", () => {
-  it("", () => {
-    const spring = getQuarterEachLocaleDateString(
-      new Date("2022-07-01T00:00:00"),
-    );
-    expect(spring[0]).toBe("2022/4/1");
-    expect(spring[spring.length - 1]).toBe("2022/6/30");
-    expect(
-      getQuarterEachLocaleDateString(new Date("2022-07-01T04:00:00")),
-    ).toStrictEqual(["2022/7/1"]);
-    expect(
-      getQuarterEachLocaleDateString(new Date("2022-07-02T03:59:00")),
-    ).toStrictEqual(["2022/7/1"]);
-    expect(
-      getQuarterEachLocaleDateString(new Date("2022-07-02T04:00:00")),
-    ).toStrictEqual(["2022/7/1", "2022/7/2"]);
   });
 });
 

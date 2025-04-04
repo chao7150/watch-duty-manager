@@ -60,7 +60,7 @@ export const countOccurrence = (items: Array<string>): Map<string, number> => {
 /**
  * Prisma から取得した Date オブジェクトを Temporal.ZonedDateTime に変換し、
  * 4時間引いてフォーマットした文字列を返します。
- * 
+ *
  * @param prismaDate - Prisma から取得した Date オブジェクト
  * @returns yyyy/MM/dd 形式の文字列
  */
@@ -318,11 +318,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       recentWatchAchievements: [],
     };
   }
-  const recentWatchAchievementCount = parseSearchParamAsNumber(
-    request.url,
-    "recentWatchAchievementCount",
-    10,
-  );
   const now = Temporal.Now.zonedDateTimeISO("Asia/Tokyo");
   const [
     tickets,
@@ -337,7 +332,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     getRecentWatchAchievements({
       db,
       userId,
-      take: recentWatchAchievementCount,
+      take: 10,
     }),
     getQuarterMetrics({ db, userId, now }),
   )();
@@ -497,14 +492,6 @@ export default function Index() {
           workIdDelayMinList={[]}
           useLocalStorage={false}
         />
-        <Link
-          className="mt-2 py-2 flex flex-row justify-center hover:bg-accent-area"
-          to={`/?recentWatchAchievementCount=${
-            recentWatchAchievements.length + 10
-          }`}
-        >
-          <span>もっと見る</span>
-        </Link>
       </section>
     </div>
   );

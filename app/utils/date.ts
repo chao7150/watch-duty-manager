@@ -116,7 +116,8 @@ export const interval2CourListFromTemporal = (
 };
 
 export const get4OriginDate = (date: Date): number => {
-  return new Date(date.getTime() - 1000 * 60 * 60 * 4).getDate();
+  const zdt = date2ZonedDateTime(date);
+  return zdt.subtract({ hours: 4 }).day;
 };
 
 export const get4OriginDateFromTemporal = (
@@ -141,7 +142,8 @@ const monthSeasonNameMap: { [K: number]: string } = {
 };
 
 export const getCourExpression = (date: Date): string => {
-  return `${date.getFullYear()}${monthSeasonNameMap[date.getMonth() + 1]}`;
+  const zdt = date2ZonedDateTime(date);
+  return `${zdt.year}${monthSeasonNameMap[zdt.month]}`;
 };
 
 export const getCourExpressionFromTemporal = (

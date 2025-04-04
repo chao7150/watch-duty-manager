@@ -28,6 +28,7 @@ import * as EpisodeWatchForm from "~/components/Episode/WatchForm";
 import * as CloseIcon from "~/components/Icons/Close";
 import * as EditIcon from "~/components/Icons/Edit";
 import * as TrashIcon from "~/components/Icons/Trash";
+import * as EditModeToggle from "~/components/EditModeToggle";
 import { serverAction as WatchSettingsEditFormServerAction } from "~/components/watch-settings-edit-form/action.server";
 import { Component as WatchSettingsEditFormComponent } from "~/components/watch-settings-edit-form/component";
 import { EpisodeDateRegistrationTabPanel } from "~/components/work-create-form/component";
@@ -262,17 +263,7 @@ function WorkInfoSection({
     <section className={`${editMode ? "col-span-2" : ""}`}>
       <header className="flex">
         <h3>作品情報</h3>
-        <button className="ml-2" onClick={turnEditMode}>
-          {editMode ? (
-            <div title="編集をやめる">
-              <CloseIcon.Component />
-            </div>
-          ) : (
-            <div title="編集する">
-              <EditIcon.Component />
-            </div>
-          )}
-        </button>
+        <EditModeToggle.Component editMode={editMode} turnEditMode={turnEditMode} />
       </header>
       {editMode ? (
         <WorkEditFormComponent {...defaultValueMap} />
@@ -316,17 +307,7 @@ function WatchSettingsSection({
     <section>
       <header className="flex">
         <h3>視聴設定</h3>
-        <button className="ml-2" onClick={toggleWatchSettingsEditMode}>
-          {watchSettingsEditMode ? (
-            <div title="編集をやめる">
-              <CloseIcon.Component />
-            </div>
-          ) : (
-            <div title="編集する">
-              <EditIcon.Component />
-            </div>
-          )}
-        </button>
+        <EditModeToggle.Component editMode={watchSettingsEditMode} turnEditMode={toggleWatchSettingsEditMode} />
       </header>
       {watchSettingsEditMode ? (
         <WatchSettingsEditFormComponent

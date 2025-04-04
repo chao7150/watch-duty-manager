@@ -133,14 +133,15 @@ const OneWeekExtensionDatePicker: React.FC<{
           </p>
           <p>
             1週間後の日時:{" "}
-            {dates.length > 0 && dates[0].toLocaleString("ja", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              weekday: "short",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {dates.length > 0 &&
+              dates[0].toLocaleString("ja", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                weekday: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
           </p>
         </>
       ) : (

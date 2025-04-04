@@ -90,13 +90,58 @@ const SequentialDatePicker: React.FC<{
   );
 };
 
-export const EpisodeDateRegistrationTabPanel = () => {
+export const EpisodeDateRegistrationTabPanel: React.FC<{
+  lastEpisodeDate?: Date;
+}> = ({ lastEpisodeDate }) => {
   const [addedDates, setAddedDates] = useState<Date[]>([]);
+
+  // 1話延長タブ用の関数
+  const setOneWeekLaterDate = () => {
+    if (lastEpisodeDate) {
+      // 最後のエピソードの1週間後の日時を設定
+      const oneWeekLater = new Date(
+        lastEpisodeDate.getTime() + 7 * 24 * 60 * 60 * 1000,
+      );
+      setAddedDates([oneWeekLater]);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <TabPanel.Component
         items={[
+          {
+            id: "append-one-episode",
+            tabText: "1話延長",
+            content: (
+              <div className="flex flex-col gap-4">
+                {lastEpisodeDate ? (
+                  <>
+                    <p>
+                      最後のエピソード放送日:{" "}
+                      {lastEpisodeDate.toLocaleString("ja", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        weekday: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <button
+                      type="button"
+                      className="bg-accent-area rounded-full py-1 px-3 w-fit"
+                      onClick={setOneWeekLaterDate}
+                    >
+                      1話延長する
+                    </button>
+                  </>
+                ) : (
+                  <p>登録済みのエピソードがありません</p>
+                )}
+              </div>
+            ),
+          },
           {
             id: "sequential",
             tabText: "連番登録",

@@ -485,7 +485,11 @@ export default function Component() {
                       </label>
                     </li>
                     <li>
-                      <EpisodeDateRegistrationTabPanel />
+                      <EpisodeDateRegistrationTabPanel
+                        lastEpisodeDate={work.episodes.length > 0
+                          ? new Date(work.episodes[work.episodes.length - 1].publishedAt)
+                          : undefined}
+                      />
                     </li>
                     <li>
                       <button

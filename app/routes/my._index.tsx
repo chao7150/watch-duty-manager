@@ -25,14 +25,13 @@ import {
   cour2symbol,
   next,
   symbol2cour,
-  zonedDateTime2cour,
 } from "../domain/cour/util";
 import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
 
 import * as CourSelect from "~/components/CourSelect";
 
-import { date2ZonedDateTime, zdt2Date } from "~/utils/date";
+import { zdt2Date } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
@@ -190,7 +189,6 @@ const Component = () => {
   } = useLoaderData<typeof loader>();
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
-  const [filterTag, setFiterTag] = useState<number | "all" | "none">("all");
   const works = _w.map((w) => {
     const watchedEpisodesDenominator = completeByPublished
       ? w.episodes.filter((e) => new Date(e.publishedAt) < new Date()).length

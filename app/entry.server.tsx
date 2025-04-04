@@ -49,7 +49,7 @@ function isBotRequest(userAgent: string | null) {
 
   // isbot < 3.8.0
   if ("default" in isbotModule && typeof isbotModule.default === "function") {
-    // @ts-expect-error
+    // @ts-expect-error remixの組み込みなのでどうにもならない
     return isbotModule.default(userAgent);
   }
 

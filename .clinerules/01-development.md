@@ -2,3 +2,5 @@
   - 型チェック `npm run test:tsc`
   - テスト `npm run test`
   - デバッグ起動は `npm run dev`
+
+- 変更を加えた後は型チェックとテストを行ってください

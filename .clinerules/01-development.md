@@ -1,0 +1,4 @@
+- 開発上必要な操作はpackage.jsonにまとめてあります。ターミナルの操作が必要なときはまずこれらを参照してください
+  - 型チェック `npm run test:tsc`
+  - テスト `npm run test`
+  - デバッグ起動は `npm run dev`

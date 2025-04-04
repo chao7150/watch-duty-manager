@@ -47,11 +47,19 @@ function convertDateToIso(date: Date) {
 const SequentialDatePicker: React.FC<{
   dates: Date[];
   onChangeDates: (dates: Date[]) => void;
-}> = ({ dates, onChangeDates }) => {
+  lastEpisodeDate?: Date;
+}> = ({ dates, onChangeDates, lastEpisodeDate }) => {
   const now = new Date();
   now.setSeconds(0);
-  const [firstDate, setFirstDate] = useState<Date>(now);
+  
+  // lastEpisodeDateが存在する場合は、その1週間後を初期値にする
+  const initialDate = lastEpisodeDate
+    ? new Date(lastEpisodeDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+    : now;
+  
+  const [firstDate, setFirstDate] = useState<Date>(initialDate);
   const [count, setCount] = useState<number>(13);
+  
   useEffect(() => {
     onChangeDates(
       Array.from({ length: count }).map((_, index) => {
@@ -59,6 +67,7 @@ const SequentialDatePicker: React.FC<{
       }),
     );
   }, [onChangeDates, firstDate, count]);
+  
   return (
     <>
       <input
@@ -149,6 +158,7 @@ export const EpisodeDateRegistrationTabPanel: React.FC<{
               <SequentialDatePicker
                 dates={addedDates}
                 onChangeDates={setAddedDates}
+                lastEpisodeDate={lastEpisodeDate}
               />
             ),
           },

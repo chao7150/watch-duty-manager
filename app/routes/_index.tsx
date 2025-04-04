@@ -36,7 +36,6 @@ import {
 } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
-import { parseSearchParamAsNumber } from "~/utils/validator";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す

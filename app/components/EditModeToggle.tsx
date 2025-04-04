@@ -1,4 +1,5 @@
-import React, { useCallback } from "react";
+import React from "react";
+
 import * as CloseIcon from "./Icons/Close";
 import * as EditIcon from "./Icons/Edit";
 

@@ -2,7 +2,7 @@ import { useFetcher } from "@remix-run/react";
 
 import { useEffect } from "react";
 
-import type { action } from "~/routes/works.$workId";
+import type { action } from "~/routes/works.$workId/route";
 
 import * as WorkInput from "../work/Input";
 

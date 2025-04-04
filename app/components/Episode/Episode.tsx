@@ -3,8 +3,8 @@ import { Link } from "@remix-run/react";
 import { useMemo } from "react";
 
 import { Temporal } from "temporal-polyfill";
-import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "~/routes/works.$workId.$count";
+import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId/route";
 
 import type { Status } from "~/domain/episode/consts";
 import { getStatus } from "~/domain/episode/util";
@@ -110,7 +110,7 @@ const _Component: React.FC<Props> = ({
   const status = getStatus(
     // TODO: これでも同じじゃない？
     date2ZonedDateTime(publishedAt),
-    Temporal.Now.zonedDateTimeISO("Asia/Tokyo")
+    Temporal.Now.zonedDateTimeISO("Asia/Tokyo"),
   );
   return (
     <div

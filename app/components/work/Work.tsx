@@ -2,7 +2,7 @@ import { Link } from "@remix-run/react";
 
 import React from "react";
 
-import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId";
+import { bindUrl as bindUrlForWorks$WorkId } from "~/routes/works.$workId/route";
 
 import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
 

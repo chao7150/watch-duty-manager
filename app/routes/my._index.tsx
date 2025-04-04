@@ -37,8 +37,8 @@ import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
 
 import { getQuarterMetrics } from "./_index";
-import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
+import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId/route";
 
 const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   if (cour === null) {

@@ -51,15 +51,15 @@ const SequentialDatePicker: React.FC<{
 }> = ({ dates, onChangeDates, lastEpisodeDate }) => {
   const now = new Date();
   now.setSeconds(0);
-  
+
   // lastEpisodeDateが存在する場合は、その1週間後を初期値にする
   const initialDate = lastEpisodeDate
     ? new Date(lastEpisodeDate.getTime() + 7 * 24 * 60 * 60 * 1000)
     : now;
-  
+
   const [firstDate, setFirstDate] = useState<Date>(initialDate);
   const [count, setCount] = useState<number>(13);
-  
+
   useEffect(() => {
     onChangeDates(
       Array.from({ length: count }).map((_, index) => {
@@ -67,7 +67,7 @@ const SequentialDatePicker: React.FC<{
       }),
     );
   }, [onChangeDates, firstDate, count]);
-  
+
   return (
     <>
       <input
@@ -99,21 +99,61 @@ const SequentialDatePicker: React.FC<{
   );
 };
 
-export const EpisodeDateRegistrationTabPanel: React.FC<{
+// 1話延長タブ用のコンポーネント
+const OneWeekExtensionDatePicker: React.FC<{
+  dates: Date[];
+  onChangeDates: (dates: Date[]) => void;
   lastEpisodeDate?: Date;
-}> = ({ lastEpisodeDate }) => {
-  const [addedDates, setAddedDates] = useState<Date[]>([]);
-
-  // 1話延長タブ用の関数
-  const setOneWeekLaterDate = () => {
+}> = ({ dates, onChangeDates, lastEpisodeDate }) => {
+  // コンポーネントがマウントされたときに自動的に日時を設定
+  useEffect(() => {
     if (lastEpisodeDate) {
       // 最後のエピソードの1週間後の日時を設定
       const oneWeekLater = new Date(
         lastEpisodeDate.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
-      setAddedDates([oneWeekLater]);
+      onChangeDates([oneWeekLater]);
     }
-  };
+  }, [lastEpisodeDate, onChangeDates]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {lastEpisodeDate ? (
+        <>
+          <p>
+            最後のエピソード放送日:{" "}
+            {lastEpisodeDate.toLocaleString("ja", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              weekday: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+          <p>
+            1週間後の日時:{" "}
+            {dates.length > 0 && dates[0].toLocaleString("ja", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              weekday: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+        </>
+      ) : (
+        <p>登録済みのエピソードがありません</p>
+      )}
+    </div>
+  );
+};
+
+export const EpisodeDateRegistrationTabPanel: React.FC<{
+  lastEpisodeDate?: Date;
+}> = ({ lastEpisodeDate }) => {
+  const [addedDates, setAddedDates] = useState<Date[]>([]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,32 +163,11 @@ export const EpisodeDateRegistrationTabPanel: React.FC<{
             id: "append-one-episode",
             tabText: "1話延長",
             content: (
-              <div className="flex flex-col gap-4">
-                {lastEpisodeDate ? (
-                  <>
-                    <p>
-                      最後のエピソード放送日:{" "}
-                      {lastEpisodeDate.toLocaleString("ja", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        weekday: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                    <button
-                      type="button"
-                      className="bg-accent-area rounded-full py-1 px-3 w-fit"
-                      onClick={setOneWeekLaterDate}
-                    >
-                      1話延長する
-                    </button>
-                  </>
-                ) : (
-                  <p>登録済みのエピソードがありません</p>
-                )}
-              </div>
+              <OneWeekExtensionDatePicker
+                dates={addedDates}
+                onChangeDates={setAddedDates}
+                lastEpisodeDate={lastEpisodeDate}
+              />
             ),
           },
           {

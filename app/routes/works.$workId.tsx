@@ -8,7 +8,7 @@ import {
   useMatches,
 } from "@remix-run/react";
 
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 import * as E from "fp-ts/lib/Either.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
@@ -237,8 +237,15 @@ export default function Component() {
     () => setWatchSettingsEditMode((s) => !s),
     [],
   );
+
   const { loggedIn, work, subscribed, rating, ratings, delay, url } =
     useLoaderData<typeof loader>();
+  const [appendEpisodeOffset, setAppendEpisodeOffset] = useState(
+    Math.max(...work.episodes.map((e) => e.count)) + 1,
+  );
+  useEffect(() => {
+    setAppendEpisodeOffset(Math.max(...work.episodes.map((e) => e.count)) + 1);
+  }, [work.episodes]);
   const countMatch = useMatches().find(
     (m) => m.id === "routes/works.$workId.$count",
   );
@@ -478,17 +485,24 @@ export default function Component() {
                         <input
                           type="number"
                           name="offset"
-                          defaultValue={
-                            Math.max(...work.episodes.map((e) => e.count)) + 1
-                          }
+                          value={appendEpisodeOffset}
+                          onChange={(e) => {
+                            setAppendEpisodeOffset(e.target.valueAsNumber);
+                          }}
                         />
                       </label>
                     </li>
                     <li>
                       <EpisodeDateRegistrationTabPanel
-                        lastEpisodeDate={work.episodes.length > 0
-                          ? new Date(work.episodes[work.episodes.length - 1].publishedAt)
-                          : undefined}
+                        lastEpisodeDate={
+                          work.episodes.length > 0
+                            ? new Date(
+                                work.episodes[
+                                  work.episodes.length - 1
+                                ].publishedAt,
+                              )
+                            : undefined
+                        }
                       />
                     </li>
                     <li>

@@ -1,5 +1,3 @@
-import { useState, useCallback } from "react";
-
 import * as EditModeToggle from "~/components/EditModeToggle";
 import {
   Component as WorkEditFormComponent,
@@ -15,13 +13,14 @@ import { LoaderData } from "../server/loader";
  */
 export const Component = ({
   work,
+  editMode,
+  turnEditMode,
 }: {
   /** 作品の基本情報 */
   work: LoaderData["work"];
+  editMode: boolean;
+  turnEditMode: () => void;
 }) => {
-  const [editMode, setEditMode] = useState(false);
-  const turnEditMode = useCallback(() => setEditMode((s) => !s), []);
-
   const defaultValueMap: WorkEditFormProps = {
     workId: work.id,
     workInput: {
@@ -32,7 +31,7 @@ export const Component = ({
       hashtag: { defaultValue: work.hashtag ?? "" },
     },
     onSubmitSuccess: () => {
-      setEditMode(false);
+      turnEditMode();
     },
   };
 

@@ -1,5 +1,7 @@
 import { Link, useLoaderData, useMatches } from "@remix-run/react";
 
+import { useState, useCallback } from "react";
+
 import urlFrom from "url-from";
 
 import * as EpisodeRatingChartSection from "./components/episode-rating-chart-section";
@@ -27,6 +29,11 @@ const useCount = () => {
 export default function Component() {
   const { loggedIn, work, subscribed, rating, ratings, delay, url } =
     useLoaderData<typeof loader>();
+  const [workInfoSectionEditMode, setWorkInfoSectionEditMode] = useState(false);
+  const turnEditMode = useCallback(
+    () => setWorkInfoSectionEditMode((s) => !s),
+    [],
+  );
 
   const outletId = useCount();
 
@@ -53,13 +60,19 @@ export default function Component() {
       <div className="grid grid-cols-2 gap-8 pt-8">
         <div className="flex flex-col justify-between gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <WorkInfoSection.Component work={work} />
+            <WorkInfoSection.Component
+              work={work}
+              editMode={workInfoSectionEditMode}
+              turnEditMode={turnEditMode}
+            />
             {subscribed && (
-              <WatchSettingsSection.Component
-                workId={work.id}
-                delay={delay}
-                url={url}
-              />
+              <div className={workInfoSectionEditMode ? "hidden" : ""}>
+                <WatchSettingsSection.Component
+                  workId={work.id}
+                  delay={delay}
+                  url={url}
+                />
+              </div>
             )}
           </div>
           <EpisodeRatingChartSection.Component ratings={ratings} />

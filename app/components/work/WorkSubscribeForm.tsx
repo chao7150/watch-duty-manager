@@ -2,13 +2,15 @@ import { useFetcher } from "@remix-run/react";
 
 import { useHover } from "react-use";
 
+import * as Button from "../Button";
+
 export type Props = {
   givenClassName?: string;
   id: string;
   subscribing: boolean;
 };
 
-export const Component: React.VFC<Props> = ({
+export const Component: React.FC<Props> = ({
   givenClassName,
   id,
   subscribing,
@@ -27,14 +29,11 @@ export const Component: React.VFC<Props> = ({
 
 const UnsubscribeButton = () => {
   const element = (hovered: boolean) => (
-    <button
-      className="w-24 bg-accent-area rounded-full py-1 px-3"
-      name="_action"
-      value="unsubscribe"
-      title="unsubscribe"
-    >
-      {hovered ? "切る？" : "見てる"}
-    </button>
+    <div className="w-24">
+      <Button.Component name="_action" value="unsubscribe" title="unsubscribe">
+        {hovered ? "切る？" : "見てる"}
+      </Button.Component>
+    </div>
   );
   const [hoverable] = useHover(element);
   return hoverable;
@@ -42,14 +41,11 @@ const UnsubscribeButton = () => {
 
 const SubscribeButton = () => {
   const element = (hovered: boolean) => (
-    <button
-      className="w-24 bg-accent-area rounded-full py-1 px-3"
-      name="_action"
-      value="subscribe"
-      title="subscribe"
-    >
-      {hovered ? "見る？" : "見てない"}
-    </button>
+    <div className="w-24">
+      <Button.Component name="_action" value="subscribe" title="subscribe">
+        {hovered ? "見る？" : "見てない"}
+      </Button.Component>
+    </div>
   );
   const [hoverable] = useHover(element);
   return hoverable;

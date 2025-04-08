@@ -2,6 +2,7 @@ import { Form, Link, Outlet } from "@remix-run/react";
 
 import { useState, useEffect, Fragment } from "react";
 
+import * as Button from "~/components/Button";
 import * as EpisodeWatchForm from "~/components/Episode/WatchForm";
 import * as CloseIcon from "~/components/Icons/Close";
 import * as EditIcon from "~/components/Icons/Edit";
@@ -99,14 +100,13 @@ export const Component = ({
                   />
                 </li>
                 <li>
-                  <button
-                    className="bg-accent-area rounded-full py-1 px-3"
+                  <Button.Component
                     type="submit"
                     name="_action"
                     value="addEpisodes"
                   >
                     送信
-                  </button>
+                  </Button.Component>
                 </li>
               </ul>
             </Form>

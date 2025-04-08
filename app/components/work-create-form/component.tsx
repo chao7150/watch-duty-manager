@@ -101,10 +101,9 @@ const SequentialDatePicker: React.FC<{
 
 // 1話延長タブ用のコンポーネント
 const OneWeekExtensionDatePicker: React.FC<{
-  dates: Date[];
   onChangeDates: (dates: Date[]) => void;
   lastEpisodeDate?: Date;
-}> = ({ dates, onChangeDates, lastEpisodeDate }) => {
+}> = ({ onChangeDates, lastEpisodeDate }) => {
   // コンポーネントがマウントされたときに自動的に日時を設定
   useEffect(() => {
     if (lastEpisodeDate) {
@@ -121,7 +120,7 @@ const OneWeekExtensionDatePicker: React.FC<{
       {lastEpisodeDate ? (
         <>
           <p>
-            最後のエピソード放送日:{" "}
+            登録されている最終話:{" "}
             {lastEpisodeDate.toLocaleString("ja", {
               year: "numeric",
               month: "2-digit",
@@ -131,18 +130,7 @@ const OneWeekExtensionDatePicker: React.FC<{
               minute: "2-digit",
             })}
           </p>
-          <p>
-            1週間後の日時:{" "}
-            {dates.length > 0 &&
-              dates[0].toLocaleString("ja", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                weekday: "short",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-          </p>
+          <p>この一週間後に1話追加します</p>
         </>
       ) : (
         <p>登録済みのエピソードがありません</p>

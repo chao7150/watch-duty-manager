@@ -2,6 +2,8 @@ import { useFetcher } from "@remix-run/react";
 
 import { useState } from "react";
 
+import * as Button from "~/components/Button";
+
 import * as EyeIcon from "../Icons/Eye";
 import * as EyeOffIcon from "../Icons/EyeOff";
 import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
@@ -28,14 +30,9 @@ export const Component: React.FC<Props> = ({ workId, count, watched }) => {
             method="POST"
             action={`/works/${workId}/${count}?index`}
           >
-            <button
-              className="bg-accent-area rounded-full py-1 px-3"
-              type="submit"
-              name="_action"
-              value={"unwatch"}
-            >
+            <Button.Component type="submit" name="_action" value={"unwatch"}>
               {"unwatch"}
-            </button>
+            </Button.Component>
           </fetcher.Form>
         ) : (
           <fetcher.Form
@@ -83,14 +80,9 @@ export const Component: React.FC<Props> = ({ workId, count, watched }) => {
               <span className="hidden">comment</span>
               <textarea className="resize" name="comment"></textarea>
             </label>
-            <button
-              className="bg-accent-area rounded-full py-1 px-3"
-              type="submit"
-              name="_action"
-              value="watch"
-            >
+            <Button.Component type="submit" name="_action" value="watch">
               {fetcher.state === "idle" ? "視聴した" : "送信中"}
-            </button>
+            </Button.Component>
           </fetcher.Form>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useMatches } from "@remix-run/react";
 
 import { useEffect, useState } from "react";
 
+import * as Button from "../Button";
 import * as ArrowDownIcon from "../Icons/ArrowDown";
 import * as ArrowUpIcon from "../Icons/ArrowUp";
 import * as ClockIcon from "../Icons/Clock";
@@ -18,7 +19,7 @@ export type Props = {
 const useLocalStorageState = <T,>(
   name: string,
   defaultValue: T,
-  useLocalStorage = true
+  useLocalStorage = true,
 ) => {
   const [initialized, setInitialized] = useState(false);
   const [state, setState] = useState<T>(defaultValue);
@@ -52,17 +53,17 @@ export const Component: React.FC<Props> = ({
   const [sortDesc, setSortDesc] = useLocalStorageState<boolean>(
     "sortDesc",
     true,
-    useLocalStorage
+    useLocalStorage,
   );
   const [stack, setStack] = useLocalStorageState<boolean>(
-    "stack", 
+    "stack",
     false,
-    useLocalStorage
+    useLocalStorage,
   );
   const [ignoreDelay, setIgnoreDelay] = useLocalStorageState<boolean>(
     "ignoreDelay",
     false,
-    useLocalStorage
+    useLocalStorage,
   );
   const [filterWorkId, setFilterWorkId] = useState<number | undefined>(
     undefined,
@@ -121,13 +122,12 @@ export const Component: React.FC<Props> = ({
           </li>
           {filterWorkId !== undefined && (
             <li>
-              <button
-                className="bg-accent-area rounded-full py-1 px-3 flex gap-2"
-                onClick={() => setFilterWorkId(undefined)}
-              >
-                <p>タイトル: {filterTitle}</p>
-                <CloseIcon.Component />
-              </button>
+              <Button.Component onClick={() => setFilterWorkId(undefined)}>
+                <div className="flex gap-2">
+                  <p>タイトル: {filterTitle}</p>
+                  <CloseIcon.Component />
+                </div>
+              </Button.Component>
             </li>
           )}
         </ul>

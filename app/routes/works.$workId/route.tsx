@@ -2,8 +2,8 @@ import { Link, useLoaderData, useMatches } from "@remix-run/react";
 
 import urlFrom from "url-from";
 
+import * as EpisodeRatingChartSection from "./components/episode-rating-chart-section";
 import * as EpisodeScheduleSection from "./components/episode-schedule-section";
-import * as RatingChartSection from "./components/rating-chart-section";
 import * as WatchSettingsSection from "./components/watch-settings-section";
 import * as WorkInfoSection from "./components/work-info-section";
 import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
@@ -62,7 +62,7 @@ export default function Component() {
               />
             )}
           </div>
-          <RatingChartSection.Component ratings={ratings} />
+          <EpisodeRatingChartSection.Component ratings={ratings} />
         </div>
         <EpisodeScheduleSection.Component
           work={{ ...work, loggedIn }}

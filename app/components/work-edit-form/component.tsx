@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 import type { action } from "~/routes/works.$workId/route";
 
+import * as Button from "~/components/Button";
+
 import * as WorkInput from "../work/Input";
 
 export type Props = {
@@ -28,14 +30,11 @@ export const Component: React.FC<Props> = ({
       {fetcher.data && fetcher.data.hasError && <p>{fetcher.data.message}</p>}
       <fetcher.Form method="POST" action={`/works/${workId}`}>
         <WorkInput.Component {...workInput} />
-        <button
-          className="mt-4 bg-accent-area rounded-full py-1 px-3 ml-auto"
-          type="submit"
-          name="_action"
-          value="edit"
-        >
-          送信
-        </button>
+        <div className="mt-4 ml-auto">
+          <Button.Component type="submit" name="_action" value="edit">
+            送信
+          </Button.Component>
+        </div>
       </fetcher.Form>
     </section>
   );

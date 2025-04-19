@@ -153,7 +153,6 @@ export const EpisodeDateRegistrationTabPanel: React.FC<{
             tabText: "1話延長",
             content: (
               <OneWeekExtensionDatePicker
-                dates={addedDates}
                 onChangeDates={setAddedDates}
                 lastEpisodeDate={lastEpisodeDate}
               />

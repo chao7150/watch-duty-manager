@@ -21,15 +21,12 @@ export const Component: React.FC<Props> = ({
         className="bg-accent-area"
         onChange={onChange}
         aria-label="放送クールを選択する"
+        defaultValue={defaultSelectedValue}
       >
         <option value="all">全期間</option>
         {courList.map(([label, date]) => {
           return (
-            <option
-              key={label}
-              value={date}
-              selected={date === defaultSelectedValue}
-            >
+            <option key={label} value={date}>
               {label}
             </option>
           );

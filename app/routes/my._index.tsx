@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import type { Prisma } from "@prisma/client";
 import {
@@ -30,6 +30,7 @@ import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
 
 import * as CourSelect from "~/components/CourSelect";
+import * as FilterIcon from "~/components/Icons/Filter";
 
 import { zdt2Date } from "~/utils/date";
 import { db } from "~/utils/db.server";
@@ -64,6 +65,28 @@ const generateStartDateQuery = (cour: Cour | null): Prisma.WorkWhereInput => {
   };
 };
 
+const _generateStartDateQuery = (
+  cour: Cour | null,
+): Prisma.EpisodeWhereInput => {
+  if (cour === null) {
+    return {};
+  }
+  const searchDate = cour2startDate(cour);
+  // Date を Temporal.ZonedDateTime に変換し、3ヶ月後の日付を計算
+  const endDate = zdt2Date(
+    Temporal.Instant.fromEpochMilliseconds(searchDate.getTime())
+      .toZonedDateTimeISO("Asia/Tokyo")
+      .add({ months: 3 }),
+  );
+  return {
+    publishedAt: {
+      // 4時始まりは未検討
+      gte: searchDate,
+      lte: endDate,
+    },
+  };
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
   const url = new URL(request.url);
@@ -77,10 +100,31 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       throw new Error("cour is invalid.");
     }
   }
+  const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
+  const watchingWorkIds = (
+    await db.episode.groupBy({
+      by: ["workId"],
+      where: {
+        work: {
+          users: { some: { userId } },
+        },
+        ..._generateStartDateQuery(cour),
+      },
+      _count: {
+        workId: true,
+      },
+      having: {
+        workId: {
+          _count: {
+            gte: minEpisodes,
+          },
+        },
+      },
+    })
+  ).map((e) => e.workId);
   const watchingWorksPromise = db.work.findMany({
     where: {
-      users: { some: { userId } },
-      ...generateStartDateQuery(cour),
+      id: { in: watchingWorkIds },
     },
     include: {
       episodes: {
@@ -162,6 +206,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           string,
         ],
     ),
+    minEpisodes,
     works: watchingWorks.map((work) => ({
       ...work,
       rating: work.episodes
@@ -186,9 +231,11 @@ const Component = () => {
     bestEpisodesOnUser,
     quarterMetrics,
     filledEpisodeRatingDistribution,
+    minEpisodes: _minEpisodes,
   } = useLoaderData<typeof loader>();
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
+  const [minEpisodes, setMinEpisodes] = useState(_minEpisodes);
   const works = _w.map((w) => {
     const watchedEpisodesDenominator = completeByPublished
       ? w.episodes.filter((e) => new Date(e.publishedAt) < new Date()).length
@@ -200,14 +247,18 @@ const Component = () => {
         sort === "rating" ? w.rating : w.complete / watchedEpisodesDenominator,
     };
   });
+
+  const applyEpisodesFilter = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("minEpisodes", minEpisodes.toString());
+    location.href = url.toString();
+  }, [minEpisodes]);
+
   return (
     <main className="grid grid-cols-2 gap-4">
       <section className="flex flex-col gap-2">
-        <div className="flex gap-2">
-          <h3>
-            作品(
-            {works.length})
-          </h3>
+        <div className="flex items-center gap-2">
+          <h3>作品({works.length})</h3>
           <CourSelect.Component
             courList={[...courList].reverse()}
             defaultSelectedValue={selectedCourDate ?? undefined}
@@ -220,6 +271,34 @@ const Component = () => {
               location.href = `/my?cour=${value}`;
             }}
           />
+          <details className="relative ml-auto">
+            <summary className="list-none cursor-pointer p-1 hover:bg-gray-700 rounded">
+              <FilterIcon.Component />
+            </summary>
+            <section className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2 rounded flex items-center gap-2 w-max">
+              期間内に
+              <input
+                type="number"
+                min="1"
+                className="bg-accent-area w-8"
+                value={minEpisodes}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (!isNaN(value)) {
+                    setMinEpisodes(value);
+                  }
+                }}
+              />
+              話以上放送される作品に限定
+              <button
+                type="button"
+                className="bg-accent-area px-2 py-1 rounded"
+                onClick={applyEpisodesFilter}
+              >
+                適用
+              </button>
+            </section>
+          </details>
         </div>
 
         <section className="flex gap-4">

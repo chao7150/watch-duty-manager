@@ -1,23 +1,15 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
-import { useState, useCallback } from "react";
-
-import type { Prisma } from "@prisma/client";
 import urlFrom from "url-from";
 
 import type { Cour } from "~/domain/cour/consts";
 import { getCourList } from "~/domain/cour/db";
-import {
-  cour2expression,
-  cour2startDate,
-  cour2symbol,
-  next,
-  symbol2cour,
-} from "~/domain/cour/util";
+import { cour2expression, cour2symbol, symbol2cour } from "~/domain/cour/util";
+import { getWorkIdsWithMinEpisodes } from "~/domain/episode/filter";
 
 import * as CourSelect from "~/components/CourSelect";
-import * as FilterIcon from "~/components/Icons/Filter";
+import * as EpisodeFilter from "~/components/EpisodeFilter";
 import * as WorkUI from "~/components/work/Work";
 
 import { db } from "~/utils/db.server";
@@ -26,24 +18,6 @@ import { getUserId } from "~/utils/session.server";
 export const bindUrl = urlFrom`/works`.narrowing<{
   "?query": { cour?: string; minEpisodes?: string };
 }>;
-
-// my._index.tsx からコピー
-const _generateStartDateQuery = (
-  cour: Cour | null,
-): Prisma.EpisodeWhereInput => {
-  if (cour === null) {
-    return {};
-  }
-  const searchDate = cour2startDate(cour);
-  const endDate = cour2startDate(next(cour));
-  return {
-    publishedAt: {
-      // 4時始まりは未検討
-      gte: searchDate,
-      lte: endDate,
-    },
-  };
-};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -60,24 +34,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
 
-  const workIds = (
-    await db.episode.groupBy({
-      by: ["workId"],
-      where: {
-        ..._generateStartDateQuery(cour),
-      },
-      _count: {
-        workId: true,
-      },
-      having: {
-        workId: {
-          _count: {
-            gte: minEpisodes,
-          },
-        },
-      },
-    })
-  ).map((e) => e.workId);
+  const workIds = await getWorkIdsWithMinEpisodes(db, cour, minEpisodes);
 
   // workIds で絞り込んで作品情報を取得
   const worksPromise = db.work.findMany({
@@ -116,14 +73,6 @@ export default function Works() {
     selectedCourDate,
     minEpisodes: _minEpisodes,
   } = loaderData;
-  const [minEpisodes, setMinEpisodes] = useState(_minEpisodes); // state で管理
-
-  // フィルター適用処理
-  const applyEpisodesFilter = useCallback(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("minEpisodes", minEpisodes.toString());
-    location.href = url.toString();
-  }, [minEpisodes]);
 
   return (
     <div>
@@ -141,38 +90,11 @@ export default function Works() {
               url.searchParams.set("cour", value);
             }
             // minEpisodes は維持する
-            url.searchParams.set("minEpisodes", minEpisodes.toString());
+            url.searchParams.set("minEpisodes", _minEpisodes.toString());
             location.href = url.toString();
           }}
         />
-        <details className="relative">
-          <summary className="list-none cursor-pointer p-1 hover:bg-gray-700 rounded">
-            <FilterIcon.Component />
-          </summary>
-          <section className="z-10 absolute right-0 top-full mt-1 shadow-menu bg-dark p-2 rounded flex items-center gap-2 w-max">
-            期間内に
-            <input
-              type="number"
-              min="1"
-              className="bg-accent-area w-8"
-              value={minEpisodes}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-                if (!isNaN(value)) {
-                  setMinEpisodes(value);
-                }
-              }}
-            />
-            話以上放送される作品に限定
-            <button
-              type="button"
-              className="bg-accent-area px-2 py-1 rounded"
-              onClick={applyEpisodesFilter}
-            >
-              適用
-            </button>
-          </section>
-        </details>
+        <EpisodeFilter.Component initialMinEpisodes={_minEpisodes} />
       </div>
       <section>
         <h3>

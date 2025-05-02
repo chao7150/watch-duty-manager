@@ -208,7 +208,7 @@ const Component = () => {
               location.href = `/my?cour=${value}`;
             }}
           />
-          <div className="ml-auto">
+          <div>
             <EpisodeFilter.Component initialMinEpisodes={_minEpisodes} />
           </div>
         </div>

@@ -141,13 +141,13 @@ const OneWeekExtensionDatePicker: React.FC<{
 
 export const EpisodeDateRegistrationTabPanel: React.FC<{
   lastEpisodeDate?: Date;
-}> = ({ lastEpisodeDate }) => {
+  showOneWeekExtensionTab?: boolean;
+}> = ({ lastEpisodeDate, showOneWeekExtensionTab = true }) => {
   const [addedDates, setAddedDates] = useState<Date[]>([]);
 
-  return (
-    <div className="flex flex-col gap-4">
-      <TabPanel.Component
-        items={[
+  const tabItems = [
+    ...(showOneWeekExtensionTab
+      ? [
           {
             id: "append-one-episode",
             tabText: "1話延長",
@@ -158,29 +158,31 @@ export const EpisodeDateRegistrationTabPanel: React.FC<{
               />
             ),
           },
-          {
-            id: "sequential",
-            tabText: "連番登録",
-            content: (
-              <SequentialDatePicker
-                dates={addedDates}
-                onChangeDates={setAddedDates}
-                lastEpisodeDate={lastEpisodeDate}
-              />
-            ),
-          },
-          {
-            id: "multiple",
-            tabText: "カレンダーから登録",
-            content: (
-              <MultipleDatePicker
-                dates={addedDates}
-                onChangeDates={setAddedDates}
-              />
-            ),
-          },
-        ]}
-      />
+        ]
+      : []),
+    {
+      id: "sequential",
+      tabText: "連番登録",
+      content: (
+        <SequentialDatePicker
+          dates={addedDates}
+          onChangeDates={setAddedDates}
+          lastEpisodeDate={lastEpisodeDate}
+        />
+      ),
+    },
+    {
+      id: "multiple",
+      tabText: "カレンダーから登録",
+      content: (
+        <MultipleDatePicker dates={addedDates} onChangeDates={setAddedDates} />
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <TabPanel.Component items={tabItems} />
       <div>
         登録しようとしているエピソード
         <ul>
@@ -229,7 +231,7 @@ export const Component: React.FC = () => {
           <legend>
             <h3>エピソード登録</h3>
           </legend>
-          <EpisodeDateRegistrationTabPanel />
+          <EpisodeDateRegistrationTabPanel showOneWeekExtensionTab={false} />
         </fieldset>
       </div>
       <button

@@ -46,8 +46,8 @@ export const Component = ({
         />
       ) : (
         <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-4 gap-y-1">
-          <dt>視聴遅延</dt>
-          <dd>
+          <dt className="whitespace-nowrap">視聴遅延</dt>
+          <dd className="break-all">
             {delay === undefined
               ? "なし"
               : `${Math.floor(delay / 86400)}日${Math.floor(
@@ -59,8 +59,8 @@ export const Component = ({
                     "0",
                   )}時間${((delay / 60) % 60).toString().padStart(2, "0")}分`}
           </dd>
-          <dt>視聴リンク</dt>
-          <dd>
+          <dt className="whitespace-nowrap">視聴リンク</dt>
+          <dd className="break-all">
             {isValidUrlString(url) ? (
               <Link to={url} target="_blank">
                 {url}

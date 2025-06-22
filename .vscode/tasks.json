@@ -11,12 +11,12 @@
     {
       "label": "start dev db",
       "type": "shell",
-      "command": "nerdctl compose -f container/compose.local.yml -p wdm-dev up -d db"
+      "command": "sudo nerdctl compose -f container/compose.local.yml up -d db"
     },
     {
       "label": "start test db",
       "type": "shell",
-      "command": "nerdctl compose -f container/compose.local.yml -p test up -d db"
+      "command": "sudo nerdctl compose -f container/compose.local.yml -p test up -d db"
     }
   ]
 }

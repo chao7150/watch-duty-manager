@@ -83,7 +83,12 @@ const getTickets =
       return await db.episode.findMany({
         where: {
           work: { users: { some: { userId } } },
-          WatchedEpisodesOnUser: { none: { userId } },
+          EpisodeStatusOnUser: {
+            none: {
+              userId,
+              status: { in: ["watched", "skipped"] },
+            },
+          },
           publishedAt: {
             lte: zdt2Date(publishedUntilDate),
           },
@@ -120,10 +125,11 @@ const getWeekWatchAchievements =
       startOf4OriginDayFromTemporal(now).subtract({ days: 7 }),
     );
     const occurrence = (
-      await db.watchedEpisodesOnUser.findMany({
+      await db.episodeStatusOnUser.findMany({
         select: { createdAt: true },
         where: {
           userId,
+          status: "watched",
           createdAt: {
             gte: startDay,
           },
@@ -206,9 +212,11 @@ const getQuarterWatchAchievements =
       cour2startZonedDateTime(zonedDateTime2cour(now)).add({ hours: 4 }),
     );
     const occurrence = (
-      await db.watchedEpisodesOnUser.findMany({
+      await db.episodeStatusOnUser.findMany({
         select: { createdAt: true },
         where: {
+          userId,
+          status: "watched",
           episode: {
             publishedAt: {
               gte: startDate,
@@ -216,7 +224,6 @@ const getQuarterWatchAchievements =
             },
             work: { users: { some: { userId } } },
           },
-          userId,
         },
       })
     ).map((w) => prismaDate2key(w.createdAt));
@@ -226,8 +233,8 @@ const getQuarterWatchAchievements =
 const getRecentWatchAchievements =
   ({ db, userId, take }: { db: PrismaClient; userId: string; take: number }) =>
   async () => {
-    return await db.watchedEpisodesOnUser.findMany({
-      where: { userId },
+    return await db.episodeStatusOnUser.findMany({
+      where: { userId, status: "watched" },
       orderBy: { createdAt: "desc" },
       take,
       include: {

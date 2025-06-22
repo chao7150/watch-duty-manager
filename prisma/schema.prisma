@@ -32,13 +32,13 @@ model Work {
 
 // アニメの単話
 model Episode {
-  work                  Work                    @relation(fields: [workId], references: [id])
-  workId                Int
-  count                 Int
-  publishedAt           DateTime
-  title                 String?
-  description           String?
-  WatchedEpisodesOnUser WatchedEpisodesOnUser[]
+  work                Work                  @relation(fields: [workId], references: [id])
+  workId              Int
+  count               Int
+  publishedAt         DateTime
+  title               String?
+  description         String?
+  EpisodeStatusOnUser EpisodeStatusOnUser[]
 
   @@id(fields: [workId, count])
 }
@@ -53,14 +53,15 @@ model SubscribedWorksOnUser {
   @@id(fields: [userId, workId])
 }
 
-model WatchedEpisodesOnUser {
+model EpisodeStatusOnUser {
   userId    String
   episode   Episode  @relation(fields: [workId, count], references: [workId, count], onDelete: Restrict, onUpdate: Cascade)
   workId    Int
   count     Int
+  status    String // "watched" | "skipped"
   createdAt DateTime
   comment   String?  @db.Text
-  rating    Int?
+  rating    Int? // ratingはwatchedの場合のみ有効
 
   @@id(fields: [userId, workId, count])
 }

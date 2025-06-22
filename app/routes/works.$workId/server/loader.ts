@@ -18,9 +18,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
         ...(userId
           ? {
               include: {
-                WatchedEpisodesOnUser: {
+                EpisodeStatusOnUser: {
                   where: { userId },
-                  select: { createdAt: true, rating: true },
+                  select: { createdAt: true, rating: true, status: true },
                 },
               },
             }
@@ -37,7 +37,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       : Promise.resolve(undefined);
   const ratingsPromise =
     userId !== undefined
-      ? db.watchedEpisodesOnUser.findMany({
+      ? db.episodeStatusOnUser.findMany({
           select: {
             episode: {
               select: {
@@ -49,6 +49,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
           where: {
             workId: parseInt(workId, 10),
             userId,
+            status: "watched",
           },
           orderBy: {
             episode: {

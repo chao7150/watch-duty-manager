@@ -23,11 +23,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       work: { select: { title: true } },
     },
   });
-  const historiesPromise = db.episodeStatusOnUser.findMany({
+  const historiesPromise = db.watchedEpisodesOnUser.findMany({
     where: {
       workId: parseInt(workId, 10),
       count: parseInt(count, 10),
-      status: "watched",
     },
   });
   const [episode, histories] = await Promise.all([
@@ -87,25 +86,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
 
   if (formData._action === "unwatch") {
-    await db.episodeStatusOnUser.delete({
+    await db.watchedEpisodesOnUser.delete({
       where: { userId_workId_count: { userId, workId, count } },
-    });
-    return null;
-  }
-
-  if (formData._action === "skip") {
-    await db.episodeStatusOnUser.upsert({
-      where: { userId_workId_count: { userId, workId, count } },
-      create: {
-        userId,
-        workId,
-        count,
-        status: "skipped",
-        createdAt: new Date(),
-      },
-      update: {
-        status: "skipped",
-      },
     });
     return null;
   }
@@ -122,21 +104,22 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     throw new Response("invalid rating", { status: 400 });
   }
 
-  await db.episodeStatusOnUser.upsert({
-    where: { userId_workId_count: { userId, workId, count } },
-    create: {
-      userId,
-      workId,
-      count,
-      status: "watched",
-      comment,
-      rating: _rating === undefined ? undefined : rating,
-      createdAt: new Date(),
+  await db.episode.update({
+    where: {
+      workId_count: {
+        workId,
+        count,
+      },
     },
-    update: {
-      status: "watched",
-      comment,
-      rating: _rating === undefined ? undefined : rating,
+    data: {
+      WatchedEpisodesOnUser: {
+        create: {
+          userId,
+          comment,
+          rating: _rating === undefined ? undefined : rating,
+          createdAt: new Date(),
+        },
+      },
     },
   });
   return null;

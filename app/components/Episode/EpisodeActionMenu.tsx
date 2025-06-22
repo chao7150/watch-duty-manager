@@ -13,7 +13,6 @@ export type Props = {
   watchUrl: string | undefined;
   count: number;
   watched: boolean;
-  skipped?: boolean;
   hashtag?: string;
   onClickWatchUnready?: (workId: number) => void;
   published: boolean;
@@ -47,7 +46,6 @@ export const Component: React.FC<Props> = ({
   officialSiteUrl,
   count,
   watched,
-  skipped,
   hashtag,
   onClickWatchUnready,
   published,
@@ -104,7 +102,6 @@ export const Component: React.FC<Props> = ({
             workId={workId}
             count={count}
             watched={watched}
-            skipped={skipped}
           />
         )}
       </div>

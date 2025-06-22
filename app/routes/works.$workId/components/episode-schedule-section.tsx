@@ -161,23 +161,10 @@ const EpisodeRow = ({
               workId={episode.workId}
               count={episode.count}
               watched={
-                // @ts-expect-error 動的にクエリを生成しているので型がついていない
-                episode.EpisodeStatusOnUser
-                  ? // @ts-expect-error 動的にクエリを生成しているので型がついていない
-                    episode.EpisodeStatusOnUser.some(
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (status: any) => status.status === "watched",
-                    )
-                  : false
-              }
-              skipped={
-                // @ts-expect-error 動的にクエリを生成しているので型がついていない
-                episode.EpisodeStatusOnUser
-                  ? // @ts-expect-error 動的にクエリを生成しているので型がついていない
-                    episode.EpisodeStatusOnUser.some(
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (status: any) => status.status === "skipped",
-                    )
+                // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
+                episode.WatchedEpisodesOnUser
+                  ? // @ts-expect-error クエリを動的に動的に生成しているので型がついていない
+                    episode.WatchedEpisodesOnUser.length >= 1
                   : false
               }
             />

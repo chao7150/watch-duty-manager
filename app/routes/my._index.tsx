@@ -73,7 +73,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     include: {
       episodes: {
         include: {
-          EpisodeStatusOnUser: { where: { userId, status: "watched" } },
+          WatchedEpisodesOnUser: { where: { userId } },
         },
       },
       users: {
@@ -81,10 +81,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
     },
   });
-  const bestEpisodesOnUserPromise = db.episodeStatusOnUser.findMany({
+  const bestEpisodesOnUserPromise = db.watchedEpisodesOnUser.findMany({
     where: {
       userId,
-      status: "watched",
       episode: {
         ...(cour === null ? {} : generateWorkDateQuery(cour).episodes?.some),
       },
@@ -99,11 +98,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     orderBy: { rating: "desc" },
     take: 30,
   });
-  const episodeRatingDistributionPromise = db.episodeStatusOnUser.groupBy({
+  const episodeRatingDistributionPromise = db.watchedEpisodesOnUser.groupBy({
     by: ["rating"],
     where: {
       userId,
-      status: "watched",
       episode: {
         ...(cour === null ? {} : generateWorkDateQuery(cour).episodes?.some),
       },
@@ -156,11 +154,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     works: watchingWorks.map((work) => ({
       ...work,
       rating: work.episodes
-        .map((episode) => episode.EpisodeStatusOnUser[0]?.rating)
+        .map((episode) => episode.WatchedEpisodesOnUser[0]?.rating)
         .filter(isNumber)
         .reduce((acc, val, _, array) => acc + val / array.length, 0),
       complete: work.episodes.filter(
-        (episode) => episode.EpisodeStatusOnUser.length === 1,
+        (episode) => episode.WatchedEpisodesOnUser.length === 1,
       ).length,
     })),
     bestEpisodesOnUser,
@@ -254,7 +252,7 @@ const Component = () => {
                     value={work.complete}
                     title={`完走率: ${
                       work.episodes.filter(
-                        (episode) => episode.EpisodeStatusOnUser.length === 1,
+                        (episode) => episode.WatchedEpisodesOnUser.length === 1,
                       ).length
                     }/${work.watchedEpisodesDenominator}`}
                   >

@@ -104,7 +104,6 @@ const _Component: React.FC<Props> = ({
   hashtag,
   watchReady,
   watched,
-  skipped,
   onClickWatchUnready,
   delayed,
 }) => {
@@ -135,7 +134,6 @@ const _Component: React.FC<Props> = ({
           watchUrl,
           count,
           watched,
-          skipped,
           hashtag,
           onClickWatchUnready,
           published: ["onair", "published"].includes(status),

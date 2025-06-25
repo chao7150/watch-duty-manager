@@ -118,7 +118,15 @@ export const Component = ({
 };
 
 // エピソード型定義
-type Episode = LoaderData["work"]["episodes"][number];
+type EpisodeStatus = {
+  status: "watched" | "skipped";
+};
+// loader.tsのクエリによって`EpisodeStatusOnUser`が追加されるが、
+// LoaderData型にその情報が自動的に反映されないため、ここで手動で型を拡張している。
+// ログインしていない場合はこのプロパティは存在しないため、オプショナル（?）にしている。
+type Episode = LoaderData["work"]["episodes"][number] & {
+  EpisodeStatusOnUser?: EpisodeStatus[];
+};
 /**
  * エピソード行コンポーネント
  * エピソードの基本情報を表示し、視聴状態の変更や削除などのアクションを提供する
@@ -161,22 +169,16 @@ const EpisodeRow = ({
               workId={episode.workId}
               count={episode.count}
               watched={
-                // @ts-expect-error 動的にクエリを生成しているので型がついていない
                 episode.EpisodeStatusOnUser
-                  ? // @ts-expect-error 動的にクエリを生成しているので型がついていない
-                    episode.EpisodeStatusOnUser.some(
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (status: any) => status.status === "watched",
+                  ? episode.EpisodeStatusOnUser.some(
+                      (status) => status.status === "watched",
                     )
                   : false
               }
               skipped={
-                // @ts-expect-error 動的にクエリを生成しているので型がついていない
                 episode.EpisodeStatusOnUser
-                  ? // @ts-expect-error 動的にクエリを生成しているので型がついていない
-                    episode.EpisodeStatusOnUser.some(
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (status: any) => status.status === "skipped",
+                  ? episode.EpisodeStatusOnUser.some(
+                      (status) => status.status === "skipped",
                     )
                   : false
               }

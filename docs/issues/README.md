@@ -1,0 +1,49 @@
+# Issues ドキュメント
+
+このディレクトリには、GitHubのissueと同じ内容をマークダウンファイルとして保存しています。これにより、コードエディタやAIツールからissueの内容を簡単に参照できます。
+
+## 優先度別一覧
+
+### Critical (緊急度最高)
+- [Issue #3: セキュリティ: SECRET環境変数のフォールバック値を削除](./issue-03-security-secret-env.md)
+
+### High (優先度高)
+- [Issue #4: 型安全性: any型の使用を排除](./issue-04-type-safety-any.md)
+- [Issue #5: 依存関係: React Canary版を安定版に更新](./issue-05-react-canary.md)
+- [Issue #6: パフォーマンス: N+1クエリ問題の解消とページネーション実装](./issue-06-performance-n1-query.md)
+- [Issue #10: セキュリティ: 認可チェックの一貫性確保](./issue-10-security-authorization.md)
+
+### Medium (優先度中)
+- [Issue #7: テスト: コンポーネントテストとE2Eテストの追加](./issue-07-testing-coverage.md)
+- [Issue #8: アーキテクチャ: リポジトリパターンの導入](./issue-08-architecture-repository.md)
+- [Issue #9: 運用: ログ戦略とモニタリングの実装](./issue-09-logging-monitoring.md)
+- [Issue #11: 依存関係: firebaseuiの廃止に対応](./issue-11-firebaseui-deprecated.md)
+- [Issue #12: エラーハンドリング: 詳細なエラー情報の保持と構造化](./issue-12-error-handling.md)
+- [Issue #14: 開発環境: CI/CDパイプラインの構築](./issue-14-cicd-pipeline.md)
+- [Issue #15: データベース: マイグレーション戦略とインデックス最適化](./issue-15-database-optimization.md)
+
+### Low (優先度低)
+- [Issue #13: コード重複: フォーム処理パターンの共通化](./issue-13-code-duplication.md)
+
+## カテゴリ別一覧
+
+### セキュリティ
+- Issue #3, #10
+
+### パフォーマンス
+- Issue #6, #15
+
+### 技術的負債
+- Issue #4, #5, #11, #12, #13
+
+### アーキテクチャ
+- Issue #8
+
+### テスト
+- Issue #7
+
+### 運用・インフラ
+- Issue #9, #14
+
+## 更新履歴
+- 2025-07-03: 初回作成（13件のissue）

@@ -6,10 +6,12 @@ import type { action } from "~/routes/works.$workId/route";
 
 import * as Button from "~/components/Button";
 
+import { durationSec2DayAndSec } from "~/utils/date";
+
 export type Props = {
   workId: string | number;
   defaultValue: {
-    delayMin?: number;
+    delaySec?: number;
     url?: string;
   };
   onSubmitSuccess: () => void;
@@ -26,7 +28,7 @@ export const Component: React.FC<Props> = ({
       onSubmitSuccess();
     }
   }, [fetcher.state, fetcher.data]);
-  const delayMin = defaultValue.delayMin ?? 0;
+  const delaySec = defaultValue.delaySec ?? 0;
   return (
     <section>
       {fetcher.data && fetcher.data.hasError && <p>{fetcher.data.message}</p>}
@@ -38,9 +40,8 @@ export const Component: React.FC<Props> = ({
               <input
                 name="days"
                 type="number"
-                min={0}
                 step={1}
-                defaultValue={Math.floor(delayMin / 1440)}
+                defaultValue={durationSec2DayAndSec(delaySec)[0]}
                 className="w-8"
               ></input>
             </label>
@@ -49,12 +50,15 @@ export const Component: React.FC<Props> = ({
               <input
                 name="hour_min"
                 type="time"
-                defaultValue={`${Math.floor((delayMin % 1440) / 60)
+                defaultValue={`${Math.floor(
+                  durationSec2DayAndSec(delaySec)[1] / 3600,
+                )
                   .toString()
-                  .padStart(
-                    2,
-                    "0",
-                  )}:${(delayMin % 60).toString().padStart(2, "0")}`}
+                  .padStart(2, "0")}:${Math.floor(
+                  (durationSec2DayAndSec(delaySec)[1] % 3600) / 60,
+                )
+                  .toString()
+                  .padStart(2, "0")}`}
               ></input>
             </label>
           </dd>

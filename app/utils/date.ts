@@ -250,3 +250,13 @@ export const zdt2Date = (zdt: Temporal.ZonedDateTime): Date => {
 export const formatZDT = (zdt: Temporal.ZonedDateTime): string => {
   return `${zdt.year}/${zdt.month}/${zdt.day}`;
 };
+
+/**
+ * 秒数（負の数も含む）を日数と秒数のタプルに変換する
+ * 秒数が負の場合日は負になり得るが秒数は常に正の値にする
+ */
+export const durationSec2DayAndSec = (seconds: number): [number, number] => {
+  console.log(seconds);
+  const days = Math.floor(seconds / 86400);
+  return [days, seconds - days * 86400];
+};

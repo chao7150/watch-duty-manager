@@ -9,6 +9,7 @@ import {
   startOf4OriginDayFromTemporal,
   getPast7DaysLocaleDateStringFromTemporal,
   getQuarterEachLocaleDateStringFromTemporal,
+  durationSec2DayAndSec,
 } from "../date";
 
 test("get4OriginDate with Date", () => {
@@ -335,5 +336,16 @@ describe("date2ZonedDateTime", () => {
     expect(zonedDateTime.year).toBe(2020);
     expect(zonedDateTime.month).toBe(2);
     expect(zonedDateTime.day).toBe(29);
+  });
+});
+
+describe("durationSec2DayAndSec", () => {
+  it("should convert seconds to days and seconds correctly", () => {
+    expect(durationSec2DayAndSec(0)).toStrictEqual([0, 0]);
+    expect(durationSec2DayAndSec(1)).toStrictEqual([0, 1]);
+    expect(durationSec2DayAndSec(86400)).toStrictEqual([1, 0]);
+    expect(durationSec2DayAndSec(90061)).toStrictEqual([1, 3661]);
+    expect(durationSec2DayAndSec(-86400)).toStrictEqual([-1, 0]);
+    expect(durationSec2DayAndSec(-90061)).toStrictEqual([-2, 82739]);
   });
 });

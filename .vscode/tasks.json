@@ -4,19 +4,18 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "compose up",
-      "type": "shell",
-      "command": "nerdctl compose -f container/compose.local.yml up --build"
-    },
-    {
       "label": "start dev db",
       "type": "shell",
-      "command": "sudo nerdctl compose -f container/compose.local.yml up -d db"
-    },
-    {
-      "label": "start test db",
-      "type": "shell",
-      "command": "sudo nerdctl compose -f container/compose.local.yml -p test up -d db"
+      "command": "sudo nerdctl compose -f container/compose.local.yml up -d db",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      }
     }
   ]
 }

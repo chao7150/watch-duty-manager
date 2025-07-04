@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import * as EditModeToggle from "~/components/EditModeToggle";
 import { Component as WatchSettingsEditFormComponent } from "~/components/watch-settings-edit-form/component";
 
+import { durationSec2DayAndSec } from "~/utils/date";
 import { isValidUrlString } from "~/utils/validator";
 
 /**
@@ -41,7 +42,7 @@ export const Component = ({
       {watchSettingsEditMode ? (
         <WatchSettingsEditFormComponent
           workId={workId}
-          defaultValue={{ delayMin: delay && delay / 60, url }}
+          defaultValue={{ delaySec: delay, url }}
           onSubmitSuccess={toggleWatchSettingsEditMode}
         />
       ) : (
@@ -50,14 +51,14 @@ export const Component = ({
           <dd className="break-all">
             {delay === undefined
               ? "なし"
-              : `${Math.floor(delay / 86400)}日${Math.floor(
-                  (delay % 86400) / 3600,
+              : `${durationSec2DayAndSec(delay)[0]}日+${Math.floor(
+                  durationSec2DayAndSec(delay)[1] / 3600,
                 )
                   .toString()
                   .padStart(
                     2,
                     "0",
-                  )}時間${((delay / 60) % 60).toString().padStart(2, "0")}分`}
+                  )}時間${((durationSec2DayAndSec(delay)[1] % 3600) / 60).toString().padStart(2, "0")}分`}
           </dd>
           <dt className="whitespace-nowrap">視聴リンク</dt>
           <dd className="break-all">

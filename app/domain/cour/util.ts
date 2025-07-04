@@ -12,8 +12,7 @@ import {
 } from "./consts";
 
 const isSeason = (s: unknown): s is Season => {
-  /* eslint @typescript-eslint/no-explicit-any: "warn" */
-  return typeof s === "string" && Season.includes(s as any);
+  return typeof s === "string" && (Season as readonly string[]).includes(s);
 };
 
 export const isCour = (s: unknown): s is Cour => {

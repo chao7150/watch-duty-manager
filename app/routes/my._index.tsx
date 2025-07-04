@@ -219,9 +219,8 @@ const Component = () => {
           <select
             className="bg-accent-area"
             onChange={(e) => {
-              // e.target.valueの型を保証する方法がない
-              /* eslint @typescript-eslint/no-explicit-any: "warn" */
-              setSort(e.target.value as any);
+              // e.target.valueの型を保証する方法がないのでasで妥協
+              setSort(e.target.value as "rating" | "complete");
             }}
           >
             <option value="rating">評価が高い順</option>

@@ -4,11 +4,7 @@
 
 ## 優先度別一覧
 
-### Critical (緊急度最高)
-- [Issue #3: セキュリティ: SECRET環境変数のフォールバック値を削除](./issue-03-security-secret-env.md)
-
 ### High (優先度高)
-- [Issue #4: 型安全性: any型の使用を排除](./issue-04-type-safety-any.md)
 - [Issue #5: 依存関係: React Canary版を安定版に更新](./issue-05-react-canary.md)
 - [Issue #6: パフォーマンス: N+1クエリ問題の解消とページネーション実装](./issue-06-performance-n1-query.md)
 - [Issue #10: セキュリティ: 認可チェックの一貫性確保](./issue-10-security-authorization.md)
@@ -28,13 +24,13 @@
 ## カテゴリ別一覧
 
 ### セキュリティ
-- Issue #3, #10
+- Issue #10
 
 ### パフォーマンス
 - Issue #6, #15
 
 ### 技術的負債
-- Issue #4, #5, #11, #12, #13
+- Issue #5, #11, #12, #13
 
 ### アーキテクチャ
 - Issue #8
@@ -44,6 +40,3 @@
 
 ### 運用・インフラ
 - Issue #9, #14
-
-## 更新履歴
-- 2025-07-03: 初回作成（13件のissue）

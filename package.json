@@ -29,24 +29,20 @@
     "fp-ts": "^2.16.10",
     "isbot": "^5.1.26",
     "prisma": "^6.6.0",
-    "react": "18.3.0-canary-1dba980e1f-20241220",
-    "react-dom": "18.3.0-canary-1dba980e1f-20241220",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-multi-date-picker": "^4.5.2",
     "react-use": "^17.6.0",
     "recharts": "^2.15.3",
     "temporal-polyfill": "^0.3.0",
     "url-from": "^1.0.0"
   },
-  "overrides": {
-    "react": "18.3.0-canary-1dba980e1f-20241220",
-    "react-dom": "18.3.0-canary-1dba980e1f-20241220"
-  },
   "devDependencies": {
     "@remix-run/dev": "2.16.5",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.14.1",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "cz-conventional-changelog": "^3.3.0",
     "esbuild-register": "^3.6.0",
     "eslint": "^9.25.0",

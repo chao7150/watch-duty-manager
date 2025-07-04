@@ -5,7 +5,6 @@
 ## 優先度別一覧
 
 ### High (優先度高)
-- [Issue #5: 依存関係: React Canary版を安定版に更新](./issue-05-react-canary.md)
 - [Issue #6: パフォーマンス: N+1クエリ問題の解消とページネーション実装](./issue-06-performance-n1-query.md)
 - [Issue #10: セキュリティ: 認可チェックの一貫性確保](./issue-10-security-authorization.md)
 
@@ -30,7 +29,7 @@
 - Issue #6, #15
 
 ### 技術的負債
-- Issue #5, #11, #12, #13
+- Issue #11, #12, #13
 
 ### アーキテクチャ
 - Issue #8

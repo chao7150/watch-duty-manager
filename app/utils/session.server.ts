@@ -2,6 +2,12 @@ import { createCookieSessionStorage, redirect } from "@remix-run/node";
 
 export const ONE_WEEK_SEC = 60 * 60 * 24 * 7;
 
+// 環境変数のチェック
+const secret = process.env.SECRET;
+if (!secret) {
+  throw new Error("SECRET environment variable is required");
+}
+
 export const { getSession, commitSession, destroySession } =
   createCookieSessionStorage({
     // a Cookie from `createCookie` or the CookieOptions to create one
@@ -12,7 +18,7 @@ export const { getSession, commitSession, destroySession } =
       maxAge: ONE_WEEK_SEC,
       path: "/",
       sameSite: "lax",
-      secrets: [process.env.SECRET ?? "s3cret1"],
+      secrets: [secret],
       secure: true,
     },
   });

@@ -5,12 +5,10 @@ import type {
 } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 
-import { useEffect } from "react";
+import { useCallback, useState } from "react";
 
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-
-import StyledFirebaseAuth from "~/components/StylesFirebaseAuth";
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 import { getAdmin } from "~/utils/firebase.server";
 import {
@@ -70,41 +68,61 @@ const firebaseConfig = {
   measurementId: "G-YNB0BEJ5GC",
 };
 
-if (firebase.apps.length === 0) {
-  firebase.initializeApp(firebaseConfig);
-  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
-}
-
-const uiConfig: firebaseui.auth.Config = {
-  signInFlow: "popup",
-  signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
-  callbacks: { signInSuccessWithAuthResult: () => false },
-};
-
 export default function Login() {
-  useEffect(() => {
-    const unregisterAuthObserver = firebase
-      .auth()
-      .onAuthStateChanged(async (user) => {
-        if (user === null) {
-          return;
-        }
-        // tokenをheaderに入れてサーバーに送り、サーバー側でtokenをfirebaseと照合する
-        // ユーザーが確認できたらset-cookieでクライアント側にcookieを設定する
-        const token = await user.getIdToken();
-        await fetch("./login", {
-          method: "POST",
-          headers: new Headers({
-            Authorization: token ? `Bearer ${token}` : "",
-          }),
-        });
-        // Set-Cookie後にリダイレクトする
-        // 本当にこんな書き方でいいのかだいぶ怪しい
-        location.href = "/";
+  const [firebaseAuth] = useState(() => {
+    const app = initializeApp(firebaseConfig);
+    return getAuth(app);
+  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const login = useCallback(async () => {
+    if (!email || !password) return;
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        firebaseAuth,
+        email,
+        password,
+      );
+      console.log("userCredential", userCredential);
+      const user = userCredential.user;
+      if (user === null) {
+        return;
+      }
+      // tokenをheaderに入れてサーバーに送り、サーバー側でtokenをfirebaseと照合する
+      // ユーザーが確認できたらset-cookieでクライアント側にcookieを設定する
+      const token = await user.getIdToken();
+      await fetch("./login", {
+        method: "POST",
+        headers: new Headers({
+          Authorization: token ? `Bearer ${token}` : "",
+        }),
       });
-    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-  }, []);
+      // Set-Cookie後にリダイレクトする
+      // 本当にこんな書き方でいいのかだいぶ怪しい
+      location.href = "/";
+    } catch (error) {
+      // TODO なんかする
+      console.error(error);
+    }
+  }, [email, password, firebaseAuth]);
+
   return (
-    <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
+    <div>
+      <form>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="button" onClick={login}>
+          Login
+        </button>
+      </form>
+    </div>
   );
 }

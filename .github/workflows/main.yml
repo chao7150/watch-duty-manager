@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write  # タグのpushに必要
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # 全履歴を取得（タグ操作に必要）
 
     - name: Login to AWS
       uses: aws-actions/configure-aws-credentials@v4
@@ -35,21 +37,108 @@ jobs:
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f container/Containerfile .
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+    - name: Get commits since last deploy
+      id: get-commits
+      run: |
+        # 前回のデプロイタグを取得
+        LAST_TAG=$(git describe --tags --match="deployed/*" --abbrev=0 2>/dev/null || echo "")
+        
+        if [ -n "$LAST_TAG" ]; then
+          # 前回のデプロイ以降のコミットを取得（プレーンテキスト）
+          COMMITS=$(git log --pretty=format:"%s" $LAST_TAG..HEAD | head -20)
+        else
+          COMMITS="Initial deployment"
+        fi
+        
+        # 複数行の出力をGitHub Actionsに渡す
+        echo "commits<<EOF" >> $GITHUB_OUTPUT
+        echo "$COMMITS" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
     - name: deploy
       uses: appleboy/ssh-action@v1.0.0
       env:
         IMAGE_TAG: ${{ github.sha }}
-        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        COMMIT_MESSAGES: ${{ steps.get-commits.outputs.commits }}
       with:
         host: chao.tokyo
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
-        envs: IMAGE_TAG,COMMIT_MESSAGE
+        envs: IMAGE_TAG,COMMIT_MESSAGES
         script: |
           cd ~/watch-duty-manager
           git pull
           aws ecr get-login-password --region ap-northeast-1 --profile watch-duty-manager-ecr-pull | docker login --username AWS --password-stdin 559095527504.dkr.ecr.ap-northeast-1.amazonaws.com
-          docker compose -f container/compose.yml up -d --build app ; if [ $? -eq 0 ]; then MESSAGE="deploy success"; else MESSAGE="deploy failed"; fi
-          curl -X POST -H 'Content-type: application/json' --data "{\"content\":\"watch-duty-manager $MESSAGE $IMAGE_TAG\r$COMMIT_MESSAGE\"}" ${{ secrets.DISCORD_WEBHOOK_URL }}
+          docker compose -f container/compose.yml up -d --build app
+
+    - name: Send Discord notification
+      if: always()  # 成功・失敗に関わらず通知
+      env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        DEPLOY_STATUS: ${{ job.status }}
+        IMAGE_TAG: ${{ github.sha }}
+        COMMIT_MESSAGES: ${{ steps.get-commits.outputs.commits }}
+      run: |
+        # ステータスに応じたメッセージとemojiを設定
+        if [ "$DEPLOY_STATUS" = "success" ]; then
+          STATUS_MESSAGE="✅ Deploy success"
+          COLOR="3066993"  # 緑
+        else
+          STATUS_MESSAGE="❌ Deploy failed"
+          COLOR="15158332" # 赤
+        fi
+        
+        # コミットメッセージをDiscord用にフォーマット
+        # 各行に • を付けて、改行を\\nに変換
+        FORMATTED_COMMITS=$(echo "$COMMIT_MESSAGES" | sed 's/^/• /' | sed ':a;N;$!ba;s/\n/\\n/g')
+        
+        # Discord Embed形式でリッチな通知を作成
+        DISCORD_JSON=$(cat <<EOF
+        {
+          "embeds": [{
+            "title": "watch-duty-manager deployment",
+            "color": $COLOR,
+            "fields": [
+              {
+                "name": "Status",
+                "value": "$STATUS_MESSAGE",
+                "inline": true
+              },
+              {
+                "name": "Commit",
+                "value": "\`${IMAGE_TAG:0:7}\`",
+                "inline": true
+              },
+              {
+                "name": "Changes",
+                "value": "$FORMATTED_COMMITS",
+                "inline": false
+              }
+            ],
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+          }]
+        }
+        EOF
+        )
+        
+        curl -X POST -H 'Content-type: application/json' \
+          --data "$DISCORD_JSON" \
+          "$DISCORD_WEBHOOK_URL"
+
+    - name: Tag successful deploy
+      if: success()
+      run: |
+        # Git設定
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # デプロイタグの作成
+        DEPLOY_TAG="deployed/$(date +%Y%m%d-%H%M%S)"
+        git tag $DEPLOY_TAG
+        git tag -f deployed/latest
+        
+        # プッシュ（+で特定タグのみforce）
+        git push origin $DEPLOY_TAG
+        git push origin +deployed/latest
 

@@ -11,7 +11,6 @@
 - [Issue #7: テスト: コンポーネントテストとE2Eテストの追加](./issue-07-testing-coverage.md)
 - [Issue #8: アーキテクチャ: リポジトリパターンの導入](./issue-08-architecture-repository.md)
 - [Issue #9: 運用: ログ戦略とモニタリングの実装](./issue-09-logging-monitoring.md)
-- [Issue #11: 依存関係: firebaseuiの廃止に対応](./issue-11-firebaseui-deprecated.md)
 - [Issue #12: エラーハンドリング: 詳細なエラー情報の保持と構造化](./issue-12-error-handling.md)
 - [Issue #14: 開発環境: CI/CDパイプラインの構築](./issue-14-cicd-pipeline.md)
 - [Issue #15: データベース: マイグレーション戦略とインデックス最適化](./issue-15-database-optimization.md)
@@ -28,7 +27,7 @@
 - Issue #15
 
 ### 技術的負債
-- Issue #11, #12, #13
+- Issue #12, #13
 
 ### アーキテクチャ
 - Issue #8

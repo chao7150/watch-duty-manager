@@ -25,7 +25,6 @@
     "dotenv": "^16.5.0",
     "firebase": "^11.0.0",
     "firebase-admin": "^13.4.0",
-    "firebaseui": "^6.1.0",
     "fp-ts": "^2.16.10",
     "isbot": "^5.1.26",
     "prisma": "^6.6.0",

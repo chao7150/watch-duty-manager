@@ -7,7 +7,6 @@ export function getAdmin(): admin.app.App {
   } else {
     const app = admin.initializeApp({
       credential: applicationDefault(),
-      databaseURL: "https://<DATABASE_NAME>.firebaseio.com",
     });
     return app;
   }

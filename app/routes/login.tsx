@@ -1,8 +1,4 @@
-import type {
-  ActionFunctionArgs,
-  LinksFunction,
-  LoaderFunctionArgs,
-} from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 
@@ -18,15 +14,6 @@ import {
   getUserId,
   ONE_WEEK_SEC,
 } from "~/utils/session.server";
-
-export const links: LinksFunction = () => {
-  return [
-    {
-      rel: "stylesheet",
-      href: "https://www.gstatic.com/firebasejs/ui/6.0.2/firebase-ui-auth.css",
-    },
-  ];
-};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId(request);

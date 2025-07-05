@@ -94,13 +94,7 @@ const getTickets =
           },
         },
         include: {
-          work: {
-            include: {
-              users: {
-                where: { userId },
-              },
-            },
-          },
+          work: true,
         },
         orderBy: { publishedAt: "desc" },
       });
@@ -240,13 +234,7 @@ const getRecentWatchAchievements =
       include: {
         episode: {
           include: {
-            work: {
-              include: {
-                users: {
-                  where: { userId },
-                },
-              },
-            },
+            work: true,
           },
         },
       },

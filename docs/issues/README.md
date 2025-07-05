@@ -5,8 +5,7 @@
 ## 優先度別一覧
 
 ### High (優先度高)
-- [Issue #6: パフォーマンス: N+1クエリ問題の解消とページネーション実装](./issue-06-performance-n1-query.md)
-- [Issue #10: セキュリティ: 認可チェックの一貫性確保](./issue-10-security-authorization.md)
+（解決済み）
 
 ### Medium (優先度中)
 - [Issue #7: テスト: コンポーネントテストとE2Eテストの追加](./issue-07-testing-coverage.md)
@@ -23,10 +22,10 @@
 ## カテゴリ別一覧
 
 ### セキュリティ
-- Issue #10
+（解決済み）
 
 ### パフォーマンス
-- Issue #6, #15
+- Issue #15
 
 ### 技術的負債
 - Issue #11, #12, #13

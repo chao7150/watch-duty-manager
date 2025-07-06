@@ -1,26 +1,59 @@
-FROM node:22.12 AS builder
+# ステージ1: 依存関係のインストール
+FROM node:22.12-alpine AS deps
+WORKDIR /app
+# package.jsonとpackage-lock.jsonのみコピー（キャッシュ効率化）
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci --only=production
 
-WORKDIR /usr/src/app
-COPY . ./
-RUN npm install
+# ステージ2: 開発依存関係を含むインストール
+FROM node:22.12-alpine AS dev-deps
+WORKDIR /app
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci
+# Prismaクライアントの生成
 RUN npx prisma generate
+
+# ステージ3: ビルド
+FROM node:22.12-alpine AS builder
+WORKDIR /app
+COPY --from=dev-deps /app/node_modules ./node_modules
+# 必要なファイルのみコピー
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY vite.config.mts ./
+COPY tailwind.config.js ./
+COPY postcss.config.mjs ./
+COPY prisma ./prisma/
+COPY app ./app/
+# ビルド実行
 RUN npm run build
 
-FROM node:22.12-alpine
+# ステージ4: 本番イメージ
+FROM node:22.12-alpine AS runner
+WORKDIR /app
 
-WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app/package.json ./package.json
-RUN npm install --omit=dev
-# Prisma関連のファイルをビルド時のものを使用（生成済み）
-COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /usr/src/app/node_modules/@prisma ./node_modules/@prisma
-# Prisma CLIも確実にコピー
-COPY --from=builder /usr/src/app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /usr/src/app/build/server ./build/server
-COPY --from=builder /usr/src/app/build/client ./build/client
-COPY --from=builder /usr/src/app/prisma ./prisma
+# 非rootユーザーの作成
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S remix -u 1001
 
-HEALTHCHECK CMD wget --quiet --spider http://localhost:3000/status || exit 1
+# 本番依存関係のみコピー
+COPY --from=deps --chown=remix:nodejs /app/node_modules ./node_modules
+COPY --from=dev-deps --chown=remix:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=dev-deps --chown=remix:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=remix:nodejs /app/build ./build
+COPY --chown=remix:nodejs package*.json ./
+COPY --chown=remix:nodejs prisma ./prisma/
+
+# 非rootユーザーに切り替え
+USER remix
+
+# ヘルスチェック（wgetの代わりにNode.jsを使用）
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/status', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"
+
 EXPOSE 3000
 
-CMD npx prisma migrate deploy && npm run start
+# Prismaのマイグレーションとアプリ起動
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]

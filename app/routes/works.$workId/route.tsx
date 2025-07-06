@@ -80,6 +80,7 @@ export default function Component() {
         <EpisodeScheduleSection.Component
           work={{ ...work, loggedIn }}
           outletId={outletId}
+          delay={delay}
         />
       </div>
     </div>

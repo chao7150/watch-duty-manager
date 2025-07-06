@@ -18,11 +18,14 @@ import { LoaderData } from "../server/loader";
 export const Component = ({
   work,
   outletId,
+  delay = 0,
 }: {
   /** 作品情報とログイン状態 */
   work: LoaderData["work"] & { loggedIn: boolean };
   /** 現在表示中のエピソードID */
   outletId: number | undefined;
+  /** 視聴遅延時間（秒） */
+  delay?: number;
 }) => {
   const [episodesEditMode, setEpisodesEditMode] = useState(false);
   const [appendEpisodeOffset, setAppendEpisodeOffset] = useState(
@@ -66,6 +69,7 @@ export const Component = ({
                 outletId={outletId}
                 episodesEditMode={episodesEditMode && outletId === undefined}
                 loggedIn={work.loggedIn}
+                watchDelay={delay}
               />
             ))}
           </ul>
@@ -136,6 +140,7 @@ const EpisodeRow = ({
   outletId,
   episodesEditMode,
   loggedIn,
+  watchDelay,
 }: {
   /** エピソードデータ */
   episode: Episode;
@@ -145,6 +150,8 @@ const EpisodeRow = ({
   episodesEditMode: boolean;
   /** ユーザーがログイン中かどうか */
   loggedIn: boolean;
+  /**  */
+  watchDelay: number;
 }) => {
   const linkTo = outletId === episode.count ? "." : `${episode.count}`;
 
@@ -164,26 +171,28 @@ const EpisodeRow = ({
           </Link>
         </div>
         <div>
-          {new Date(episode.publishedAt) < new Date() && loggedIn && (
-            <EpisodeWatchForm.Component
-              workId={episode.workId}
-              count={episode.count}
-              watched={
-                episode.EpisodeStatusOnUser
-                  ? episode.EpisodeStatusOnUser.some(
-                      (status) => status.status === "watched",
-                    )
-                  : false
-              }
-              skipped={
-                episode.EpisodeStatusOnUser
-                  ? episode.EpisodeStatusOnUser.some(
-                      (status) => status.status === "skipped",
-                    )
-                  : false
-              }
-            />
-          )}
+          {new Date(episode.publishedAt).getTime() + watchDelay * 1000 <
+            new Date().getTime() &&
+            loggedIn && (
+              <EpisodeWatchForm.Component
+                workId={episode.workId}
+                count={episode.count}
+                watched={
+                  episode.EpisodeStatusOnUser
+                    ? episode.EpisodeStatusOnUser.some(
+                        (status) => status.status === "watched",
+                      )
+                    : false
+                }
+                skipped={
+                  episode.EpisodeStatusOnUser
+                    ? episode.EpisodeStatusOnUser.some(
+                        (status) => status.status === "skipped",
+                      )
+                    : false
+                }
+              />
+            )}
         </div>
         {episodesEditMode && (
           <div className="align-middle h-6">

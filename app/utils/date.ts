@@ -256,7 +256,6 @@ export const formatZDT = (zdt: Temporal.ZonedDateTime): string => {
  * 秒数が負の場合日は負になり得るが秒数は常に正の値にする
  */
 export const durationSec2DayAndSec = (seconds: number): [number, number] => {
-  console.log(seconds);
   const days = Math.floor(seconds / 86400);
   return [days, seconds - days * 86400];
 };

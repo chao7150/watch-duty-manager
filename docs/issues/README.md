@@ -14,6 +14,7 @@
 - [Issue #12: エラーハンドリング: 詳細なエラー情報の保持と構造化](./issue-12-error-handling.md)
 - [Issue #14: 開発環境: CI/CDパイプラインの構築](./issue-14-cicd-pipeline.md)
 - [Issue #15: データベース: マイグレーション戦略とインデックス最適化](./issue-15-database-optimization.md)
+- [Issue #16: パフォーマンス: Dockerイメージサイズの削減](./issue-16-image-size-optimization.md)
 
 ### Low (優先度低)
 - [Issue #13: コード重複: フォーム処理パターンの共通化](./issue-13-code-duplication.md)
@@ -24,7 +25,7 @@
 （解決済み）
 
 ### パフォーマンス
-- Issue #15
+- Issue #15, #16
 
 ### 技術的負債
 - Issue #12, #13
@@ -37,3 +38,6 @@
 
 ### 運用・インフラ
 - Issue #9, #14
+
+### UI/UX
+（解決済み）

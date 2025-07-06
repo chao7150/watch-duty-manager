@@ -73,30 +73,56 @@ const getTickets =
     db,
     userId,
     publishedUntilDate,
+    subscribedWorks,
   }: {
     db: PrismaClient;
     userId: string;
     publishedUntilDate: Temporal.ZonedDateTime;
+    subscribedWorks: { workId: number; watchDelaySecFromPublish: number }[];
   }) =>
   async () => {
     try {
-      return await db.episode.findMany({
+      const longestNegativeDelaySec = Math.min(
+        0,
+        ...subscribedWorks.map((s) => s.watchDelaySecFromPublish),
+      );
+      const tickets = await db.episode.findMany({
         where: {
-          work: { users: { some: { userId } } },
-          EpisodeStatusOnUser: {
-            none: {
-              userId,
-              status: { in: ["watched", "skipped"] },
+          AND: [
+            { work: { id: { in: subscribedWorks.map((s) => s.workId) } } },
+            { work: { users: { some: { userId } } } },
+            {
+              EpisodeStatusOnUser: {
+                none: { userId, status: { in: ["watched", "skipped"] } },
+              },
             },
-          },
-          publishedAt: {
-            lte: zdt2Date(publishedUntilDate),
-          },
+            {
+              publishedAt: {
+                lte: zdt2Date(
+                  publishedUntilDate.subtract({
+                    seconds: longestNegativeDelaySec,
+                  }),
+                ),
+              },
+            },
+          ],
         },
         include: {
           work: true,
         },
         orderBy: { publishedAt: "desc" },
+      });
+      // 最も大きなマイナス遅延を持つWorkに合わせて全てのWorkのチケットを取得している
+      // マイナス遅延が小さいWorkのチケットは除外する
+      return tickets.filter((ticket) => {
+        const publishedAt = ticket.publishedAt;
+        const delaySec =
+          subscribedWorks.find((s) => s.workId === ticket.workId)
+            ?.watchDelaySecFromPublish ?? 0;
+        return (
+          publishedAt.getTime() + delaySec * 1000 <
+          zdt2Date(publishedUntilDate).getTime()
+        );
       });
     } catch (e) {
       console.log(e);
@@ -313,6 +339,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     };
   }
   const now = Temporal.Now.zonedDateTimeISO("Asia/Tokyo");
+  const subscription = await db.subscribedWorksOnUser.findMany({
+    where: { userId },
+    select: { watchDelaySecFromPublish: true, workId: true, watchUrl: true },
+  });
   const [
     tickets,
     weekWatchAchievements,
@@ -320,7 +350,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     recentWatchAchievements,
     quarterMetrics,
   ] = await A.sequenceT(T.ApplyPar)(
-    getTickets({ db, userId, publishedUntilDate: now.add({ days: 1 }) }),
+    getTickets({
+      db,
+      userId,
+      publishedUntilDate: now.add({ days: 1 }),
+      subscribedWorks: subscription.map((s) => ({
+        workId: s.workId,
+        watchDelaySecFromPublish: s.watchDelaySecFromPublish ?? 0,
+      })),
+    }),
     getWeekWatchAchievements({ db, userId, now }),
     getWeekDutyAccumulation({ db, userId, now }),
     getRecentWatchAchievements({
@@ -348,19 +386,28 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     ...v,
   }));
 
-  const workIds = new Set(tickets.map((t) => t.workId));
-  const subscription = await db.subscribedWorksOnUser.findMany({
-    where: { userId, workId: { in: Array.from(workIds) } },
-    select: { watchDelaySecFromPublish: true, workId: true, watchUrl: true },
-  });
-
   return {
     userId,
     tickets,
     weekMetrics,
     quarterMetrics,
     recentWatchAchievements,
-    subscription,
+    subscription: tickets.reduce(
+      (acc, val) => {
+        const workId = val.workId;
+        const s = subscription.find((s) => s.workId === workId);
+        if (s === undefined) {
+          return acc;
+        }
+        acc.push(s);
+        return acc;
+      },
+      [] as {
+        workId: number;
+        watchDelaySecFromPublish: number | null;
+        watchUrl: string | null;
+      }[],
+    ),
   };
 };
 
@@ -403,7 +450,13 @@ export default function Index() {
   }
 
   const unwatchedTickets = tickets.filter((ticket) => {
-    return new Date(ticket.publishedAt) < now;
+    return (
+      ticket.publishedAt.getTime() +
+        (subscription.find((s) => s.workId === ticket.workId)
+          ?.watchDelaySecFromPublish ?? 0) *
+          1000 <
+      now.getTime()
+    );
   });
 
   return (

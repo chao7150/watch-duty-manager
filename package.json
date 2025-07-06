@@ -18,9 +18,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
-    "@remix-run/node": "2.16.5",
-    "@remix-run/react": "2.16.5",
-    "@remix-run/serve": "2.16.5",
+    "@remix-run/node": "^2.16.8",
+    "@remix-run/react": "^2.16.8",
+    "@remix-run/serve": "^2.16.8",
     "@tailwindcss/vite": "^4.1.4",
     "dotenv": "^16.5.0",
     "firebase": "^11.0.0",
@@ -37,7 +37,7 @@
     "url-from": "^1.0.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "2.16.5",
+    "@remix-run/dev": "^2.16.8",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.14.1",
     "@types/react": "^18.3.23",

@@ -107,9 +107,14 @@ export const Component: React.FC<Props> = ({
             <Button.Component type="submit" name="_action" value="watch">
               {fetcher.state === "idle" ? "視聴した" : "送信中"}
             </Button.Component>
-            <Button.Component type="submit" name="_action" value="skip">
+            <button
+              type="submit"
+              name="_action"
+              value="skip"
+              className="self-end text-text-weak text-sm"
+            >
               スキップ
-            </Button.Component>
+            </button>
           </fetcher.Form>
         )}
       </div>

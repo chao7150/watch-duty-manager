@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 
-import { useInterval } from "react-use";
+import { useEffect, useRef } from "react";
 
 import type { PrismaClient } from "@prisma/client";
 import "firebase/compat/auth";
@@ -430,7 +430,24 @@ export const setOldestOfWork = <T extends { workId: number }>(
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
   const revalidator = useRevalidator();
-  useInterval(() => revalidator.revalidate(), 1000 * 60 * 15);
+  const lastUpdatedRef = useRef(Date.now());
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastUpdatedRef.current > 1000 * 60 * 5
+      ) {
+        revalidator.revalidate();
+        lastUpdatedRef.current = Date.now();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [revalidator]);
   const {
     userId,
     tickets,

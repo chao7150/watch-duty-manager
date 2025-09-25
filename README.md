@@ -19,10 +19,23 @@
 
 ## 開発
 
+このdevcontainerを開くと、自動的にseedデータが投入されます。
+
+```bash
+npm run dev  # 開発サーバー起動
 ```
+
+### 利用可能なスクリプト
+
+- `npm run dev` - 開発サーバー起動
+- `npm run db:setup` - データベースセットアップ（push + seed）
+
+### Manual Setup（devcontainer以外で開発する場合）
+
+```bash
 npm i
 sudo nerdctl compose -f container/compose.local.yml up -d db
 npx prisma generate
-npx prisma db push
+npm run db:setup  # 初回のみ
 npm run dev
 ```

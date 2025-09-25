@@ -8,6 +8,7 @@
     "build": "remix vite:build",
     "commit": "cz",
     "dev": "node -r dotenv/config node_modules/.bin/remix vite:dev --host 0.0.0.0",
+    "db:setup": "npx prisma db push && npx prisma db seed",
     "format": "prettier --write \"./app/**/*.{ts,tsx,js,json}\"",
     "lint": "eslint \"app/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
@@ -66,7 +67,7 @@
     }
   },
   "prisma": {
-    "seed": "node --require esbuild-register prisma/seed.ts"
+    "seed": "node --experimental-strip-types prisma/seed.ts"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"

@@ -37,6 +37,7 @@ services:
     shm_size: "512m"
     environment:
       - VNC_PW=password # VNC接続のパスワード
+      - KASM_SVC_SSL_ONLY=false # HTTP接続を許可
     networks:
       - dev-net
 

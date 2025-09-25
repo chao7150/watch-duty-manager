@@ -5,6 +5,6 @@
   "dockerComposeFile": "./compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces",
-  "postCreateCommand": "rm -rf /tmp/vscode-ssh-auth-* && npm ci --ignore-scripts && npx prisma generate",
+  "postCreateCommand": "rm -rf /tmp/vscode-ssh-auth-* && npm ci --ignore-scripts && npx prisma generate && npm run db:setup",
   "remoteUser": "node"
 }

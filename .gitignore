@@ -6,6 +6,7 @@ node_modules
 /prisma/dbml
 
 .env
+.devcontainer/*.pem
 
 firebase-service-account.json
 

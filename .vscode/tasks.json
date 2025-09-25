@@ -7,9 +7,6 @@
       "label": "start dev db",
       "type": "shell",
       "command": "sudo nerdctl compose -f container/compose.local.yml up -d db",
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
       "presentation": {
         "reveal": "silent",
         "panel": "shared",

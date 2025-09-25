@@ -7,6 +7,7 @@ import tailwindcss from "tailwindcss";
 import { defineConfig } from "vite";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import tsconfigPaths from "vite-tsconfig-paths";
+import fs from "fs";
 
 declare module "@remix-run/server-runtime" {
   interface Future {
@@ -50,4 +51,16 @@ export default defineConfig({
     /* for example, use global to avoid globals imports (describe, test, expect): */
     // globals: true,
   },
+  ...(process.env.NODE_ENV === "development" && {
+    server: {
+      allowedHosts: ["app"],
+      host: true,
+      port: 5173,
+      https: {
+        key: fs.readFileSync("./.devcontainer/key.pem"),
+        cert: fs.readFileSync("./.devcontainer/cert.pem"),
+      },
+      hmr: { host: "app", protocol: "wss", clientPort: 5137 }
+    },
+  }),
 });

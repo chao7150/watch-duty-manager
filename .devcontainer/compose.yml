@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  # 1. 開発用のコンテナ (devcontainer.jsonで指定していたもの)
+  app:
+    image: watch-duty-manager-app:latest
+    build:
+      context: .
+      dockerfile: ./ContainerFile
+    # devcontainer.jsonのrunArgsをここに記述
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    pids_limit: 512
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+      - /var/tmp:rw,noexec,nosuid,nodev
+    environment:
+      - TZ=Asia/Tokyo
+      - NPM_CONFIG_IGNORE_SCRIPTS=true
+      - SSH_AUTH_SOCK=""
+      - SECRET=dummy
+    networks:
+      - dev-net
+    # コンテナを起動し続けるためのコマンド
+    command: sleep infinity
+    # ソースコードをマウント
+    volumes:
+      - ..:/workspaces:cached
+
+  # 2. 動作確認用のブラウザコンテナ
+  browser:
+    image: kasmweb/chrome:1.14.0
+    ports:
+      - "6901:6901" # ホストPCの6901ポートに接続
+    shm_size: "512m"
+    environment:
+      - VNC_PW=password # VNC接続のパスワード
+    networks:
+      - dev-net
+
+  db:
+    container_name: watch-duty-manager-db-with-app
+    image: mysql:8.0.27
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: watch-duty-manager
+      MYSQL_USER: masaki
+      MYSQL_PASSWORD: tsuji
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/log:/var/log/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+    networks:
+      - dev-net
+
+networks:
+  dev-net:
+    driver: bridge
+
+volumes:
+  db-data:

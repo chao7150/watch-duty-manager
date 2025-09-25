@@ -7,7 +7,7 @@
   "scripts": {
     "build": "remix vite:build",
     "commit": "cz",
-    "dev": "node -r dotenv/config node_modules/.bin/remix vite:dev",
+    "dev": "node -r dotenv/config node_modules/.bin/remix vite:dev --host 0.0.0.0",
     "format": "prettier --write \"./app/**/*.{ts,tsx,js,json}\"",
     "lint": "eslint \"app/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",

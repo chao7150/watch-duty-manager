@@ -1,3 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark: #202124;
+  --color-link: #8ab4f8;
+  --color-text: #bdc1c6;
+  --color-text-weak: #9aa0a6;
+  --color-text-strong: #bcc0c3;
+  --color-accent-area: #303134;
+  --color-outline: #3c4043;
+  --color-tw-border: #5f6368;
+  --color-red: #f28b82;
+
+  --flex-basis-graph: 600px;
+  --box-shadow-menu: 1px 1px 15px 0px #171717;
+}
+
 /*
  * You can just delete everything here or keep whatever you like, it's just a
  * quick baseline!
@@ -140,4 +157,36 @@ hr {
 
 .remix__page > aside > :last-child {
   margin-bottom: 0;
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  a {
+    @apply text-link;
+  }
+
+  input[type="text"],
+  input[type="search"],
+  input[type="datetime-local"],
+  input[type="number"],
+  input[type="time"],
+  textarea {
+    @apply bg-accent-area outline-none;
+  }
+
+  input[type="text"]::placeholder,
+  input[type="search"]::placeholder {
+    @apply text-text-weak;
+  }
 }

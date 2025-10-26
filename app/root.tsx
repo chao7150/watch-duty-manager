@@ -20,7 +20,6 @@ import { useState } from "react";
 
 import { bindUrl as bindUrlForMy } from "~/routes/my";
 import { bindUrl as bindUrlForWorks } from "~/routes/works._index";
-import globalStylesUrl from "~/styles/global.css?url";
 
 import { cour2symbol, date2cour } from "~/domain/cour/util";
 
@@ -29,14 +28,11 @@ import * as MobileNavigation from "~/components/mobileNavigation";
 
 import { getUserId } from "~/utils/session.server";
 
-import styles from "./tailwind.css?url";
+import styles from "./styles/global.css?url";
 
 // https://remix.run/api/app#links
 export const links: LinksFunction = () => {
-  return [
-    { rel: "stylesheet", href: globalStylesUrl },
-    { rel: "stylesheet", href: styles },
-  ];
+  return [{ rel: "stylesheet", href: styles }];
 };
 
 // https://remix.run/api/conventions#meta

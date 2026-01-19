@@ -15,6 +15,12 @@
   --box-shadow-menu: 1px 1px 15px 0px #171717;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /*
  * You can just delete everything here or keep whatever you like, it's just a
  * quick baseline!
@@ -30,15 +36,8 @@
 }
 
 html {
-  box-sizing: border-box;
   overflow-y: scroll;
   color-scheme: dark;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
 }
 
 html,
@@ -174,6 +173,10 @@ hr {
 
   a {
     @apply text-link;
+  }
+
+  button {
+    @apply cursor-pointer disabled:cursor-not-allowed;
   }
 
   input[type="text"],

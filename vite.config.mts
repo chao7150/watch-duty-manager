@@ -5,9 +5,9 @@ import { installGlobals } from "@remix-run/node";
 
 import tailwindcss from "@tailwindcss/vite";
 import fs from "fs";
-import { defineConfig } from "vite";
 import { cjsInterop } from "vite-plugin-cjs-interop";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
 
 declare module "@remix-run/server-runtime" {
   interface Future {

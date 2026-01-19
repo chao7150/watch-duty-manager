@@ -4,10 +4,14 @@ export type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children: React.ReactNode;
 };
 
-export const Component: React.FC<Props> = ({ children, ...props }) => {
+export const Component: React.FC<Props> = ({
+  children,
+  className,
+  ...props
+}) => {
   return (
     <button
-      className="w-full h-full bg-accent-area rounded-full py-1 px-3"
+      className={`bg-accent-area rounded-full py-1 px-3 cursor-pointer disabled:cursor-not-allowed ${className ?? "w-full"}`}
       {...props}
     >
       {children}

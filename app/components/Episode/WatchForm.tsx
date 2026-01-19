@@ -37,12 +37,12 @@ export const Component: React.FC<Props> = ({
           <EyeIcon.Component />
         )}
       </summary>
-      <div className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2">
+      <div className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2 w-max flex flex-col gap-2">
         {watched ? (
           <fetcher.Form
             method="POST"
             action={`/works/${workId}/${count}?index`}
-            className="w-max"
+            className="w-full"
           >
             <Button.Component type="submit" name="_action" value={"unwatch"}>
               {"unwatch"}
@@ -52,7 +52,7 @@ export const Component: React.FC<Props> = ({
           <fetcher.Form
             method="POST"
             action={`/works/${workId}/${count}?index`}
-            className="w-max"
+            className="w-full"
           >
             <Button.Component type="submit" name="_action" value={"unwatch"}>
               {"スキップ解除"}
@@ -60,12 +60,12 @@ export const Component: React.FC<Props> = ({
           </fetcher.Form>
         ) : (
           <fetcher.Form
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-2 w-full"
             method="POST"
             action={`/works/${workId}/${count}?index`}
           >
-            <div className="flex justify-between">
-              <label className="flex justify-between">
+            <div className="flex justify-between gap-4">
+              <label className="flex items-center">
                 <span className="hidden">rating enabled</span>
                 <input
                   type="checkbox"
@@ -74,10 +74,11 @@ export const Component: React.FC<Props> = ({
                   onChange={(e) => setRatingEnabled(e.target.checked)}
                 />
               </label>
-              <label>
+              <label className="flex-1">
                 <span className="hidden">rating</span>
                 <input
                   disabled={!ratingEnabled}
+                  className="w-full"
                   name="rating"
                   type="range"
                   min="0"
@@ -102,7 +103,10 @@ export const Component: React.FC<Props> = ({
             </div>
             <label>
               <span className="hidden">comment</span>
-              <textarea className="resize" name="comment"></textarea>
+              <textarea
+                className="resize w-full min-w-[200px]"
+                name="comment"
+              ></textarea>
             </label>
             <Button.Component type="submit" name="_action" value="watch">
               {fetcher.state === "idle" ? "視聴した" : "送信中"}

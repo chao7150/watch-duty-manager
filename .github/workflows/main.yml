@@ -9,11 +9,10 @@ on:
 jobs:
   docker-build-and-push:
     name: Build and Push to ECR
-    runs-on: ubuntu-latest
+    uses: chao7150/actions/.github/workflows/ecr-push.yml@main
     permissions:
       id-token: write
       contents: read
-    uses: chao7150/actions/.github/workflows/ecr-push.yml@main
     secrets:
       aws_role_to_assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     with:

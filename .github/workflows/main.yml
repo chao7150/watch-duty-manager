@@ -15,6 +15,7 @@ jobs:
       contents: read
     secrets:
       aws_role_to_assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      dispatch_token: ${{ secrets.DISPATCH_TOKEN }}
     with:
       aws_region: ap-northeast-1
       ecr_repository: watch-duty-manager

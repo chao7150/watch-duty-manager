@@ -1,5 +1,4 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link } from "react-router";
 
 import { useState } from "react";
 
@@ -38,11 +37,12 @@ import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
 
+import type { Route } from "./+types/my._index";
 import { getQuarterMetrics } from "./_index";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
 import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId/route";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
   const userId = await requireUserId(request);
   const url = new URL(request.url);
   const courString = url.searchParams.get("cour");
@@ -169,7 +169,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 };
 
-const Component = () => {
+const Component = ({ loaderData }: Route.ComponentProps) => {
   const {
     courList,
     selectedCourDate,
@@ -178,7 +178,7 @@ const Component = () => {
     quarterMetrics,
     filledEpisodeRatingDistribution,
     minEpisodes: _minEpisodes,
-  } = useLoaderData<typeof loader>();
+  } = loaderData;
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
   const works = _w.map((w) => {

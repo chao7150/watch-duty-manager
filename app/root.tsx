@@ -1,8 +1,3 @@
-import type {
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
 import {
   Form,
   isRouteErrorResponse,
@@ -12,9 +7,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
-  useRouteError,
-} from "@remix-run/react";
+  useRouteLoaderData,
+} from "react-router";
 
 import { useState } from "react";
 
@@ -28,36 +22,31 @@ import * as MobileNavigation from "~/components/mobileNavigation";
 
 import { getUserId } from "~/utils/session.server";
 
+import type { Route } from "./+types/root";
 import styles from "./styles/global.css?url";
 
-// https://remix.run/api/app#links
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
   return [{ rel: "stylesheet", href: styles }];
 };
 
-// https://remix.run/api/conventions#meta
-export const meta: MetaFunction = () => {
+export const meta: Route.MetaFunction = () => {
   return [
     { title: "Watch duty manager" },
     { name: "description", content: "アニメの視聴管理をするwebサービスです" },
   ];
 };
 
-// https://remix.run/api/conventions#default-export
-// https://remix.run/api/conventions#route-filenames
-export default function App() {
-  return (
-    <Document>
-      <Layout>
-        <Outlet />
-      </Layout>
-    </Document>
-  );
+export function Layout({ children }: { children: React.ReactNode }) {
+  const userId = useRouteLoaderData<Awaited<ReturnType<typeof loader>>>("root");
+
+  return <Document userId={userId}>{children}</Document>;
 }
 
-export function ErrorBoundary() {
-  const error = useRouteError();
+export default function App() {
+  return <Outlet />;
+}
 
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   if (error instanceof Error) {
     return <div>An unexpected error occurred: {error.message}</div>;
   }
@@ -76,9 +65,11 @@ export function ErrorBoundary() {
 function Document({
   children,
   title,
+  userId,
 }: {
   children: React.ReactNode;
   title?: string;
+  userId?: Awaited<ReturnType<typeof loader>>;
 }) {
   return (
     <html lang="en">
@@ -94,7 +85,7 @@ function Document({
         <Links />
       </head>
       <body>
-        {children}
+        <LayoutBody userId={userId}>{children}</LayoutBody>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -102,18 +93,23 @@ function Document({
   );
 }
 
-export const loader = ({ request }: LoaderFunctionArgs) => {
+export const loader = ({ request }: Route.LoaderArgs) => {
   const userId = getUserId(request);
   return userId;
 };
 
-function Layout({ children }: { children: React.ReactNode }) {
-  const userId = useLoaderData<typeof loader>();
+function LayoutBody({
+  children,
+  userId,
+}: {
+  children: React.ReactNode;
+  userId: Awaited<ReturnType<typeof loader>> | undefined;
+}) {
   const [mobileMenuOpened, setMobileMenuOpened] = useState<boolean>(false);
 
   return (
-    <div className="remix-app bg-dark text-text">
-      <header className="remix-app__header">
+    <div className="app-shell bg-dark text-text">
+      <header className="app-shell__header">
         <div className="flex items-center justify-between flex-wrap w-11/12 mx-auto">
           <h1>
             <Link to="/" title="Watch Duty Manager">
@@ -122,7 +118,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           </h1>
           <nav
             aria-label="Main navigation"
-            className="remix-app__header-nav max-lg:hidden"
+            className="app-shell__header-nav max-lg:hidden"
           >
             <ul>
               <li>
@@ -186,11 +182,11 @@ function Layout({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </header>
-      <div className="remix-app__main">
+      <div className="app-shell__main">
         <div className="w-11/12 mx-auto py-8">{children}</div>
       </div>
-      <footer className="remix-app__footer">
-        <div className="remix-app__footer-content">
+      <footer className="app-shell__footer">
+        <div className="app-shell__footer-content">
           <p>&copy; chao7150</p>
         </div>
       </footer>

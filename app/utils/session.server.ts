@@ -1,4 +1,4 @@
-import { createCookieSessionStorage, redirect } from "@remix-run/node";
+import { createCookieSessionStorage, redirect } from "react-router";
 
 export const ONE_WEEK_SEC = 60 * 60 * 24 * 7;
 

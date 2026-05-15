@@ -13,7 +13,7 @@
 
 ## 技術スタック
 
-- Remix
+- React Router 7
 - Prisma/MySQL
 - Firebase Authentication
 
@@ -28,6 +28,8 @@ npm run dev  # 開発サーバー起動
 ### 利用可能なスクリプト
 
 - `npm run dev` - 開発サーバー起動
+- `npm run test:tsc` - React Router typegen + 型チェック
+- `npm run test` - テスト実行
 - `npm run db:setup` - データベースセットアップ（push + seed）
 
 ### Manual Setup（devcontainer以外で開発する場合）

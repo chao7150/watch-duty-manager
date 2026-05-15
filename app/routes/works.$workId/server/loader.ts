@@ -1,10 +1,10 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
-
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import { extractParams, isNumber } from "~/utils/type";
 
-export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+import type { Route } from "../+types/route";
+
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
   const { workId } = extractParams(params, ["workId"]);
   const workPromise = db.work.findUnique({

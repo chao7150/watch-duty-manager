@@ -1,10 +1,9 @@
-// https://remix.run/docs/en/v1/tutorials/jokes#connect-to-the-database
 import { PrismaClient } from "@prisma/client";
 
 let db: PrismaClient;
 
 declare global {
-  /* eslint-disable-next-line no-var */
+   
   var __db: PrismaClient | undefined;
 }
 

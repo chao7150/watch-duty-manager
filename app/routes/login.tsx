@@ -1,6 +1,5 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
-import { useNavigate } from "@remix-run/react";
+import { redirect } from "react-router";
+import { useNavigate } from "react-router";
 
 import { useCallback, useState } from "react";
 
@@ -15,7 +14,9 @@ import {
   ONE_WEEK_SEC,
 } from "~/utils/session.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+import type { Route } from "./+types/login";
+
+export const loader = async ({ request }: Route.LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId) {
     return redirect("/");
@@ -23,7 +24,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return null;
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: Route.ActionArgs) => {
   const authorizationHeader = request.headers.get("Authorization");
   if (
     authorizationHeader === null ||

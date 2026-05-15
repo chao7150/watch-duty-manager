@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, data } from "@remix-run/node";
+import { data } from "react-router";
 
 import * as E from "fp-ts/lib/Either.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
@@ -11,7 +11,9 @@ import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { extractParams } from "~/utils/type";
 
-export const action = async ({ request, params }: LoaderFunctionArgs) => {
+import type { Route } from "../+types/route";
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
   const { workId: _workId } = extractParams(params, ["workId"]);
   const workId = parseInt(_workId, 10);
 

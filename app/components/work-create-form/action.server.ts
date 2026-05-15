@@ -1,4 +1,4 @@
-import { data } from "@remix-run/node";
+import { data } from "react-router";
 
 import * as E from "fp-ts/lib/Either.js";
 import * as F from "fp-ts/lib/function.js";

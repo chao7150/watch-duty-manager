@@ -1,5 +1,4 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
+import { Link, useRevalidator } from "react-router";
 
 import { useEffect, useRef } from "react";
 
@@ -36,6 +35,8 @@ import {
 } from "~/utils/date";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
+
+import type { Route } from "./+types/_index";
 
 /**
  * targetMsが日本標準時の日付で表すと現在から何日前かを返す
@@ -327,7 +328,7 @@ export const getQuarterMetrics =
       );
   };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
   const userId = await getUserId(request);
   if (userId === null) {
     return {
@@ -427,8 +428,7 @@ export const setOldestOfWork = <T extends { workId: number }>(
     .reverse();
 };
 
-// https://remix.run/guides/routing#index-routes
-export default function Index() {
+export default function Index({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
   const lastUpdatedRef = useRef(Date.now());
 
@@ -455,7 +455,7 @@ export default function Index() {
     quarterMetrics,
     recentWatchAchievements,
     subscription,
-  } = useLoaderData<typeof loader>();
+  } = loaderData;
   const now = new Date();
 
   if (userId === null) {
@@ -477,7 +477,7 @@ export default function Index() {
   });
 
   return (
-    <div className="remix__page">
+    <div className="dashboard-page">
       <section>
         <header className="flex gap-2 ">
           <h2>未視聴のエピソード</h2>

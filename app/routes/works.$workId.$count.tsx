@@ -1,15 +1,14 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-
 import urlFrom from "url-from";
 
 import { db } from "~/utils/db.server";
 import { getUserId, requireUserId } from "~/utils/session.server";
 import { extractParams, nonEmptyStringOrUndefined } from "~/utils/type";
 
+import type { Route } from "./+types/works.$workId.$count";
+
 export const bindUrl = urlFrom`/works/${"workId:number"}/${"count:number"}`;
 
-export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const userId = await getUserId(request);
   const { workId, count } = extractParams(params, ["workId", "count"]);
   const episodePromise = db.episode.findUnique({
@@ -52,7 +51,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   };
 };
 
-export const action = async ({ request, params }: ActionFunctionArgs) => {
+export const action = async ({ request, params }: Route.ActionArgs) => {
   const { workId: _workId, count: _count } = extractParams(params, [
     "workId",
     "count",
@@ -142,8 +141,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return null;
 };
 
-export default function Component() {
-  const { myHistory, otherHistories, episode } = useLoaderData<typeof loader>();
+export default function Component({ loaderData }: Route.ComponentProps) {
+  const { myHistory, otherHistories, episode } = loaderData;
 
   return (
     <div>

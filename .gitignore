@@ -18,3 +18,4 @@ dump.sql
 /playwright/.cache/
 /example
 *.tsbuildinfo
+.react-router/

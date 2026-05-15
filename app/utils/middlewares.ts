@@ -1,13 +1,16 @@
-import { redirect } from "@remix-run/node";
-import { type DataFunctionArgs } from "@remix-run/server-runtime";
+import { redirect } from "react-router";
 
 import * as E from "fp-ts/lib/Either.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
 
 import { getUserSession } from "./session.server";
 
+type RequestArgs = {
+  request: Request;
+};
+
 export const requireUserIdTaskEither = (redirectTo: string | undefined) =>
-  TE.chain(({ request }: DataFunctionArgs) => async () => {
+  TE.chain(({ request }: RequestArgs) => async () => {
     const session = await getUserSession(request);
     const userId = session.get("uid");
     if (!userId || typeof userId !== "string") {

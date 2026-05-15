@@ -1,7 +1,6 @@
-import { data } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
-import type { ActionFunctionArgs } from "@remix-run/server-runtime";
-import { redirect } from "@remix-run/server-runtime";
+import { data } from "react-router";
+import { useActionData } from "react-router";
+import { redirect } from "react-router";
 
 import { useState } from "react";
 
@@ -16,7 +15,9 @@ import { Component as WorkCreateFormComponent } from "~/components/work-create-f
 
 import { db } from "~/utils/db.server";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+import type { Route } from "./+types/create";
+
+export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
   if (formData.get("_action") === "bulkCreate") {
     return await F.pipe(

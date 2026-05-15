@@ -1,6 +1,3 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-
 import urlFrom from "url-from";
 
 import type { Cour } from "~/domain/cour/consts";
@@ -15,11 +12,13 @@ import * as WorkUI from "~/components/work/Work";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 
+import type { Route } from "./+types/works._index";
+
 export const bindUrl = urlFrom`/works`.narrowing<{
   "?query": { cour?: string; minEpisodes?: string };
 }>;
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
   const url = new URL(request.url);
   const userId = await getUserId(request);
   const courString = url.searchParams.get("cour");
@@ -64,8 +63,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   };
 };
 
-export default function Works() {
-  const loaderData = useLoaderData<typeof loader>();
+export default function Works({ loaderData }: Route.ComponentProps) {
   const {
     works,
     loggedIn,

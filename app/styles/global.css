@@ -61,30 +61,30 @@ hr {
   margin-bottom: 2rem;
 }
 
-.remix-app {
+.app-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   min-height: calc(100vh - env(safe-area-inset-bottom));
 }
 
-.remix-app > * {
+.app-shell > * {
   width: 100%;
 }
 
-.remix-app__header {
+.app-shell__header {
   padding-top: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
 }
 
-.remix-app__header-content {
+.app-shell__header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.remix-app__header-nav ul {
+.app-shell__header-nav ul {
   list-style: none;
   margin: 0;
   display: flex;
@@ -92,27 +92,27 @@ hr {
   gap: 1.5em;
 }
 
-.remix-app__header-nav li {
+.app-shell__header-nav li {
   font-weight: bold;
 }
 
-.remix-app__main {
+.app-shell__main {
   flex: 1 1 100%;
 }
 
-.remix-app__footer {
+.app-shell__footer {
   padding-top: 1rem;
   padding-bottom: 1rem;
   border-top: 1px solid var(--color-border);
 }
 
-.remix-app__footer-content {
+.app-shell__footer-content {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.remix__page {
+.dashboard-page {
   --gap: 1rem;
   --space: 2rem;
   display: grid;
@@ -122,7 +122,7 @@ hr {
 }
 
 @media print, screen and (min-width: 640px) {
-  .remix__page {
+  .dashboard-page {
     --gap: 2rem;
     grid-auto-rows: unset;
     grid-template-columns: repeat(2, 1fr);
@@ -130,31 +130,31 @@ hr {
 }
 
 @media screen and (min-width: 1024px) {
-  .remix__page {
+  .dashboard-page {
     --gap: 4rem;
   }
 }
 
-.remix__page > main > :first-child {
+.dashboard-page > main > :first-child {
   margin-top: 0;
 }
 
-.remix__page > main > :last-child {
+.dashboard-page > main > :last-child {
   margin-bottom: 0;
 }
 
-.remix__page > aside {
+.dashboard-page > aside {
   margin: 0;
   padding: 1.5ch 2ch;
   border: solid 1px var(--color-border);
   border-radius: 0.5rem;
 }
 
-.remix__page > aside > :first-child {
+.dashboard-page > aside > :first-child {
   margin-top: 0;
 }
 
-.remix__page > aside > :last-child {
+.dashboard-page > aside > :last-child {
   margin-bottom: 0;
 }
 

@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useMatches } from "@remix-run/react";
+import { Link, useMatches } from "react-router";
 
 import { useState, useCallback } from "react";
 
@@ -10,6 +10,7 @@ import * as WatchSettingsSection from "./components/watch-settings-section";
 import * as WorkInfoSection from "./components/work-info-section";
 import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
 
+import type { Route } from "./+types/route";
 import { loader } from "./server/loader";
 
 export { action } from "./server/action";
@@ -26,9 +27,9 @@ const useCount = () => {
   return countMatch && Number(countMatch.params.count);
 };
 
-export default function Component() {
+export default function Component({ loaderData }: Route.ComponentProps) {
   const { loggedIn, work, subscribed, rating, ratings, delay, url } =
-    useLoaderData<typeof loader>();
+    loaderData;
   const [workInfoSectionEditMode, setWorkInfoSectionEditMode] = useState(false);
   const turnEditMode = useCallback(
     () => setWorkInfoSectionEditMode((s) => !s),

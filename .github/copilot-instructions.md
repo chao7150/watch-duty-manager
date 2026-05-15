@@ -6,10 +6,10 @@ applyTo: "watch-duty-manager/**/*"
 
 ## ディレクトリ構成
 
-- `app/` ... アプリケーション本体（React/Remixベースのフロントエンド、コンポーネント、ドメインロジック、ルーティング等）
+- `app/` ... アプリケーション本体（React/React Routerベースのフロントエンド、コンポーネント、ドメインロジック、ルーティング等）
   - `components/` ... UIコンポーネント群
   - `domain/` ... ドメイン層（ビジネスロジック）
-  - `routes/` ... Remixのルーティング
+  - `routes/` ... React Routerのルーティング
   - `styles/` ... CSSやTailwind等のスタイル
   - `utils/` ... ユーティリティ関数
 - `prisma/` ... Prisma ORMのスキーマやマイグレーション
@@ -23,7 +23,7 @@ applyTo: "watch-duty-manager/**/*"
 
 ## 使用技術
 
-- フロントエンド: React, Remix, TypeScript, Tailwind CSS
+- フロントエンド: React, React Router, TypeScript, Tailwind CSS
 - バックエンド: Node.js, Prisma ORM, MySQL
 - インフラ: Docker, AWS CDK
 - テスト: Jest

@@ -1,7 +1,7 @@
 export default {
   plugins: ["@trivago/prettier-plugin-sort-imports"],
   importOrder: [
-    "remix",
+    "react-router",
     "react",
     "<THIRD_PARTY_MODULES>",
     "domain/(.*)$",

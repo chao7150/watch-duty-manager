@@ -1,5 +1,5 @@
 # ステージ1: 依存関係のインストール
-FROM node:22.12-alpine AS deps
+FROM node:24-alpine AS deps
 WORKDIR /app
 # package.jsonとpackage-lock.jsonのみコピー（キャッシュ効率化）
 COPY package*.json ./
@@ -7,7 +7,7 @@ COPY prisma ./prisma/
 RUN npm ci --only=production
 
 # ステージ2: 開発依存関係を含むインストール
-FROM node:22.12-alpine AS dev-deps
+FROM node:24-alpine AS dev-deps
 WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -16,7 +16,7 @@ RUN npm ci
 RUN npx prisma generate
 
 # ステージ3: ビルド
-FROM node:22.12-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=dev-deps /app/node_modules ./node_modules
 # 必要なファイルのみコピー
@@ -29,7 +29,7 @@ COPY app ./app/
 RUN npm run build
 
 # ステージ4: 本番イメージ
-FROM node:22.12-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 # 非rootユーザーの作成

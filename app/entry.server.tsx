@@ -4,7 +4,7 @@ import { ServerRouter } from "react-router";
 
 import { renderToPipeableStream } from "react-dom/server";
 
-import * as isbotModule from "isbot";
+import { isbot } from "isbot";
 import { PassThrough } from "node:stream";
 
 const ABORT_DELAY = 5_000;
@@ -34,23 +34,12 @@ export default function handleRequest(
       );
 }
 
-// isbot の v3/v4 両系統を吸収して user-agent 判定を安定させる。
 function isBotRequest(userAgent: string | null) {
   if (!userAgent) {
     return false;
   }
 
-  // isbot >= 3.8.0, >4
-  if ("isbot" in isbotModule && typeof isbotModule.isbot === "function") {
-    return isbotModule.isbot(userAgent);
-  }
-
-  // isbot < 3.8.0
-  if ("default" in isbotModule && typeof isbotModule.default === "function") {
-    return isbotModule.default(userAgent);
-  }
-
-  return false;
+  return isbot(userAgent);
 }
 
 function handleBotRequest(

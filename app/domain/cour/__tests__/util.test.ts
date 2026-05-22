@@ -3,15 +3,15 @@ import { describe, expect, it } from "vitest";
 import { date2ZonedDateTime } from "../../../utils/date";
 
 import {
-  eachCourOfInterval,
+  cour2expression,
+  cour2startDate,
+  cour2startZonedDateTime,
+  cour2symbol,
   date2cour,
+  eachCourOfInterval,
   next,
   symbol2cour,
-  cour2startDate,
-  cour2symbol,
-  cour2expression,
   zonedDateTime2cour,
-  cour2startZonedDateTime,
 } from "../util";
 
 describe("date2cour", () => {

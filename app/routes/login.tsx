@@ -1,10 +1,8 @@
-import { redirect } from "react-router";
-import { useNavigate } from "react-router";
-
-import { useCallback, useState } from "react";
-
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+import { useCallback, useState } from "react";
+import { redirect, useNavigate } from "react-router";
 
 import { getAdmin } from "~/utils/firebase.server";
 import {

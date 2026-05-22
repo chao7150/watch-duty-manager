@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 
 import type { Cour } from "./consts";
-import { eachCourOfInterval, date2cour } from "./util";
+import { date2cour, eachCourOfInterval } from "./util";
 
 export const getCourList = async (
   db: PrismaClient,

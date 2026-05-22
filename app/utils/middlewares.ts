@@ -1,7 +1,6 @@
-import { redirect } from "react-router";
-
 import * as E from "fp-ts/lib/Either.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
+import { redirect } from "react-router";
 
 import { getUserSession } from "./session.server";
 

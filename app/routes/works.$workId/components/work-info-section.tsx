@@ -1,9 +1,9 @@
 import * as EditModeToggle from "~/components/EditModeToggle";
+import * as Work from "~/components/work/component";
 import {
   Component as WorkEditFormComponent,
   type Props as WorkEditFormProps,
 } from "~/components/work-edit-form/component";
-import * as Work from "~/components/work/component";
 
 import { LoaderData } from "../server/loader";
 

@@ -1,7 +1,6 @@
-import { Form } from "react-router";
-
 import * as E from "fp-ts/lib/Either.js";
 import * as F from "fp-ts/lib/function.js";
+import { Form } from "react-router";
 
 import { isNonEmptyString } from "~/utils/validator";
 

@@ -1,8 +1,7 @@
-import { Link, useRevalidator } from "react-router";
+import type { PrismaClient } from "@prisma/client";
 
 import { useEffect, useRef } from "react";
-
-import type { PrismaClient } from "@prisma/client";
+import { Link, useRevalidator } from "react-router";
 import "firebase/compat/auth";
 import * as A from "fp-ts/lib/Apply.js";
 import * as T from "fp-ts/lib/Task.js";
@@ -17,13 +16,11 @@ import {
   YAxis,
 } from "recharts";
 import { Temporal } from "temporal-polyfill";
-
+import * as EpisodeList from "~/components/Episode/List";
 import {
   cour2startZonedDateTime,
   zonedDateTime2cour,
 } from "~/domain/cour/util";
-
-import * as EpisodeList from "~/components/Episode/List";
 
 import {
   date2ZonedDateTime,

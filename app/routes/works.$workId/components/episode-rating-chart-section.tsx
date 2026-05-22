@@ -1,11 +1,11 @@
 import {
-  ResponsiveContainer,
-  LineChart,
   CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  Line,
 } from "recharts";
 
 import { LoaderData } from "../server/loader";

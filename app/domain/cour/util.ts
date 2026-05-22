@@ -7,8 +7,8 @@ import type { Cour } from "./consts";
 import {
   Season,
   SeasonExpression,
-  SeasonStartMonth,
   SeasonMonth,
+  SeasonStartMonth,
 } from "./consts";
 
 const isSeason = (s: unknown): s is Season => {

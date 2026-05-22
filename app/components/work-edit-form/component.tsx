@@ -1,10 +1,7 @@
-import { useFetcher } from "react-router";
-
 import { useEffect } from "react";
-
-import type { action } from "~/routes/works.$workId/route";
-
+import { useFetcher } from "react-router";
 import * as Button from "~/components/Button";
+import type { action } from "~/routes/works.$workId/route";
 
 import * as WorkInput from "../work/Input";
 

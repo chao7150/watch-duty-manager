@@ -1,6 +1,5 @@
+import { useCallback, useState } from "react";
 import { Link } from "react-router";
-
-import { useState, useCallback } from "react";
 
 import * as EditModeToggle from "~/components/EditModeToggle";
 import { Component as WatchSettingsEditFormComponent } from "~/components/watch-settings-edit-form/component";

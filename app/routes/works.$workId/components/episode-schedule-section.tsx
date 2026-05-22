@@ -1,6 +1,5 @@
+import { Fragment, useEffect, useState } from "react";
 import { Form, Link, Outlet } from "react-router";
-
-import { useState, useEffect, Fragment } from "react";
 
 import * as Button from "~/components/Button";
 import * as EpisodeWatchForm from "~/components/Episode/WatchForm";

@@ -1,21 +1,30 @@
+import { useState } from "react";
 import { Link } from "react-router";
 
-import { useState } from "react";
-
 import {
-  ResponsiveContainer,
-  LineChart,
+  Bar,
+  BarChart,
   CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
   Legend,
   Line,
-  BarChart,
-  Bar,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import { Temporal } from "temporal-polyfill";
-
+import * as CourSelect from "~/components/CourSelect";
+import * as EpisodeFilter from "~/components/EpisodeFilter";
+import type { Cour } from "~/domain/cour/consts";
+import { getCourList } from "~/domain/cour/db";
+import {
+  generateWorkDateQuery,
+  getWorkIdsWithMinEpisodes,
+} from "~/domain/episode/filter";
+import { db } from "~/utils/db.server";
+import { requireUserId } from "~/utils/session.server";
+import { isNumber } from "~/utils/type";
 import {
   cour2expression,
   cour2startZonedDateTime,
@@ -23,24 +32,10 @@ import {
   next,
   symbol2cour,
 } from "../domain/cour/util";
-import type { Cour } from "~/domain/cour/consts";
-import { getCourList } from "~/domain/cour/db";
-import {
-  generateWorkDateQuery,
-  getWorkIdsWithMinEpisodes,
-} from "~/domain/episode/filter";
-
-import * as CourSelect from "~/components/CourSelect";
-import * as EpisodeFilter from "~/components/EpisodeFilter";
-
-import { db } from "~/utils/db.server";
-import { requireUserId } from "~/utils/session.server";
-import { isNumber } from "~/utils/type";
-
-import type { Route } from "./+types/my._index";
 import { getQuarterMetrics } from "./_index";
-import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
+import type { Route } from "./+types/my._index";
 import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId/route";
+import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const userId = await requireUserId(request);

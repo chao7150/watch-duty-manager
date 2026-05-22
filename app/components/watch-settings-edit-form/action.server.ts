@@ -1,5 +1,5 @@
-import * as TE from "fp-ts/lib/TaskEither.js";
 import * as F from "fp-ts/lib/function.js";
+import * as TE from "fp-ts/lib/TaskEither.js";
 
 import { db } from "~/utils/db.server";
 

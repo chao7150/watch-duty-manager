@@ -1,8 +1,6 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
-
-import { date2ZonedDateTime } from "../date";
-import { eachQuarterOfIntervalFromTemporal } from "../date";
+import { date2ZonedDateTime, eachQuarterOfIntervalFromTemporal } from "../date";
 
 describe("eachQuarterOfIntervalFromTemporal", () => {
   it("四半期の開始日から終了日までの四半期の開始日を配列で返す", () => {

@@ -1,10 +1,9 @@
 import { isValidUrlString } from "~/utils/validator";
-
+import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
 import * as ClipboardCopyIcon from "../Icons/ClipboardCopy";
 import * as ExternalLinkIcon from "../Icons/ExternalLink";
 import * as FilterIcon from "../Icons/Filter";
 import * as MenuIcon from "../Icons/Menu";
-import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
 import * as WatchForm from "./WatchForm";
 
 export type Props = {

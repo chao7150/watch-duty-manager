@@ -1,13 +1,11 @@
+import { useState } from "react";
 import { useFetcher } from "react-router";
 
-import { useState } from "react";
-
 import * as Button from "~/components/Button";
-
+import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
 import * as EyeIcon from "../Icons/Eye";
 import * as EyeOffIcon from "../Icons/EyeOff";
 import * as SkipIcon from "../Icons/Skip";
-import { useCloseDetailsOnClickAway } from "../hooks/useCloseDetailsOnClickAway";
 
 export type Props = {
   workId: number;

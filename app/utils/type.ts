@@ -27,7 +27,8 @@ export const nonEmptyStringOrUndefined = <Keys extends string>(
 ): { [Key in Keys]: string | undefined } => {
   return keys.reduce(
     (acc, key) => {
-      return { ...acc, [key]: extractAsNonEmptyStringOrUndefined(params, key) };
+      acc[key] = extractAsNonEmptyStringOrUndefined(params, key);
+      return acc;
     },
     {} as { [Key in Keys]: string | undefined },
   );

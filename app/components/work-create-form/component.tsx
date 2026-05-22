@@ -29,8 +29,8 @@ export const MultipleDatePicker: React.FC<{
         numberOfMonths={3}
         format="YYYY/MM/DD HH:mm"
         plugins={[
-          <TimePicker position="bottom" hideSeconds />,
-          <DatePanel markFocused={true} />,
+          <TimePicker key="time-picker" position="bottom" hideSeconds />,
+          <DatePanel key="date-panel" markFocused={true} />,
         ]}
       />
     </div>
@@ -76,22 +76,26 @@ const SequentialDatePicker: React.FC<{
       ></input>
       <ul className="flex flex-col gap-2">
         <li className="flex flex-col">
-          <label>初回放送日時</label>
-          <input
-            className="w-3/4"
-            type="datetime-local"
-            value={convertDateToIso(firstDate)}
-            onChange={(e) => setFirstDate(new Date(`${e.target.value}+0900`))}
-          ></input>
+          <label className="flex flex-col gap-1">
+            <span>初回放送日時</span>
+            <input
+              className="w-3/4"
+              type="datetime-local"
+              value={convertDateToIso(firstDate)}
+              onChange={(e) => setFirstDate(new Date(`${e.target.value}+0900`))}
+            ></input>
+          </label>
         </li>
         <li className="flex flex-col">
-          <label>話数</label>
-          <input
-            className="w-3/4"
-            type="number"
-            value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
-          ></input>
+          <label className="flex flex-col gap-1">
+            <span>話数</span>
+            <input
+              className="w-3/4"
+              type="number"
+              value={count}
+              onChange={(e) => setCount(Number(e.target.value))}
+            ></input>
+          </label>
         </li>
       </ul>
     </>

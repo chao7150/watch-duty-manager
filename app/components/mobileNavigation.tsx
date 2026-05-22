@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { Form, Link } from "react-router";
 import { cour2symbol, date2cour } from "~/domain/cour/util";
 import { bindUrl as bindUrlForMy } from "~/routes/my";

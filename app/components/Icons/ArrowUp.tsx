@@ -8,6 +8,7 @@ export const Component = () => {
       stroke="currentColor"
       className="w-6 h-6"
     >
+      <title>icon</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

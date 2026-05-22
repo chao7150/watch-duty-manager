@@ -35,7 +35,7 @@ export const Component = ({
           value={minEpisodes}
           onChange={(e) => {
             const value = Number(e.target.value);
-            if (!isNaN(value)) {
+            if (!Number.isNaN(value)) {
               setMinEpisodes(value);
             }
           }}

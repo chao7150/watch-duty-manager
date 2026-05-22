@@ -25,6 +25,7 @@ const useLocalStorageState = <T,>(
   const namespace = useMatches().at(-1)?.id;
   const key = `${namespace}_${name}`;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: key only changes on page reload, which remounts the component
   useEffect(() => {
     if (useLocalStorage) {
       const saved = localStorage.getItem(key);
@@ -81,6 +82,7 @@ export const Component: React.FC<Props> = ({
               className="align-middle"
               onClick={() => setSortDesc((sort) => !sort)}
               title={sortDesc ? "降順" : "昇順"}
+              type="button"
             >
               {sortDesc ? (
                 <ArrowDownIcon.Component />
@@ -94,6 +96,7 @@ export const Component: React.FC<Props> = ({
               className="align-middle"
               onClick={() => setStack((stack) => !stack)}
               title={stack ? "同一作品をまとめて表示中" : "通常表示"}
+              type="button"
             >
               {stack ? (
                 <Square2StackIcon.AltComponent />
@@ -111,6 +114,7 @@ export const Component: React.FC<Props> = ({
                   ? "視聴遅延設定を無視しています"
                   : "視聴遅延設定が有効です"
               }
+              type="button"
             >
               {ignoreDelay ? (
                 <ClockIcon.AltComponent />

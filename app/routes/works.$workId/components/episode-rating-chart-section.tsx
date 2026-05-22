@@ -8,7 +8,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { LoaderData } from "../server/loader";
+import type { LoaderData } from "../server/loader";
 
 /**
  * 評価グラフ表示用コンポーネント

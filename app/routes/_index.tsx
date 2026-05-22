@@ -305,17 +305,16 @@ export const getQuarterMetrics =
       .reduce(
         (acc, val) => {
           if (acc.length === 0) {
-            return [val];
+            acc.push(val);
+            return acc;
           }
           const last = acc[acc.length - 1];
-          return [
-            ...acc,
-            {
-              date: val.date,
-              watchAchievements: last.watchAchievements + val.watchAchievements,
-              dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
-            },
-          ];
+          acc.push({
+            date: val.date,
+            watchAchievements: last.watchAchievements + val.watchAchievements,
+            dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
+          });
+          return acc;
         },
         [] as Array<{
           date: string;

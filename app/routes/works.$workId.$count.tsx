@@ -37,7 +37,7 @@ export const loader = async ({ request, params }: Route.LoaderArgs) => {
     throw Error("episode not found");
   }
   return {
-    myHistory: userId && histories.find((w) => w.userId === userId),
+    myHistory: userId ? histories.find((w) => w.userId === userId) : undefined,
     // 他のユーザーの情報は必要以上に返さない
     otherHistories: histories
       .filter((h) => h.userId !== userId)
@@ -178,7 +178,7 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             <dd>{myHistory.rating}点</dd>
           </>
         )}
-        {myHistory && myHistory.comment && (
+        {myHistory?.comment && (
           <>
             <dt>あなたの感想</dt>
             <dd>

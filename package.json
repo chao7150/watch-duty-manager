@@ -6,12 +6,9 @@
   "license": "",
   "scripts": {
     "build": "react-router build",
-    "commit": "cz",
+    "check": "biome check --write ./app",
     "dev": "node -r dotenv/config node_modules/.bin/react-router dev --host 0.0.0.0",
     "db:setup": "npx prisma db push && npx prisma db seed",
-    "format": "prettier --write \"./app/**/*.{ts,tsx,js,json}\"",
-    "lint": "eslint \"app/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
     "start": "react-router-serve ./build/server/index.js",
     "test": "SECRET=test-secret vitest run",
     "test:tsc": "react-router typegen && tsc --noEmit --incremental",
@@ -36,23 +33,17 @@
     "url-from": "^1.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
     "@react-router/dev": "^7.15.1",
     "@react-router/fs-routes": "^7.15.1",
     "@tailwindcss/vite": "^4.3.0",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-    "@types/node": "^22.19.19",
+    "@types/node": "^24.12.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "cz-conventional-changelog": "^3.3.0",
     "esbuild-register": "^3.6.0",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "lint-staged": "^16.2.7",
-    "prettier": "3.6.2",
     "simple-git-hooks": "^2.13.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.3",
     "vite": "^8.0.13",
     "vite-plugin-cjs-interop": "^4.0.0",
     "vitest": "^4.1.6"
@@ -60,16 +51,11 @@
   "engines": {
     "node": ">=24"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "prisma": {
     "seed": "node --experimental-strip-types prisma/seed.ts"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
+    "pre-commit": "npx biome check --staged --write"
   },
   "sideEffects": false
 }

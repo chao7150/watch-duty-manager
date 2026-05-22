@@ -92,14 +92,22 @@ export const action = async ({ request }: Route.ActionArgs) => {
       TE.bindW("createEpisodesResult", ({ insertingWorks, insertedWorks }) =>
         TE.tryCatch(
           async () => {
+            const insertedWorkIdByTitle = new Map(
+              insertedWorks.map((work) => [work.title, work.id]),
+            );
+
             return await db.episode.createMany({
               data: insertingWorks
-                .map((work) => ({
-                  ...work,
-                  id: insertedWorks.find(
-                    (insertedWork) => insertedWork.title === work.title,
-                  )!.id,
-                }))
+                .map((work) => {
+                  const workId = insertedWorkIdByTitle.get(work.title);
+                  if (workId === undefined) {
+                    throw new Error("inserted work not found");
+                  }
+                  return {
+                    ...work,
+                    id: workId,
+                  };
+                })
                 .flatMap((combinedWork) =>
                   Array.from({ length: combinedWork.episodeCount }).map(
                     (_, index) => {
@@ -220,7 +228,7 @@ export default function Create() {
       <section className="mt-4">
         <p>{actionData && JSON.stringify(actionData)}</p>
         <div>
-          <button onClick={() => setBulkCreateMode((m) => !m)}>
+          <button onClick={() => setBulkCreateMode((m) => !m)} type="button">
             {bulkCreateMode ? "戻る" : "複数入力する"}
           </button>
           {bulkCreateMode ? (

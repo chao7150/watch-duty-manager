@@ -169,6 +169,7 @@ function LayoutBody({
           <button
             className="lg:hidden"
             onClick={() => setMobileMenuOpened((o) => !o)}
+            type="button"
           >
             <MenuIcon.Component />
           </button>

@@ -21,10 +21,10 @@ export const Component: React.FC<Props> = ({
     if (fetcher.state === "idle" && fetcher.data && !fetcher.data.hasError) {
       onSubmitSuccess();
     }
-  }, [fetcher.state, fetcher.data]);
+  }, [fetcher.state, fetcher.data, onSubmitSuccess]);
   return (
     <section>
-      {fetcher.data && fetcher.data.hasError && <p>{fetcher.data.message}</p>}
+      {fetcher.data?.hasError && <p>{fetcher.data.message}</p>}
       <fetcher.Form method="POST" action={`/works/${workId}`}>
         <WorkInput.Component {...workInput} />
         <div className="mt-4 ml-auto">

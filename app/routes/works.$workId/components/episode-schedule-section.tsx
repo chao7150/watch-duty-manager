@@ -8,7 +8,7 @@ import * as EditIcon from "~/components/Icons/Edit";
 import * as TrashIcon from "~/components/Icons/Trash";
 import { EpisodeDateRegistrationTabPanel } from "~/components/work-create-form/component";
 
-import { LoaderData } from "../server/loader";
+import type { LoaderData } from "../server/loader";
 
 /**
  * 放送スケジュール表示・編集用コンポーネント
@@ -171,7 +171,7 @@ const EpisodeRow = ({
         </div>
         <div>
           {new Date(episode.publishedAt).getTime() + watchDelay * 1000 <
-            new Date().getTime() &&
+            Date.now() &&
             loggedIn && (
               <EpisodeWatchForm.Component
                 workId={episode.workId}

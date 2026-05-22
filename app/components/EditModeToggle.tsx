@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 import * as CloseIcon from "./Icons/Close";
 import * as EditIcon from "./Icons/Edit";
@@ -10,7 +10,7 @@ interface Props {
 
 export const Component: React.FC<Props> = ({ editMode, turnEditMode }) => {
   return (
-    <button className="ml-2" onClick={turnEditMode}>
+    <button className="ml-2" onClick={turnEditMode} type="button">
       {editMode ? (
         <div title="編集をやめる">
           <CloseIcon.Component />

@@ -60,6 +60,7 @@ const Information: React.FC<InformationProps> = ({
           <button
             title="まだ前の話数を見ていません"
             onClick={() => onClickWatchUnready(workId)}
+            type="button"
           >
             <ExclamationCircleIcon.Component />
           </button>
@@ -144,4 +145,5 @@ const _Component: React.FC<Props> = ({
 };
 
 export const Component = (props: Props) =>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: props is already decomposed into Object.values
   useMemo(() => <_Component {...props} />, [...Object.values(props)]);

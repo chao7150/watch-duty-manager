@@ -36,7 +36,7 @@ export const useCloseDetailsOnClickAway = () => {
     if (ref.current) {
       ref.current.removeAttribute("open");
     }
-  }, [ref.current]);
+  }, []);
   const [onClickAway, setOnClickAway] = useState({ f: noOpCallback });
   const onToggle = useCallback<React.ReactEventHandler<HTMLDetailsElement>>(
     (_) => {
@@ -49,7 +49,7 @@ export const useCloseDetailsOnClickAway = () => {
         setOnClickAway({ f: noOpCallback });
       }
     },
-    [],
+    [closeCallback],
   );
   useClickAway(ref, onClickAway.f, ["click"]);
   return { ref, onToggle };

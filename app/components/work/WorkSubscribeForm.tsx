@@ -29,29 +29,31 @@ export const Component: React.FC<Props> = ({
 const UnsubscribeButton = () => {
   const [hovered, setHovered] = useState(false);
   return (
-    <div
+    <Button.Component
       className="w-24"
+      name="_action"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      title="unsubscribe"
+      value="unsubscribe"
     >
-      <Button.Component name="_action" value="unsubscribe" title="unsubscribe">
-        {hovered ? "切る？" : "見てる"}
-      </Button.Component>
-    </div>
+      {hovered ? "切る？" : "見てる"}
+    </Button.Component>
   );
 };
 
 const SubscribeButton = () => {
   const [hovered, setHovered] = useState(false);
   return (
-    <div
+    <Button.Component
       className="w-24"
+      name="_action"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      title="subscribe"
+      value="subscribe"
     >
-      <Button.Component name="_action" value="subscribe" title="subscribe">
-        {hovered ? "見る？" : "見てない"}
-      </Button.Component>
-    </div>
+      {hovered ? "見る？" : "見てない"}
+    </Button.Component>
   );
 };

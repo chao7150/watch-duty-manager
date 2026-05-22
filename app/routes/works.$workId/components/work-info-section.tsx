@@ -5,7 +5,7 @@ import {
   type Props as WorkEditFormProps,
 } from "~/components/work-edit-form/component";
 
-import { LoaderData } from "../server/loader";
+import type { LoaderData } from "../server/loader";
 
 /**
  * 作品情報表示・編集用コンポーネント

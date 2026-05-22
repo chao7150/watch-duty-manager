@@ -14,6 +14,7 @@ export const Component: React.FC<Props> = ({ className }) => {
       width="24"
       height="24"
     >
+      <title>icon</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

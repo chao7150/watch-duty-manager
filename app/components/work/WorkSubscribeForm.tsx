@@ -1,6 +1,6 @@
 import { useFetcher } from "react-router";
 
-import { useHover } from "react-use";
+import { useState } from "react";
 
 import * as Button from "../Button";
 
@@ -28,25 +28,31 @@ export const Component: React.FC<Props> = ({
 };
 
 const UnsubscribeButton = () => {
-  const element = (hovered: boolean) => (
-    <div className="w-24">
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="w-24"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <Button.Component name="_action" value="unsubscribe" title="unsubscribe">
         {hovered ? "切る？" : "見てる"}
       </Button.Component>
     </div>
   );
-  const [hoverable] = useHover(element);
-  return hoverable;
 };
 
 const SubscribeButton = () => {
-  const element = (hovered: boolean) => (
-    <div className="w-24">
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="w-24"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <Button.Component name="_action" value="subscribe" title="subscribe">
         {hovered ? "見る？" : "見てない"}
       </Button.Component>
     </div>
   );
-  const [hoverable] = useHover(element);
-  return hoverable;
 };

@@ -3,22 +3,20 @@
 import { reactRouter } from "@react-router/dev/vite";
 
 import tailwindcss from "@tailwindcss/vite";
-import fs from "fs";
 import { cjsInterop } from "vite-plugin-cjs-interop";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [
     !process.env.VITEST &&
       reactRouter(),
-    tsconfigPaths(),
     cjsInterop({
       dependencies: ["url-from", "react-use", "firebase-admin"],
     }),
     tailwindcss(),
   ],
   resolve: {
+    tsconfigPaths: true,
     alias: {
       // tsconfigのpathと合わせている
       "~/": `${__dirname}/app/`,

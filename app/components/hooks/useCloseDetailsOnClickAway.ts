@@ -1,7 +1,30 @@
-import { useCallback, useRef, useState } from "react";
-import { useClickAway } from "react-use";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const noOpCallback = () => {};
+
+function useClickAway(
+  ref: React.RefObject<HTMLElement | null>,
+  onClickAway: (event: Event) => void,
+  events: string[] = ["click"],
+) {
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const el = ref.current;
+      if (!el || el.contains(event.target as Node)) return;
+      onClickAway(event);
+    };
+
+    events.forEach((event) => {
+      document.addEventListener(event, handler);
+    });
+
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, handler);
+      });
+    };
+  }, [ref, onClickAway, events]);
+}
 
 /**
  * detailsが開かれたときに

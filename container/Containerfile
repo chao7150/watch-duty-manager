@@ -21,8 +21,10 @@ WORKDIR /app
 COPY --from=dev-deps /app/node_modules ./node_modules
 # 必要なファイルのみコピー
 COPY package*.json ./
+COPY .gitignore ./
 COPY tsconfig.json ./
 COPY vite.config.mts ./
+COPY react-router.config.ts ./
 COPY prisma ./prisma/
 COPY app ./app/
 # ビルド実行

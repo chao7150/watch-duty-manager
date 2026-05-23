@@ -25,7 +25,6 @@ node_modules
 
 # Git
 .git
-.gitignore
 
 # Documentation
 /docs

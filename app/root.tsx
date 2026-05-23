@@ -170,6 +170,7 @@ function LayoutBody({
             className="lg:hidden"
             onClick={() => setMobileMenuOpened((o) => !o)}
             type="button"
+            aria-label="メニューを開く"
           >
             <MenuIcon.Component />
           </button>

@@ -43,6 +43,11 @@ export const Component = ({
           className="ml-2"
           type="button"
           onClick={() => setEpisodesEditMode((c) => !c)}
+          aria-label={
+            episodesEditMode && outletId === undefined
+              ? "編集をやめる"
+              : "編集する"
+          }
         >
           {episodesEditMode && outletId === undefined ? (
             <CloseIcon.Component />
@@ -202,7 +207,7 @@ const EpisodeRow = ({
                 type="submit"
                 name="_action"
                 value="delete"
-                title=""
+                title="削除"
               >
                 <TrashIcon.Component />
               </button>

@@ -26,7 +26,10 @@ export const Component: React.FC<Props> = ({
 
   return (
     <details ref={ref} onToggle={onToggle} className="relative">
-      <summary className="cursor-pointer list-none">
+      <summary
+        className="cursor-pointer list-none"
+        aria-label={watched ? "視聴済み" : skipped ? "スキップ済み" : "未視聴"}
+      >
         {watched ? (
           <EyeOffIcon.Component />
         ) : skipped ? (

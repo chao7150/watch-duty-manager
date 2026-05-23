@@ -7,8 +7,9 @@ export const Component = () => {
       viewBox="0 0 24 24"
       stroke="currentColor"
       strokeWidth={2}
+      aria-hidden="true"
+      focusable="false"
     >
-      <title>icon</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

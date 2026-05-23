@@ -13,8 +13,9 @@ export const Component: React.FC<Props> = ({ className }) => {
       stroke="currentColor"
       width="24"
       height="24"
+      aria-hidden="true"
+      focusable="false"
     >
-      <title>icon</title>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

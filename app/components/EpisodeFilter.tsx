@@ -23,7 +23,10 @@ export const Component = ({
 
   return (
     <details className="relative">
-      <summary className="list-none cursor-pointer p-1 hover:bg-gray-700 rounded">
+      <summary
+        className="list-none cursor-pointer p-1 hover:bg-gray-700 rounded"
+        aria-label="フィルター"
+      >
         <FilterIcon.Component />
       </summary>
       <section className="z-10 absolute left-0 top-full mt-1 shadow-menu bg-dark p-2 rounded flex items-center gap-2 w-max">

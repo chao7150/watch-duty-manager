@@ -56,7 +56,10 @@ export const Component: React.FC<Props> = ({
     <div className="grid grid-cols-2 gap-2">
       <div>
         <details ref={ref} onToggle={onToggle} className="relative">
-          <summary className="cursor-pointer list-none">
+          <summary
+            className="cursor-pointer list-none"
+            aria-label="アクションメニュー"
+          >
             <MenuIcon.Component />
           </summary>
           <ul className="z-10 absolute left-10 -top-1 shadow-menu bg-dark p-2 flex flex-col">

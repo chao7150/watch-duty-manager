@@ -333,6 +333,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       weekMetrics: [],
       quarterMetrics: [],
       recentWatchAchievements: [],
+      nowMs: Date.now(),
     };
   }
   const now = Temporal.Now.zonedDateTimeISO("Asia/Tokyo");
@@ -389,6 +390,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     weekMetrics,
     quarterMetrics,
     recentWatchAchievements,
+    nowMs: now.epochMilliseconds,
     subscription: tickets.reduce(
       (acc, val) => {
         const workId = val.workId;
@@ -451,8 +453,8 @@ export default function Index({ loaderData }: Route.ComponentProps) {
     quarterMetrics,
     recentWatchAchievements,
     subscription,
+    nowMs,
   } = loaderData;
-  const now = new Date();
 
   if (userId === null) {
     return (
@@ -468,7 +470,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         (subscription.find((s) => s.workId === ticket.workId)
           ?.watchDelaySecFromPublish ?? 0) *
           1000 <
-      now.getTime()
+      nowMs
     );
   });
 
@@ -508,6 +510,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
             d.workId,
             d.watchDelaySecFromPublish,
           ])}
+          nowMs={nowMs}
         />
       </section>
       <section>
@@ -547,10 +550,10 @@ export default function Index({ loaderData }: Route.ComponentProps) {
             watchUrl:
               subscription.find((s) => s.workId === a.workId)?.watchUrl ??
               undefined,
-            published: true,
           }))}
           workIdDelayMinList={[]}
           useLocalStorage={false}
+          nowMs={nowMs}
         />
       </section>
     </div>

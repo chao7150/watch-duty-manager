@@ -91,7 +91,7 @@ const statusStyles: { [K in Status]: string } = {
 export type Props = Omit<
   InformationProps & EpisodeActoinMenu.Props,
   "status" | "published"
->;
+> & { nowMs: number };
 const _Component: React.FC<Props> = ({
   workId,
   officialSiteUrl,
@@ -106,11 +106,14 @@ const _Component: React.FC<Props> = ({
   skipped,
   onClickWatchUnready,
   delayed,
+  nowMs,
 }) => {
   const status = getStatus(
     // TODO: これでも同じじゃない？
     date2ZonedDateTime(publishedAt),
-    Temporal.Now.zonedDateTimeISO("Asia/Tokyo"),
+    Temporal.Instant.fromEpochMilliseconds(nowMs).toZonedDateTimeISO(
+      "Asia/Tokyo",
+    ),
   );
   return (
     <div

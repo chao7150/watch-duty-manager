@@ -10,9 +10,10 @@ import * as Square2StackIcon from "../Icons/Square2Stack";
 import * as Episode from "./Episode";
 
 export type Props = {
-  episodes: Omit<Episode.Props, "onClickWatchUnready">[];
+  episodes: Omit<Episode.Props, "onClickWatchUnready" | "nowMs">[];
   workIdDelayMinList: [number, number | null][];
   useLocalStorage?: boolean;
+  nowMs: number;
 };
 
 const useLocalStorageState = <T,>(
@@ -49,6 +50,7 @@ export const Component: React.FC<Props> = ({
   episodes,
   workIdDelayMinList,
   useLocalStorage = true,
+  nowMs,
 }) => {
   const [sortDesc, setSortDesc] = useLocalStorageState<boolean>(
     "sortDesc",
@@ -172,6 +174,7 @@ export const Component: React.FC<Props> = ({
               >
                 <Episode.Component
                   {...e}
+                  nowMs={nowMs}
                   onClickWatchUnready={(workId: number) => {
                     setFilterWorkId((current) => {
                       if (current === undefined) {

@@ -21,10 +21,15 @@ import {
   cour2startZonedDateTime,
   zonedDateTime2cour,
 } from "~/domain/cour/util";
+import { getAnimeDate } from "~/domain/date/util";
+import {
+  computeCumulativeMetrics,
+  countOccurrence,
+  mergeWeekMetrics,
+} from "~/domain/metrics/compute";
+import { setOldestOfWork } from "~/domain/ticket/compute";
 
 import {
-  date2ZonedDateTime,
-  formatZDT,
   getPast7DaysLocaleDateStringFromTemporal,
   getQuarterEachLocaleDateStringFromTemporal,
   startOf4OriginDayFromTemporal,
@@ -34,37 +39,6 @@ import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 
 import type { Route } from "./+types/_index";
-
-/**
- * targetMsが日本標準時の日付で表すと現在から何日前かを返す
- */
-export const getNormalizedDate = (nowMs: number, targetMs: number) => {
-  const JPUnixToday = Math.floor((nowMs + 18000000) / 86400000);
-  const JPUnixDate = Math.floor((targetMs + 18000000) / 86400000);
-  return JPUnixDate - JPUnixToday;
-};
-
-export const countOccurrence = (items: Array<string>): Map<string, number> => {
-  return items.reduce((acc, val) => {
-    const v = acc.get(val);
-    if (v === undefined) {
-      return acc.set(val, 1);
-    }
-    return acc.set(val, v + 1);
-  }, new Map<string, number>());
-};
-
-/**
- * Prisma から取得した Date オブジェクトを Temporal.ZonedDateTime に変換し、
- * 4時間引いてフォーマットした文字列を返します。
- *
- * @param prismaDate - Prisma から取得した Date オブジェクト
- * @returns yyyy/MM/dd 形式の文字列
- */
-const prismaDate2key = (prismaDate: Date): string => {
-  const date = date2ZonedDateTime(prismaDate).subtract({ hours: 4 });
-  return formatZDT(date);
-};
 
 const getTickets =
   ({
@@ -153,7 +127,7 @@ const getWeekWatchAchievements =
           },
         },
       })
-    ).map((w) => prismaDate2key(w.createdAt));
+    ).map((w) => getAnimeDate(w.createdAt));
     return countOccurrence(occurrence);
   };
 
@@ -183,7 +157,7 @@ const getWeekDutyAccumulation =
           },
         },
       })
-    ).map((d) => prismaDate2key(d.publishedAt));
+    ).map((d) => getAnimeDate(d.publishedAt));
     return countOccurrence(occurrence);
   };
 
@@ -210,7 +184,7 @@ const getQuarterDuties =
           publishedAt: { gte: startDate, lte: dateNow },
         },
       })
-    ).map((e) => prismaDate2key(e.publishedAt));
+    ).map((e) => getAnimeDate(e.publishedAt));
     return countOccurrence(occurrence);
   };
 
@@ -244,7 +218,7 @@ const getQuarterWatchAchievements =
           },
         },
       })
-    ).map((w) => prismaDate2key(w.createdAt));
+    ).map((w) => getAnimeDate(w.createdAt));
     return countOccurrence(occurrence);
   };
 
@@ -285,43 +259,12 @@ export const getQuarterMetrics =
     })();
     const quarterDuties = await getQuarterDuties({ db, userId, now })();
     const quarterKeys = getQuarterEachLocaleDateStringFromTemporal(now);
-    const mergedQuarterMetricsMap = new Map<
-      string,
-      { watchAchievements: number; dutyAccumulation: number }
-    >();
-    quarterKeys.forEach((k) => {
-      mergedQuarterMetricsMap.set(k, {
-        watchAchievements: quarterWatchAchievements.get(k) ?? 0,
-        dutyAccumulation: quarterDuties.get(k) ?? 0,
-      });
-    });
-    return Object.entries(Object.fromEntries(mergedQuarterMetricsMap))
-      .map(([k, v]) => {
-        return {
-          date: k,
-          ...v,
-        };
-      })
-      .reduce(
-        (acc, val) => {
-          if (acc.length === 0) {
-            acc.push(val);
-            return acc;
-          }
-          const last = acc[acc.length - 1];
-          acc.push({
-            date: val.date,
-            watchAchievements: last.watchAchievements + val.watchAchievements,
-            dutyAccumulation: last.dutyAccumulation + val.dutyAccumulation,
-          });
-          return acc;
-        },
-        [] as Array<{
-          date: string;
-          watchAchievements: number;
-          dutyAccumulation: number;
-        }>,
-      );
+    const merged = mergeWeekMetrics(
+      quarterKeys,
+      quarterWatchAchievements,
+      quarterDuties,
+    );
+    return computeCumulativeMetrics(merged);
   };
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
@@ -367,22 +310,11 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     getQuarterMetrics({ db, userId, now }),
   )();
   const weekKeys = getPast7DaysLocaleDateStringFromTemporal(now);
-  const mergedWeekMetricsMap = new Map<
-    string,
-    { watchAchievements: number; dutyAccumulation: number }
-  >();
-  weekKeys.forEach((k) => {
-    mergedWeekMetricsMap.set(k, {
-      watchAchievements: weekWatchAchievements.get(k) ?? 0,
-      dutyAccumulation: weekDutyAccumulation.get(k) ?? 0,
-    });
-  });
-  const weekMetrics = Object.entries(
-    Object.fromEntries(mergedWeekMetricsMap),
-  ).map(([k, v]) => ({
-    date: k,
-    ...v,
-  }));
+  const weekMetrics = mergeWeekMetrics(
+    weekKeys,
+    weekWatchAchievements,
+    weekDutyAccumulation,
+  );
 
   return {
     userId,
@@ -408,22 +340,6 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       }[],
     ),
   };
-};
-
-export const setOldestOfWork = <T extends { workId: number }>(
-  tickets: T[],
-): Array<T & { watchReady: boolean }> => {
-  const s = new Set<number>();
-  return tickets
-    .reverse()
-    .map((t) => {
-      if (s.has(t.workId)) {
-        return { ...t, watchReady: false };
-      }
-      s.add(t.workId);
-      return { ...t, watchReady: true };
-    })
-    .reverse();
 };
 
 export default function Index({ loaderData }: Route.ComponentProps) {

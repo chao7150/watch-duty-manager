@@ -127,7 +127,7 @@ export default function Login() {
           <form className="space-y-4" onSubmit={login}>
             {error && (
               <div className="p-3 rounded-md bg-red bg-opacity-10 border border-red border-opacity-20">
-                <p className="text-sm text-red">{error}</p>
+                <p className="text-sm text-white">{error}</p>
               </div>
             )}
             <div>

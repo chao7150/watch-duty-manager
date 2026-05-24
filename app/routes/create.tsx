@@ -5,6 +5,7 @@ import * as TE from "fp-ts/lib/TaskEither.js";
 import { useState } from "react";
 import { data, redirect, useActionData } from "react-router";
 
+import { resultToEither } from "~/adapters/resultToEither";
 import * as WorkBulkCreateForm from "~/components/WorkBulkCreateForm";
 import { serverValidator as WorkCreateFormServerValidator } from "~/components/work-create-form/action.server";
 import { Component as WorkCreateFormComponent } from "~/components/work-create-form/component";
@@ -177,8 +178,9 @@ export const action = async ({ request }: Route.ActionArgs) => {
   return await F.pipe(
     formData,
     WorkCreateFormServerValidator,
+    resultToEither,
     TE.fromEither,
-    TE.chain(({ episodeDate, ...work }) => {
+    TE.chainW(({ episodeDate, ...work }) => {
       return TE.tryCatch(
         async () => ({
           returnedWork: await db.work.create({
@@ -192,7 +194,7 @@ export const action = async ({ request }: Route.ActionArgs) => {
         (e) => data({ errorMessage: e as string }, { status: 409 }),
       );
     }),
-    TE.chain(({ returnedWork, episodeDate }) => {
+    TE.chainW(({ returnedWork, episodeDate }) => {
       return TE.tryCatch(
         async () => {
           await db.episode.createMany({

@@ -1,19 +1,29 @@
-import * as E from "fp-ts/lib/Either.js";
-
 import { db } from "~/utils/db.server";
+import type { Result } from "~/utils/result";
+import { Err, Ok } from "~/utils/result";
+
+type SuccessResult = { successMessage: string; status: number };
+type ErrorResult = { errorMessage: string; status: number };
+
+const resolveFormDataEntryValueToNonEmptyStringOrNull = (
+  v: FormDataEntryValue | null,
+): string | null => {
+  if (typeof v !== "string") {
+    return null;
+  }
+  if (v === "") {
+    return null;
+  }
+  return v;
+};
 
 export const serverAction = async (
   workId: number,
   formData: FormData,
-): Promise<
-  E.Either<
-    { errorMessage: string; status: number },
-    { successMessage: string; status: number }
-  >
-> => {
+): Promise<Result<SuccessResult, ErrorResult>> => {
   const title = formData.get("title");
   if (typeof title !== "string" || title === "") {
-    return E.left({ errorMessage: "title must not be empty", status: 400 });
+    return Err({ errorMessage: "title must not be empty", status: 400 });
   }
   const officialSiteUrl = resolveFormDataEntryValueToNonEmptyStringOrNull(
     formData.get("officialSiteUrl"),
@@ -26,14 +36,14 @@ export const serverAction = async (
   );
   const _durationMin = formData.get("durationMin");
   if (typeof _durationMin !== "string") {
-    return E.left({
+    return Err({
       errorMessage: "durationMin must not be empty",
       status: 400,
     });
   }
   const durationMin = _durationMin === "" ? undefined : Number(_durationMin);
   if (durationMin !== undefined && Number.isNaN(durationMin)) {
-    return E.left({
+    return Err({
       errorMessage: "durationMin must be a number",
       status: 400,
     });
@@ -51,24 +61,12 @@ export const serverAction = async (
       },
     });
 
-    return E.right({
+    return Ok({
       successMessage: `${work.title} is successfully updated`,
       status: 200,
     });
   } catch (e) {
     console.log(e);
-    return E.left({ errorMessage: "internal server error", status: 500 });
+    return Err({ errorMessage: "internal server error", status: 500 });
   }
-};
-
-const resolveFormDataEntryValueToNonEmptyStringOrNull = (
-  v: FormDataEntryValue | null,
-): string | null => {
-  if (typeof v !== "string") {
-    return null;
-  }
-  if (v === "") {
-    return null;
-  }
-  return v;
 };

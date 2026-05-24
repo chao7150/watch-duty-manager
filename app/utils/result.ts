@@ -1,9 +1,7 @@
-type Result<T, E extends AppError = AppError> =
-  | { ok: T; err?: never }
-  | { ok?: never; err: E };
+type Result<T, E = AppError> = { ok: T; err?: never } | { ok?: never; err: E };
 
 const Ok = <T>(value: T): Result<T, never> => ({ ok: value });
-const Err = <E extends AppError>(error: E): Result<never, E> => ({
+const Err = <E>(error: E): Result<never, E> => ({
   err: error,
 });
 

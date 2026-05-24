@@ -3,6 +3,10 @@ import * as F from "fp-ts/lib/function.js";
 import * as TE from "fp-ts/lib/TaskEither.js";
 import { data } from "react-router";
 
+import {
+  awaitResultToTaskEither,
+  resultToEither,
+} from "~/adapters/resultToEither";
 import { serverAction as WatchSettingsEditFormServerAction } from "~/components/watch-settings-edit-form/action.server";
 import { serverAction as WorkEditFormServerAction } from "~/components/work-edit-form/action.server";
 
@@ -77,7 +81,9 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   if (formData.get("_action") === "watch-settings-edit") {
     const userId = await requireUserId(request);
     return await F.pipe(
-      WatchSettingsEditFormServerAction(userId, workId, formData),
+      awaitResultToTaskEither(
+        WatchSettingsEditFormServerAction(userId, workId, formData),
+      ),
       TE.match(
         ({ errorMessage, status }) =>
           data({ message: errorMessage, hasError: true }, { status }),
@@ -88,7 +94,7 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   }
   // _action === "edit"
   return F.pipe(
-    await WorkEditFormServerAction(workId, formData),
+    resultToEither(await WorkEditFormServerAction(workId, formData)),
     E.match(
       ({ errorMessage, status }) =>
         data({ message: errorMessage, hasError: true }, { status }),

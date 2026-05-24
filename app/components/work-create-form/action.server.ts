@@ -1,46 +1,49 @@
-import * as E from "fp-ts/lib/Either.js";
-import * as F from "fp-ts/lib/function.js";
-import { data } from "react-router";
-
+import type { Result } from "~/utils/result";
+import { Err, Ok } from "~/utils/result";
 import { nonEmptyStringOrUndefined } from "~/utils/type";
 import { isNonEmptyString } from "~/utils/validator";
 
-export const serverValidator = (formData: FormData) => {
-  return F.pipe(
-    formData,
-    (formData) => {
-      const title = formData.get("title");
-      return isNonEmptyString(title)
-        ? E.right({ formData, title })
-        : E.left("title must not be empty");
-    },
-    E.chain(({ formData, ...rest }) => {
-      const episodeDate = formData.get("episodeDate");
-      return isNonEmptyString(episodeDate)
-        ? E.right({
-            formData,
-            episodeDate: episodeDate.split(",").map((d) => new Date(d)),
-            ...rest,
-          })
-        : E.left("episodeDate must not be empty");
-    }),
-    E.bimap(
-      (l) => data({ errorMessage: l }, { status: 400 }),
-      ({ title, episodeDate, formData }) => {
-        const optionals = nonEmptyStringOrUndefined(
-          Object.fromEntries(formData),
-          ["officialSiteUrl", "twitterId", "hashtag", "durationMin"],
-        );
-        return {
-          title,
-          episodeDate,
-          ...optionals,
-          durationMin:
-            optionals.durationMin && optionals.durationMin !== ""
-              ? Number(optionals.durationMin)
-              : undefined,
-        };
-      },
-    ),
-  );
+type ValidationResult = {
+  title: string;
+  episodeDate: Date[];
+  officialSiteUrl: string | null;
+  twitterId: string | null;
+  hashtag: string | null;
+  durationMin: number | undefined;
+};
+
+export const serverValidator = (
+  formData: FormData,
+): Result<ValidationResult, { type: "validation"; message: string }> => {
+  const title = formData.get("title");
+  if (!isNonEmptyString(title)) {
+    return Err({ type: "validation", message: "title must not be empty" });
+  }
+
+  const episodeDate = formData.get("episodeDate");
+  if (!isNonEmptyString(episodeDate)) {
+    return Err({
+      type: "validation",
+      message: "episodeDate must not be empty",
+    });
+  }
+
+  const optionals = nonEmptyStringOrUndefined(Object.fromEntries(formData), [
+    "officialSiteUrl",
+    "twitterId",
+    "hashtag",
+    "durationMin",
+  ]);
+
+  return Ok({
+    title,
+    episodeDate: episodeDate.split(",").map((d) => new Date(d)),
+    officialSiteUrl: optionals.officialSiteUrl ?? null,
+    twitterId: optionals.twitterId ?? null,
+    hashtag: optionals.hashtag ?? null,
+    durationMin:
+      optionals.durationMin && optionals.durationMin !== ""
+        ? Number(optionals.durationMin)
+        : undefined,
+  });
 };

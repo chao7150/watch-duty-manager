@@ -597,7 +597,7 @@ describe("subscribeWork", () => {
 |------|------|--------|---------|------|
 | **0** | `app/utils/result.ts` に `Result`, `Ok`, `Err`, `tryResult`, `AppError`, `errorToStatus`, `errorToMessage` を定義 | 低 | なし | ✅ |
 | **1** | 純粋計算関数を `domain/` に抽出 | 低 | `_index.tsx` | ✅ |
-| **2** | `components/*/action.server.ts` のバリデーションを `Result` に置き換え | 中 | コンポーネントとrouteのaction | ❌ |
+| **2** | `components/*/action.server.ts` のバリデーションを `Result` に置き換え | 中 | コンポーネントとrouteのaction | ✅ |
 | **3** | Repository interface + Prisma実装を追加 | 低 | なし (新規追加のみ) | ❌ |
 | **4** | `create.tsx` の `TE.bind` チェーンを Use Case + 早期returnに書き換え | 高 | `create.tsx` | ❌ |
 | **5** | `works.$workId/action.ts` のaction分岐をUse Caseに抽出 | 高 | `works.$workId` | ❌ |
@@ -606,7 +606,7 @@ describe("subscribeWork", () => {
 
 Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層の基盤を固めてから取り組むこと。
 
-## 8. 進捗と申し送り (Step 0-1 完了)
+## 8. 進捗と申し送り (Step 0-2 完了)
 
 ### 完了した変更
 
@@ -622,6 +622,13 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 | `app/routes/_index.tsx` | 上記抽出関数を import に置き換え。`getQuarterMetrics` 内のインライン reduce を `computeCumulativeMetrics` + `mergeWeekMetrics` に置き換え |
 | `app/routes/__tests__/index.test.ts` | **削除**: 内容は domain の各テストファイルに移行 |
 | `tsconfig.json` | `exclude: ["**/*.test.ts"]` を削除 (テストファイルにも型チェックが効くように) |
+| `app/components/work-create-form/action.server.ts` | fp-ts → Result型 (Ok/Err) に置き換え。`serverValidator` が `Result` を返すように |
+| `app/components/work-edit-form/action.server.ts` | fp-ts → Result型 に置き換え。`serverAction` が `Promise<Result<SuccessResult, ErrorResult>>` を返すように |
+| `app/components/watch-settings-edit-form/action.server.ts` | fp-ts → Result型 に置き換え。`serverAction` が `Promise<Result<SuccessResult, ErrorResult>>` を返すように |
+| `app/adapters/resultToEither.ts` | 新規作成。Result → fp-ts Either/TaskEither に変換する腐敗防止層 |
+| `app/routes/create.tsx` | `resultToEither` adapter 経由で `WorkCreateFormServerValidator` を使用 |
+| `app/routes/works.$workId/server/action.ts` | `resultToEither`, `awaitResultToTaskEither` adapter 経由で `serverAction` を使用 |
+| `app/utils/result.ts` | `Err` の型制約を缓和 (`<E extends AppError>` → `<E>`)して任意のError型を受け取れるように |
 
 ### リネーム・整理
 
@@ -638,18 +645,22 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 | Domain内の依存は「具体→汎用」の方向のみ許可 | 循環依存防止。例: `metrics/compute.ts` → `date/util.ts` |
 | `setOldestOfWork` は位置ベースのreverseトリックを廃止 | `publishedAt` を直接比較する純粋関数に。呼び出し元のsort順に依存しない |
 | Domain層から `~/utils/date` への依存は許容 | `date2ZonedDateTime` / `formatZDT` は副作用のない純粋関数であり、Prisma/React Routerのような外部インフラではない |
+| `Result` の第二型引数 (Error) は任意の型を許容 | 旧的には `extends AppError` で制約されていたが、component-level のエラーハンドリングでは `AppError` 以外の型も使うため緩和 |
 
-### 注意点
+### 今後の課題 (Step 2 相关)
 
-- `_index.tsx` はまだ fp-ts (`A.sequenceT`, `T.ApplyPar`) を使用している。Step 4-6で除去予定
-- `app/domain/metrics/compute.ts` は `getAnimeDate` を import して metrics 関数内で利用している(外部から見れば `getAnimeDate` 経由で間接的に `~/utils/date` に依存している)
-- ディレクトリ構成の `domain/date/` は本計画の「8. ディレクトリ構造」の図には未記載。次回更新時に反映推奨
+- `_index.tsx` はまだ fp-ts (`A.sequenceT`, `T.ApplyPar`) を使用している。Step 6で除去予定
+- `app/domain/metrics/compute.ts` は `getAnimeDate` を import して metrics 関数内で利用している
+- ディレクトリ構成の `domain/date/` は本計画の「ディレクトリ構造」の図には未記載
+- `serverAction` / `serverValidator` が `components/` にあるのは过渡的なもの。いずれ Use Case 層に移動する
+- `resolveFormDataEntryValueToNonEmptyStringOrNull` は `FormDataEntryValue` をハンドリングするインフラ層のロジック。将来到了 adapter 層（例: `app/adapters/form-data.ts`）に移動する可能性が高い
 
-## 10. ディレクトリ構造 (移行後)
+## 9. ディレクトリ構造 (移行後)
 
 ```
 app/
 ├── adapters/
+│   ├── resultToEither.ts     (Result → fp-ts Either 変換: 腐敗防止層)
 │   └── repository/
 │       └── prisma/
 │           ├── work.ts

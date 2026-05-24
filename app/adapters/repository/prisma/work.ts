@@ -2,6 +2,12 @@ import type { PrismaClient } from "@prisma/client";
 import type { WorkRepository } from "~/domain/work/repository";
 import { Err, Ok } from "~/utils/result";
 
+const isUniqueConstraintError = (e: unknown): boolean =>
+  e != null &&
+  typeof e === "object" &&
+  "code" in e &&
+  (e as { code: unknown }).code === "P2002";
+
 export const createWorkRepository = (db: PrismaClient): WorkRepository => ({
   findById: (id, options) =>
     db.work.findUnique({
@@ -42,17 +48,33 @@ export const createWorkRepository = (db: PrismaClient): WorkRepository => ({
       orderBy: { id: "asc" },
     }) as ReturnType<WorkRepository["findManyByIds"]>,
 
-  findManyByTitle: (titles) =>
-    db.work.findMany({
-      where: { title: { in: titles } },
-      select: { id: true, title: true },
-    }),
+  findManyByTitle: async (titles) => {
+    try {
+      const works = await db.work.findMany({
+        where: { title: { in: titles } },
+        select: { id: true, title: true },
+      });
+      return Ok(works);
+    } catch (e) {
+      return Err({
+        type: "db" as const,
+        message: "work findManyByTitle failed",
+        cause: e,
+      });
+    }
+  },
 
   create: async (data) => {
     try {
       const work = await db.work.create({ data });
       return Ok({ id: work.id });
     } catch (e) {
+      if (isUniqueConstraintError(e)) {
+        return Err({
+          type: "unique_constraint" as const,
+          duplicatedFields: ["title"],
+        });
+      }
       return Err({
         type: "db" as const,
         message: "work create failed",
@@ -66,6 +88,12 @@ export const createWorkRepository = (db: PrismaClient): WorkRepository => ({
       await db.work.createMany({ data });
       return Ok(undefined);
     } catch (e) {
+      if (isUniqueConstraintError(e)) {
+        return Err({
+          type: "unique_constraint" as const,
+          duplicatedFields: ["title"],
+        });
+      }
       return Err({
         type: "db" as const,
         message: "work createMany failed",

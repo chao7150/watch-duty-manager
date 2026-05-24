@@ -1,32 +1,28 @@
-import * as E from "fp-ts/lib/Either.js";
-import * as F from "fp-ts/lib/function.js";
 import { Form } from "react-router";
 
+import type { BulkWorkInput } from "~/domain/work/types";
+import type { Result } from "~/utils/result";
+import { Err, Ok } from "~/utils/result";
 import { isNonEmptyString } from "~/utils/validator";
 
-export const serverValidator = (formData: FormData) => {
-  return F.pipe(
-    formData,
-    (formData) => {
-      const works = formData.get("works");
-      return isNonEmptyString(works)
-        ? E.right(works)
-        : E.left({ code: "empty" as const });
-    },
-    E.chain((works) => {
-      return E.right(
-        works.split("\n").map((line) => {
-          const properties = line.split(",");
-          return {
-            title: properties[0],
-            publishedAt: new Date(properties[1]),
-            episodeCount: Number(properties[2]),
-            officialSiteUrl: properties[3] || undefined,
-            twitterId: properties[4] || undefined,
-            hashtag: properties[5] || undefined,
-          };
-        }),
-      );
+export const serverValidator = (
+  formData: FormData,
+): Result<BulkWorkInput[], { type: "empty" }> => {
+  const works = formData.get("works");
+  if (!isNonEmptyString(works)) {
+    return Err({ type: "empty" });
+  }
+  return Ok(
+    works.split("\n").map((line) => {
+      const properties = line.split(",");
+      return {
+        title: properties[0],
+        publishedAt: new Date(properties[1]),
+        episodeCount: Number(properties[2]),
+        officialSiteUrl: properties[3] || undefined,
+        twitterId: properties[4] || undefined,
+        hashtag: properties[5] || undefined,
+      };
     }),
   );
 };

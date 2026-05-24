@@ -51,3 +51,12 @@ export interface WorkTitleRecord {
   id: number;
   title: string;
 }
+
+export interface BulkWorkInput {
+  title: string;
+  publishedAt: Date;
+  episodeCount: number;
+  officialSiteUrl?: string;
+  twitterId?: string;
+  hashtag?: string;
+}

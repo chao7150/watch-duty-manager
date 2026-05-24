@@ -599,7 +599,7 @@ describe("subscribeWork", () => {
 | **1** | 純粋計算関数を `domain/` に抽出 | 低 | `_index.tsx` | ✅ |
 | **2** | `components/*/action.server.ts` のバリデーションを `Result` に置き換え | 中 | コンポーネントとrouteのaction | ✅ |
 | **3** | Repository interface + Prisma実装を追加 | 低 | なし (新規追加のみ) | ✅ |
-| **4** | `create.tsx` の `TE.bind` チェーンを Use Case + 早期returnに書き換え | 高 | `create.tsx` | ❌ |
+| **4** | `create.tsx` の `TE.bind` チェーンを Use Case + 早期returnに書き換え | 高 | `create.tsx` | ✅ |
 | **5** | `works.$workId/action.ts` のaction分岐をUse Caseに抽出 | 高 | `works.$workId` | ❌ |
 | **6** | `_index.tsx` loaderのクエリ群をUse Caseに抽出 | 高 | `_index.tsx`, `my._index.tsx` | ❌ |
 | **7** | `fp-ts` 依存を `package.json` から削除 | 低 | package.json | ❌ |
@@ -686,6 +686,52 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 - Domain層のDTOとPrisma型の重複に関する最終的な落とし所はまだ見えていない。Prisma自体が「DBから取り出した値をそのまま取り回す」設計思想であり、Clean Architecture的なレイヤー分離との間に自然な緊張関係がある。Step 4以降でUse Caseを書きながら感覚を掴む
 - `domain/episode/filter.ts` と `domain/cour/db.ts` は現状 Prisma に依存したまま。これらをRepositoryパターンに乗せるか、Adapter層に移すかは未決定
 - `components/*/action.server.ts` はまだ `db` を直接 import している。Step 4-5 で Use Case + Repository に置き換える
+
+## 10. 進捗と申し送り (Step 4 完了)
+
+### 完了した変更
+
+| 変更 | 説明 |
+|------|------|
+| `app/usecases/createWork.ts` | 新規作成。単一作品登録のUse Case。`WorkRepository.create` + `EpisodeRepository.createMany` をオーケストレーション。早期returnパターンでResult型を返す |
+| `app/usecases/bulkCreateWorks.ts` | 新規作成。一括作品登録のUse Case。`WorkRepository.createMany` → `findManyByTitle` → `EpisodeRepository.createMany` の流れを早期returnで実装。P2002の一意制約エラー時は既存作品タイトルを返す |
+| `app/routes/create.tsx` | fp-ts (TE.bind, TE.foldW, pipe等) を完全除去。Result型 + Use Case呼び出しに書き換え。DIでRepository実装を注入 |
+| `app/components/WorkBulkCreateForm.tsx` | `serverValidator` をfp-ts EitherからResult型(Ok/Err)に変換。fp-ts依存を除去 |
+| `app/domain/work/types.ts` | `BulkWorkInput` 型を追加 (title, publishedAt, episodeCount, optional fields) |
+| `app/domain/work/repository.ts` | `findManyByTitle` の戻り値を `Promise<WorkTitleRecord[]>` → `Promise<Result<WorkTitleRecord[], AppError>>` に変更 |
+| `app/adapters/repository/prisma/work.ts` | P2002 (unique constraint) 検出を `create`/`createMany` に追加。`findManyByTitle` にエラーハンドリングを追加。`isUniqueConstraintError` ヘルパーを抽出 |
+
+### 設計判断
+
+| 判断 | 理由 |
+|------|------|
+| `WorkRepository.create`/`createMany` でP2002を `{ type: "unique_constraint" }` エラーとして返す |	fp-tsのtry-catchで直接Prismaエラーを処理していた旧コードから、Repository層でP2002を検出しドメインエラーに変換する設計に変更。Use Case層はPrismaのエラーコードを知らない |
+| `bulkCreateWorks` でP2002後に `findManyByTitle` を呼んで重複タイトルを特定 | 一意制約違反の内容(どのタイトルが重複したか)をユーザーに伝えるため、エラー時に既存作品を検索して `duplicatedFields` にタイトルを格納する |
+| Use Case入力型に `CreateWorkInput`/`BulkWorkInput` を定義 | フォームのバリデーション結果型とRepository入力型(`WorkInput`)の差異(publishedAtの導出等)をUse Case層で吸収 |
+| `create.tsx` はDI (`createWorkRepository(db)`) でUse CaseにRepositoryを注入 | テスト可能性と依存関係の方向(Pramework → Use Cases → Domain ← Adapters)を維持 |
+| `WorkBulkCreateForm.serverValidator` は `Result<BulkWorkInput[], { type: "empty" }>` を返す | fp-tsの `E.left({ code: "empty" })` をResult型の `Err({ type: "empty" })` に置き換え。BulkWorkInput型はdomain/work/types.tsで定義 |
+
+### 削除できたfp-ts依存
+
+| ファイル | 変更 |
+|---------|------|
+| `app/routes/create.tsx` | `fp-ts/lib/function.js`, `fp-ts/lib/Task.js`, `fp-ts/lib/TaskEither.js` のimportを除去 |
+| `app/components/WorkBulkCreateForm.tsx` | `fp-ts/lib/Either.js`, `fp-ts/lib/function.js` のimportを除去 |
+
+### 残存するfp-ts依存 (Step 5-7で除去予定)
+
+| ファイル | 使用箇所 |
+|---------|---------|
+| `app/routes/works.$workId/server/action.ts` | `E.pipe`, `E.match`, `TE.match`, FP関数 |
+| `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)`, `T` |
+| `app/utils/middlewares.ts` | `E`, `TE` |
+| `app/domain/cour/util.ts` | `pipe` |
+| `app/adapters/resultToEither.ts` | Result→fp-ts変換(Step 5で不要になるまで残存) |
+
+### 今後の課題
+
+- `createWork` Use Caseでepisode作成失敗時のエラーが `{ type: "db", message: "episode creation failed" }` となり、workは作成済みだがepisodeが未作成の不整合状態が発生し得る。将来はトランザクションで対応すべき
+- `CreateWorkInput` と `WorkInput` の `publishedAt` の扱い(episodeDate[0]から導出)は、Form→Use Case間のマッピングの代表性に過ぎない。将来的にドメイン層で公開日計算を純粋関数化する可能性あり
 
 ## 11. ディレクトリ構造 (移行後)
 

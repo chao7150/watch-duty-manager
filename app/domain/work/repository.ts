@@ -24,7 +24,9 @@ export interface WorkRepository {
     },
   ): Promise<WorkListItem[]>;
 
-  findManyByTitle(titles: string[]): Promise<WorkTitleRecord[]>;
+  findManyByTitle(
+    titles: string[],
+  ): Promise<Result<WorkTitleRecord[], AppError>>;
 
   create(data: WorkInput): Promise<Result<{ id: number }, AppError>>;
 

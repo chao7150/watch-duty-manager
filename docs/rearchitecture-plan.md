@@ -598,7 +598,7 @@ describe("subscribeWork", () => {
 | **0** | `app/utils/result.ts` に `Result`, `Ok`, `Err`, `tryResult`, `AppError`, `errorToStatus`, `errorToMessage` を定義 | 低 | なし | ✅ |
 | **1** | 純粋計算関数を `domain/` に抽出 | 低 | `_index.tsx` | ✅ |
 | **2** | `components/*/action.server.ts` のバリデーションを `Result` に置き換え | 中 | コンポーネントとrouteのaction | ✅ |
-| **3** | Repository interface + Prisma実装を追加 | 低 | なし (新規追加のみ) | ❌ |
+| **3** | Repository interface + Prisma実装を追加 | 低 | なし (新規追加のみ) | ✅ |
 | **4** | `create.tsx` の `TE.bind` チェーンを Use Case + 早期returnに書き換え | 高 | `create.tsx` | ❌ |
 | **5** | `works.$workId/action.ts` のaction分岐をUse Caseに抽出 | 高 | `works.$workId` | ❌ |
 | **6** | `_index.tsx` loaderのクエリ群をUse Caseに抽出 | 高 | `_index.tsx`, `my._index.tsx` | ❌ |
@@ -655,7 +655,39 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 - `serverAction` / `serverValidator` が `components/` にあるのは过渡的なもの。いずれ Use Case 層に移動する
 - `resolveFormDataEntryValueToNonEmptyStringOrNull` は `FormDataEntryValue` をハンドリングするインフラ層のロジック。将来到了 adapter 層（例: `app/adapters/form-data.ts`）に移動する可能性が高い
 
-## 9. ディレクトリ構造 (移行後)
+## 9. 進捗と申し送り (Step 3 完了)
+
+### 完了した変更
+
+| 変更 | 説明 |
+|------|------|
+| `app/domain/watch/types.ts` | `SubscribedWorkSummary`, `WatchSettingsInput`, `TicketWorkSummary`, `TicketEpisode`, `WatchAchievement` を定義 |
+| `app/domain/work/types.ts` | `WorkInput`, `WorkUpdateInput`, `WorkCore`, `WorkDetail`, `WorkListItem`, `WorkTitleRecord` を定義（`WorkCore` を `extends` の起点に） |
+| `app/domain/episode/types.ts` | `EpisodeInput` を定義 |
+| `app/domain/watch/repository.ts` | `WatchRepository` interface (9メソッド)。戻り値型は `types.ts` のDTOを使用 |
+| `app/domain/work/repository.ts` | `WorkRepository` interface (7メソッド) |
+| `app/domain/episode/repository.ts` | `EpisodeRepository` interface (4メソッド) |
+| `app/domain/metrics/repository.ts` | `MetricsRepository` interface (4メソッド) |
+| `app/adapters/repository/prisma/watch.ts` | `createWatchRepository(db)` — Prisma実装 |
+| `app/adapters/repository/prisma/work.ts` | `createWorkRepository(db)` — Prisma実装 |
+| `app/adapters/repository/prisma/episode.ts` | `createEpisodeRepository(db)` — Prisma実装 |
+| `app/adapters/repository/prisma/metrics.ts` | `createMetricsRepository(db)` — Prisma実装 |
+
+### 設計判断
+
+| 判断 | 理由 |
+|------|------|
+| Repositoryの戻り値DTOは `domain/types.ts` に定義し、`extends` で段階的に構成 | インライン型の肥大化を防止。intersection (`&`) より `extends` の方がエラーメッセージが読みやすい |
+| `Prisma.EpisodeWhereInput` が `episode/repository.ts` と `metrics/repository.ts` に漏れている | Episodeフィルタ条件オブジェクトの型を自前定義するのが非現実的だったため（PrismaのクエリDSLそのもの）。将来的に独自クエリ条件型に置き換えるか、interfaceを分離する |
+| Domain層のDTOは結果的にPrismaの型と似た形状になる | 同一テーブル構造をモデル化している以上避けられない。重要なのは「依存の方向」（Domain ← Adapter）であり、型の「形」が似ることは問題ではない |
+
+### 今後の課題・未解決の問い
+
+- Domain層のDTOとPrisma型の重複に関する最終的な落とし所はまだ見えていない。Prisma自体が「DBから取り出した値をそのまま取り回す」設計思想であり、Clean Architecture的なレイヤー分離との間に自然な緊張関係がある。Step 4以降でUse Caseを書きながら感覚を掴む
+- `domain/episode/filter.ts` と `domain/cour/db.ts` は現状 Prisma に依存したまま。これらをRepositoryパターンに乗せるか、Adapter層に移すかは未決定
+- `components/*/action.server.ts` はまだ `db` を直接 import している。Step 4-5 で Use Case + Repository に置き換える
+
+## 11. ディレクトリ構造 (移行後)
 
 ```
 app/
@@ -716,7 +748,7 @@ app/
 └── ...
 ```
 
-## 11. 現在のコードとの差分まとめ
+## 12. 現在のコードとの差分まとめ
 
 | 現在 | 移行後 |
 |------|--------|

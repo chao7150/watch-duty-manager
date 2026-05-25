@@ -1,4 +1,3 @@
-import { pipe } from "fp-ts/lib/function.js";
 import { Temporal } from "temporal-polyfill";
 
 import { date2ZonedDateTime } from "~/utils/date";
@@ -26,18 +25,14 @@ export const isCour = (s: unknown): s is Cour => {
   );
 };
 
-export const date2cour = (date: Date): Cour =>
-  pipe(
-    date,
-    date2ZonedDateTime,
-    (zdt) => zdt.subtract({ hours: 4 }),
-    (zdt) => {
-      return {
-        year: zdt.year,
-        season: Season[Math.floor((zdt.month - 1) / 3)],
-      };
-    },
-  );
+export const date2cour = (date: Date): Cour => {
+  const zdt = date2ZonedDateTime(date);
+  const zdtMinus4Hours = zdt.subtract({ hours: 4 });
+  return {
+    year: zdtMinus4Hours.year,
+    season: Season[Math.floor((zdtMinus4Hours.month - 1) / 3)],
+  };
+};
 
 /**
  * Temporal.ZonedDateTimeをCourオブジェクトに変換します。

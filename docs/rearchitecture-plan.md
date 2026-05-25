@@ -601,8 +601,8 @@ describe("subscribeWork", () => {
 | **3** | Repository interface + Prisma実装を追加 | 低 | なし (新規追加のみ) | ✅ |
 | **4** | `create.tsx` の `TE.bind` チェーンを Use Case + 早期returnに書き換え | 高 | `create.tsx` | ✅ |
 | **5** | `works.$workId/action.ts` のaction分岐をUse Caseに抽出 | 高 | `works.$workId` | ✅ |
-| **6** | `_index.tsx` loaderのクエリ群をUse Caseに抽出 | 高 | `_index.tsx`, `my._index.tsx` | ❌ |
-| **7** | `fp-ts` 依存を `package.json` から削除 | 低 | package.json | ❌ |
+| **6** | `_index.tsx` loaderのクエリ群をUse Caseに抽出 | 高 | `_index.tsx`, `my._index.tsx` | ✅ |
+| **7** | `fp-ts` 依存を `package.json` から削除 | 低 | package.json | ✅ |
 
 Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層の基盤を固めてから取り組むこと。
 
@@ -718,13 +718,14 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 | `app/routes/create.tsx` | `fp-ts/lib/function.js`, `fp-ts/lib/Task.js`, `fp-ts/lib/TaskEither.js` のimportを除去 |
 | `app/components/WorkBulkCreateForm.tsx` | `fp-ts/lib/Either.js`, `fp-ts/lib/function.js` のimportを除去 |
 
-### 残存するfp-ts依存 (Step 6-7で除去予定)
+### fp-ts依存の完全除去 (Step 6-7完了)
 
-| ファイル | 使用箇所 |
-|---------|---------|
-| `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)`, `T` |
-| `app/utils/middlewares.ts` | `E`, `TE` |
-| `app/domain/cour/util.ts` | `pipe` |
+| ファイル | 対応 |
+|---------|------|
+| `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)` → `Promise.all([...])` に置き換え。loader ロジックを `getDashboard` Use Case に抽出 |
+| `app/utils/middlewares.ts` | **削除**: 未使用の `requireUserIdTaskEither` |
+| `app/domain/cour/util.ts` | `pipe` → 通常の変数代入に書き換え |
+| `package.json` | `fp-ts` 依存を削除 |
 
 ### 今後の課題
 
@@ -760,13 +761,14 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 | `app/routes/works.$workId/server/action.ts` | `fp-ts/lib/Either.js`, `fp-ts/lib/function.js`, `fp-ts/lib/TaskEither.js` のimportを除去 |
 | `app/adapters/resultToEither.ts` | **削除**: `create.tsx`, `works.$workId` のfp-ts依存除去により不要に |
 
-### 残存するfp-ts依存 (Step 6-7で除去予定)
+### fp-ts依存の完全除去 (Step 6-7完了)
 
-| ファイル | 使用箇所 |
-|---------|---------|
-| `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)`, `T` |
-| `app/utils/middlewares.ts` | `E`, `TE` |
-| `app/domain/cour/util.ts` | `pipe` |
+| ファイル | 対応 |
+|---------|------|
+| `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)` → `Promise.all([...])` に置き換え。loader ロジックを `getDashboard` Use Case に抽出 |
+| `app/utils/middlewares.ts` | **削除**: 未使用の `requireUserIdTaskEither` |
+| `app/domain/cour/util.ts` | `pipe` → 通常の変数代入に書き換え |
+| `package.json` | `fp-ts` 依存を削除 |
 
 ### 今後の課題
 

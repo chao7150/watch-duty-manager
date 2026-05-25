@@ -14,6 +14,8 @@ import {
   YAxis,
 } from "recharts";
 import { Temporal } from "temporal-polyfill";
+import { metricsRepository } from "~/adapters/repository/prisma/metrics";
+import { watchRepository } from "~/adapters/repository/prisma/watch";
 import * as CourSelect from "~/components/CourSelect";
 import * as EpisodeFilter from "~/components/EpisodeFilter";
 import type { Cour } from "~/domain/cour/consts";
@@ -22,6 +24,7 @@ import {
   generateWorkDateQuery,
   getWorkIdsWithMinEpisodes,
 } from "~/domain/episode/filter";
+import { getQuarterMetrics } from "~/usecases/getQuarterMetrics";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
 import { isNumber } from "~/utils/type";
@@ -32,7 +35,6 @@ import {
   next,
   symbol2cour,
 } from "../domain/cour/util";
-import { getQuarterMetrics } from "./_index";
 import type { Route } from "./+types/my._index";
 import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId/route";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
@@ -117,12 +119,13 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     watchingWorksPromise,
     bestEpisodesOnUserPromise,
     getQuarterMetrics({
-      db,
+      watchRepo: watchRepository,
+      metricsRepo: metricsRepository,
+      userId,
       now:
         cour === null
           ? Temporal.Now.zonedDateTimeISO("Asia/Tokyo")
           : cour2startZonedDateTime(next(cour)).subtract({ milliseconds: 1 }),
-      userId,
     })(),
     episodeRatingDistributionPromise,
   ]);

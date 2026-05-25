@@ -1,10 +1,6 @@
-import type { PrismaClient } from "@prisma/client";
-
 import { useEffect, useRef } from "react";
 import { Link, useRevalidator } from "react-router";
 import "firebase/compat/auth";
-import * as A from "fp-ts/lib/Apply.js";
-import * as T from "fp-ts/lib/Task.js";
 import {
   CartesianGrid,
   Legend,
@@ -15,257 +11,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Temporal } from "temporal-polyfill";
+import { metricsRepository } from "~/adapters/repository/prisma/metrics";
+import { watchRepository } from "~/adapters/repository/prisma/watch";
 import * as EpisodeList from "~/components/Episode/List";
-import {
-  cour2startZonedDateTime,
-  zonedDateTime2cour,
-} from "~/domain/cour/util";
-import { getAnimeDate } from "~/domain/date/util";
-import {
-  computeCumulativeMetrics,
-  countOccurrence,
-  mergeWeekMetrics,
-} from "~/domain/metrics/compute";
 import { setOldestOfWork } from "~/domain/ticket/compute";
-
-import {
-  getPast7DaysLocaleDateStringFromTemporal,
-  getQuarterEachLocaleDateStringFromTemporal,
-  startOf4OriginDayFromTemporal,
-  zdt2Date,
-} from "~/utils/date";
-import { db } from "~/utils/db.server";
+import { getDashboard } from "~/usecases/getDashboard";
 import { getUserId } from "~/utils/session.server";
 
 import type { Route } from "./+types/_index";
-
-const getTickets =
-  ({
-    db,
-    userId,
-    publishedUntilDate,
-    subscribedWorks,
-  }: {
-    db: PrismaClient;
-    userId: string;
-    publishedUntilDate: Temporal.ZonedDateTime;
-    subscribedWorks: { workId: number; watchDelaySecFromPublish: number }[];
-  }) =>
-  async () => {
-    try {
-      const longestNegativeDelaySec = Math.min(
-        0,
-        ...subscribedWorks.map((s) => s.watchDelaySecFromPublish),
-      );
-      const tickets = await db.episode.findMany({
-        where: {
-          AND: [
-            { work: { id: { in: subscribedWorks.map((s) => s.workId) } } },
-            { work: { users: { some: { userId } } } },
-            {
-              EpisodeStatusOnUser: {
-                none: { userId, status: { in: ["watched", "skipped"] } },
-              },
-            },
-            {
-              publishedAt: {
-                lte: zdt2Date(
-                  publishedUntilDate.subtract({
-                    seconds: longestNegativeDelaySec,
-                  }),
-                ),
-              },
-            },
-          ],
-        },
-        include: {
-          work: true,
-        },
-        orderBy: { publishedAt: "desc" },
-      });
-      // 最も大きなマイナス遅延を持つWorkに合わせて全てのWorkのチケットを取得している
-      // マイナス遅延が小さいWorkのチケットは除外する
-      return tickets.filter((ticket) => {
-        const publishedAt = ticket.publishedAt;
-        const delaySec =
-          subscribedWorks.find((s) => s.workId === ticket.workId)
-            ?.watchDelaySecFromPublish ?? 0;
-        return (
-          publishedAt.getTime() + delaySec * 1000 <
-          zdt2Date(publishedUntilDate).getTime()
-        );
-      });
-    } catch (e) {
-      console.log(e);
-      return [];
-    }
-  };
-
-const getWeekWatchAchievements =
-  ({
-    db,
-    userId,
-    now,
-  }: {
-    db: PrismaClient;
-    userId: string;
-    now: Temporal.ZonedDateTime;
-  }) =>
-  async () => {
-    const startDay = zdt2Date(
-      startOf4OriginDayFromTemporal(now).subtract({ days: 7 }),
-    );
-    const occurrence = (
-      await db.episodeStatusOnUser.findMany({
-        select: { createdAt: true },
-        where: {
-          userId,
-          status: "watched",
-          createdAt: {
-            gte: startDay,
-          },
-        },
-      })
-    ).map((w) => getAnimeDate(w.createdAt));
-    return countOccurrence(occurrence);
-  };
-
-const getWeekDutyAccumulation =
-  ({
-    db,
-    userId,
-    now,
-  }: {
-    db: PrismaClient;
-    userId: string;
-    now: Temporal.ZonedDateTime;
-  }) =>
-  async () => {
-    const dateNow = zdt2Date(now);
-    const startDay = zdt2Date(
-      startOf4OriginDayFromTemporal(now).subtract({ days: 7 }),
-    );
-    const occurrence = (
-      await db.episode.findMany({
-        select: { publishedAt: true },
-        where: {
-          work: { users: { some: { userId } } },
-          publishedAt: {
-            gte: startDay,
-            lte: dateNow,
-          },
-        },
-      })
-    ).map((d) => getAnimeDate(d.publishedAt));
-    return countOccurrence(occurrence);
-  };
-
-const getQuarterDuties =
-  ({
-    db,
-    userId,
-    now,
-  }: {
-    db: PrismaClient;
-    userId: string;
-    now: Temporal.ZonedDateTime;
-  }) =>
-  async () => {
-    const dateNow = zdt2Date(now);
-    const startDate = zdt2Date(
-      cour2startZonedDateTime(zonedDateTime2cour(now)),
-    );
-    const occurrence = (
-      await db.episode.findMany({
-        select: { publishedAt: true },
-        where: {
-          work: { users: { some: { userId } } },
-          publishedAt: { gte: startDate, lte: dateNow },
-        },
-      })
-    ).map((e) => getAnimeDate(e.publishedAt));
-    return countOccurrence(occurrence);
-  };
-
-const getQuarterWatchAchievements =
-  ({
-    db,
-    userId,
-    now,
-  }: {
-    db: PrismaClient;
-    userId: string;
-    now: Temporal.ZonedDateTime;
-  }) =>
-  async () => {
-    const dateNow = zdt2Date(now);
-    const startDate = zdt2Date(
-      cour2startZonedDateTime(zonedDateTime2cour(now)).add({ hours: 4 }),
-    );
-    const occurrence = (
-      await db.episodeStatusOnUser.findMany({
-        select: { createdAt: true },
-        where: {
-          userId,
-          status: "watched",
-          episode: {
-            publishedAt: {
-              gte: startDate,
-              lte: dateNow,
-            },
-            work: { users: { some: { userId } } },
-          },
-        },
-      })
-    ).map((w) => getAnimeDate(w.createdAt));
-    return countOccurrence(occurrence);
-  };
-
-const getRecentWatchAchievements =
-  ({ db, userId, take }: { db: PrismaClient; userId: string; take: number }) =>
-  async () => {
-    return await db.episodeStatusOnUser.findMany({
-      where: { userId, status: "watched" },
-      orderBy: { createdAt: "desc" },
-      take,
-      include: {
-        episode: {
-          include: {
-            work: true,
-          },
-        },
-      },
-    });
-  };
-
-export const getQuarterMetrics =
-  ({
-    db,
-    now,
-    userId,
-  }: {
-    db: PrismaClient;
-    now: Temporal.ZonedDateTime;
-    userId: string;
-  }) =>
-  async (): Promise<
-    { date: string; watchAchievements: number; dutyAccumulation: number }[]
-  > => {
-    const quarterWatchAchievements = await getQuarterWatchAchievements({
-      db,
-      userId,
-      now,
-    })();
-    const quarterDuties = await getQuarterDuties({ db, userId, now })();
-    const quarterKeys = getQuarterEachLocaleDateStringFromTemporal(now);
-    const merged = mergeWeekMetrics(
-      quarterKeys,
-      quarterWatchAchievements,
-      quarterDuties,
-    );
-    return computeCumulativeMetrics(merged);
-  };
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const userId = await getUserId(request);
@@ -277,69 +30,15 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
       quarterMetrics: [],
       recentWatchAchievements: [],
       nowMs: Date.now(),
+      subscription: [],
     };
   }
-  const now = Temporal.Now.zonedDateTimeISO("Asia/Tokyo");
-  const subscription = await db.subscribedWorksOnUser.findMany({
-    where: { userId },
-    select: { watchDelaySecFromPublish: true, workId: true, watchUrl: true },
-  });
-  const [
-    tickets,
-    weekWatchAchievements,
-    weekDutyAccumulation,
-    recentWatchAchievements,
-    quarterMetrics,
-  ] = await A.sequenceT(T.ApplyPar)(
-    getTickets({
-      db,
-      userId,
-      publishedUntilDate: now.add({ days: 1 }),
-      subscribedWorks: subscription.map((s) => ({
-        workId: s.workId,
-        watchDelaySecFromPublish: s.watchDelaySecFromPublish ?? 0,
-      })),
-    }),
-    getWeekWatchAchievements({ db, userId, now }),
-    getWeekDutyAccumulation({ db, userId, now }),
-    getRecentWatchAchievements({
-      db,
-      userId,
-      take: 10,
-    }),
-    getQuarterMetrics({ db, userId, now }),
-  )();
-  const weekKeys = getPast7DaysLocaleDateStringFromTemporal(now);
-  const weekMetrics = mergeWeekMetrics(
-    weekKeys,
-    weekWatchAchievements,
-    weekDutyAccumulation,
-  );
 
-  return {
+  return getDashboard({
+    watchRepo: watchRepository,
+    metricsRepo: metricsRepository,
     userId,
-    tickets,
-    weekMetrics,
-    quarterMetrics,
-    recentWatchAchievements,
-    nowMs: now.epochMilliseconds,
-    subscription: tickets.reduce(
-      (acc, val) => {
-        const workId = val.workId;
-        const s = subscription.find((s) => s.workId === workId);
-        if (s === undefined) {
-          return acc;
-        }
-        acc.push(s);
-        return acc;
-      },
-      [] as {
-        workId: number;
-        watchDelaySecFromPublish: number | null;
-        watchUrl: string | null;
-      }[],
-    ),
-  };
+  })();
 };
 
 export default function Index({ loaderData }: Route.ComponentProps) {

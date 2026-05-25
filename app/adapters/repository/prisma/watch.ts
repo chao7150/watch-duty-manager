@@ -1,8 +1,8 @@
-import type { PrismaClient } from "@prisma/client";
 import type { WatchRepository } from "~/domain/watch/repository";
+import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
 
-export const createWatchRepository = (db: PrismaClient): WatchRepository => ({
+export const watchRepository: WatchRepository = {
   findSubscribedWorks: (userId) =>
     db.subscribedWorksOnUser.findMany({
       where: { userId },
@@ -98,4 +98,4 @@ export const createWatchRepository = (db: PrismaClient): WatchRepository => ({
       where: { userId_workId: { userId, workId } },
       select: { workId: true, watchDelaySecFromPublish: true, watchUrl: true },
     }),
-});
+};

@@ -600,7 +600,7 @@ describe("subscribeWork", () => {
 | **2** | `components/*/action.server.ts` のバリデーションを `Result` に置き換え | 中 | コンポーネントとrouteのaction | ✅ |
 | **3** | Repository interface + Prisma実装を追加 | 低 | なし (新規追加のみ) | ✅ |
 | **4** | `create.tsx` の `TE.bind` チェーンを Use Case + 早期returnに書き換え | 高 | `create.tsx` | ✅ |
-| **5** | `works.$workId/action.ts` のaction分岐をUse Caseに抽出 | 高 | `works.$workId` | ❌ |
+| **5** | `works.$workId/action.ts` のaction分岐をUse Caseに抽出 | 高 | `works.$workId` | ✅ |
 | **6** | `_index.tsx` loaderのクエリ群をUse Caseに抽出 | 高 | `_index.tsx`, `my._index.tsx` | ❌ |
 | **7** | `fp-ts` 依存を `package.json` から削除 | 低 | package.json | ❌ |
 
@@ -718,27 +718,79 @@ Step 4が最も影響が大きいので、Step 2-3でResult型とドメイン層
 | `app/routes/create.tsx` | `fp-ts/lib/function.js`, `fp-ts/lib/Task.js`, `fp-ts/lib/TaskEither.js` のimportを除去 |
 | `app/components/WorkBulkCreateForm.tsx` | `fp-ts/lib/Either.js`, `fp-ts/lib/function.js` のimportを除去 |
 
-### 残存するfp-ts依存 (Step 5-7で除去予定)
+### 残存するfp-ts依存 (Step 6-7で除去予定)
 
 | ファイル | 使用箇所 |
 |---------|---------|
-| `app/routes/works.$workId/server/action.ts` | `E.pipe`, `E.match`, `TE.match`, FP関数 |
 | `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)`, `T` |
 | `app/utils/middlewares.ts` | `E`, `TE` |
 | `app/domain/cour/util.ts` | `pipe` |
-| `app/adapters/resultToEither.ts` | Result→fp-ts変換(Step 5で不要になるまで残存) |
 
 ### 今後の課題
 
 - `createWork` Use Caseでepisode作成失敗時のエラーが `{ type: "db", message: "episode creation failed" }` となり、workは作成済みだがepisodeが未作成の不整合状態が発生し得る。将来はトランザクションで対応すべき
 - `CreateWorkInput` と `WorkInput` の `publishedAt` の扱い(episodeDate[0]から導出)は、Form→Use Case間のマッピングの代表性に過ぎない。将来的にドメイン層で公開日計算を純粋関数化する可能性あり
 
-## 11. ディレクトリ構造 (移行後)
+## 11. 進捗と申し送り (Step 5 完了)
+
+### 完了した変更
+
+| 変更 | 説明 |
+|------|------|
+| `app/usecases/editWork.ts` | 新規作成。作品情報編集のUse Case。`WorkRepository.update` を呼び出し。入力検証はroute層で実施 |
+| `app/usecases/editWatchSettings.ts` | 新規作成。視聴設定編集のUse Case。`WatchRepository.updateWatchSettings` を呼び出し |
+| `app/usecases/subscribeWork.ts` | 新規作成。作品視聴登録のUse Case。`WatchRepository.subscribe` を呼び出し |
+| `app/usecases/unsubscribeWork.ts` | 新規作成。作品視聴登録解除のUse Case。`WatchRepository.unsubscribe` を呼び出し |
+| `app/usecases/deleteEpisode.ts` | 新規作成。エピソード削除のUse Case。`EpisodeRepository.deleteAndReorder` を呼び出し |
+| `app/usecases/addEpisodes.ts` | 新規作成。エピソード一括追加のUse Case。`EpisodeRepository.createMany` を呼び出し |
+| `app/routes/works.$workId/server/action.ts` | fp-ts (`E.pipe`, `E.match`, `TE.match`) を完全除去。6つのaction分岐をUse Case呼び出し + switch文に書き換え。DIでRepository実装を注入 |
+
+### 設計判断
+
+| 判断 | 理由 |
+|------|------|
+| `editWork`, `editWatchSettings` の入力検証をroute層で実施 | 既存の `components/*/action.server.ts` と同様の検証ロジックをroute層に配置。将来的にdomain層のvalidate関数に移動する可能性あり |
+| `deleteEpisode`, `addEpisodes` はEpisodeRepositoryの既存メソッドを使用 | `deleteAndReorder`, `createMany` が既にinterfaceに定義されていたため、Use Caseは薄めのオーケストレーションに |
+| `action.ts` のswitch文でactionTypeを分岐 | リアキテクチャプランの例に従ったパターン。各caseで早期return |
+
+### 削除できたfp-ts依存
+
+| ファイル | 変更 |
+|---------|------|
+| `app/routes/works.$workId/server/action.ts` | `fp-ts/lib/Either.js`, `fp-ts/lib/function.js`, `fp-ts/lib/TaskEither.js` のimportを除去 |
+| `app/adapters/resultToEither.ts` | **削除**: `create.tsx`, `works.$workId` のfp-ts依存除去により不要に |
+
+### 残存するfp-ts依存 (Step 6-7で除去予定)
+
+| ファイル | 使用箇所 |
+|---------|---------|
+| `app/routes/_index.tsx` | `A.sequenceT(T.ApplyPar)`, `T` |
+| `app/utils/middlewares.ts` | `E`, `TE` |
+| `app/domain/cour/util.ts` | `pipe` |
+
+### 今後の課題
+
+- `components/watch-settings-edit-form/action.server.ts` と `components/work-edit-form/action.server.ts` はまだ存在するが、`action.ts` からは呼び出されなくなった。削除またはテスト用に残すか判断が必要
+- `components/work-create-form/action.server.ts` の `serverValidator` は `create.tsx` で引き続き使用されている。将来的にUse Case層またはdomain層のvalidate関数に移動する予定
+
+### リファクタリング: Repositoryシングルトン化
+
+| 変更 | 説明 |
+|------|------|
+| `app/adapters/repository/prisma/watch.ts` | `createWatchRepository(db)` → `watchRepository` (モジュールレベルシングルトン) |
+| `app/adapters/repository/prisma/work.ts` | `createWorkRepository(db)` → `workRepository` |
+| `app/adapters/repository/prisma/episode.ts` | `createEpisodeRepository(db)` → `episodeRepository` |
+| `app/adapters/repository/prisma/metrics.ts` | `createMetricsRepository(db)` → `metricsRepository` |
+| `app/routes/create.tsx` | `createXxxRepository(db)` 呼び出しを削除、シングルトンimportに変更 |
+| `app/routes/works.$workId/server/action.ts` | 同上 |
+
+**理由**: React Routerのloader/actionはリクエストごとに独立実行されるため、毎回 `createRepository` を呼ぶのは無駄。`db` が既にsingletonなので、repositoryもモジュールロード時に一度だけ生成すれば良い。
+
+## 12. ディレクトリ構造 (移行後)
 
 ```
 app/
 ├── adapters/
-│   ├── resultToEither.ts     (Result → fp-ts Either 変換: 腐敗防止層)
 │   └── repository/
 │       └── prisma/
 │           ├── work.ts
@@ -794,7 +846,7 @@ app/
 └── ...
 ```
 
-## 12. 現在のコードとの差分まとめ
+## 13. 現在のコードとの差分まとめ
 
 | 現在 | 移行後 |
 |------|--------|

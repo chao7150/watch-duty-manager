@@ -1,10 +1,8 @@
-import type { PrismaClient } from "@prisma/client";
 import type { EpisodeRepository } from "~/domain/episode/repository";
+import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
 
-export const createEpisodeRepository = (
-  db: PrismaClient,
-): EpisodeRepository => ({
+export const episodeRepository: EpisodeRepository = {
   createMany: async (data) => {
     try {
       const result = await db.episode.createMany({ data });
@@ -55,4 +53,4 @@ export const createEpisodeRepository = (
         having: { workId: { _count: { gte: havingCount } } },
       })
       .then((rows) => rows.map((r) => r.workId)),
-});
+};

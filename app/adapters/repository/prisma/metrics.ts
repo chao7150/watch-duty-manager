@@ -1,9 +1,7 @@
-import type { PrismaClient } from "@prisma/client";
 import type { MetricsRepository } from "~/domain/metrics/repository";
+import { db } from "~/utils/db.server";
 
-export const createMetricsRepository = (
-  db: PrismaClient,
-): MetricsRepository => ({
+export const metricsRepository: MetricsRepository = {
   findWeekDuties: (userId, since, until) =>
     db.episode.findMany({
       select: { publishedAt: true },
@@ -47,4 +45,4 @@ export const createMetricsRepository = (
     });
     return rows;
   },
-});
+};

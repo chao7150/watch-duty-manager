@@ -1,23 +1,19 @@
 import { useState } from "react";
 import { data, redirect, useActionData } from "react-router";
 
-import { createEpisodeRepository } from "~/adapters/repository/prisma/episode";
-import { createWorkRepository } from "~/adapters/repository/prisma/work";
+import { episodeRepository } from "~/adapters/repository/prisma/episode";
+import { workRepository } from "~/adapters/repository/prisma/work";
 import * as WorkBulkCreateForm from "~/components/WorkBulkCreateForm";
 import { serverValidator as WorkCreateFormServerValidator } from "~/components/work-create-form/action.server";
 import { Component as WorkCreateFormComponent } from "~/components/work-create-form/component";
 import { bulkCreateWorks } from "~/usecases/bulkCreateWorks";
 import { createWork } from "~/usecases/createWork";
-import { db } from "~/utils/db.server";
 import { errorToMessage, errorToStatus } from "~/utils/result";
 
 import type { Route } from "./+types/create";
 
 export const action = async ({ request }: Route.ActionArgs) => {
   const formData = await request.formData();
-
-  const workRepo = createWorkRepository(db);
-  const episodeRepo = createEpisodeRepository(db);
 
   if (formData.get("_action") === "bulkCreate") {
     const validationResult = WorkBulkCreateForm.serverValidator(formData);
@@ -28,9 +24,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
       );
     }
 
-    const result = await bulkCreateWorks({ workRepo, episodeRepo })(
-      validationResult.ok,
-    );
+    const result = await bulkCreateWorks({
+      workRepo: workRepository,
+      episodeRepo: episodeRepository,
+    })(validationResult.ok);
     if (result.err) {
       return data(
         { errorMessage: errorToMessage(result.err) },
@@ -50,7 +47,10 @@ export const action = async ({ request }: Route.ActionArgs) => {
   }
 
   const { episodeDate, ...workData } = validationResult.ok;
-  const result = await createWork({ workRepo, episodeRepo })({
+  const result = await createWork({
+    workRepo: workRepository,
+    episodeRepo: episodeRepository,
+  })({
     ...workData,
     episodeDate,
   });

@@ -1,5 +1,5 @@
-import type { PrismaClient } from "@prisma/client";
 import type { WorkRepository } from "~/domain/work/repository";
+import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
 
 const isUniqueConstraintError = (e: unknown): boolean =>
@@ -8,7 +8,7 @@ const isUniqueConstraintError = (e: unknown): boolean =>
   "code" in e &&
   (e as { code: unknown }).code === "P2002";
 
-export const createWorkRepository = (db: PrismaClient): WorkRepository => ({
+export const workRepository: WorkRepository = {
   findById: (id, options) =>
     db.work.findUnique({
       where: { id },
@@ -116,4 +116,4 @@ export const createWorkRepository = (db: PrismaClient): WorkRepository => ({
   },
 
   count: () => db.work.count(),
-});
+};

@@ -19,4 +19,10 @@ export interface EpisodeRepository {
     where: Prisma.EpisodeWhereInput,
     havingCount: number,
   ): Promise<number[]>;
+
+  findWorkIdsWithMinEpisodes(
+    cour: import("~/domain/cour/consts").Cour | null,
+    minEpisodes: number,
+    additionalWhere?: Prisma.EpisodeWhereInput,
+  ): Promise<number[]>;
 }

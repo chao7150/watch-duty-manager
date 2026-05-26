@@ -14,16 +14,14 @@ import {
   YAxis,
 } from "recharts";
 import { Temporal } from "temporal-polyfill";
+import { episodeRepository } from "~/adapters/repository/prisma/episode";
 import { metricsRepository } from "~/adapters/repository/prisma/metrics";
+import { generateWorkDateQuery } from "~/adapters/repository/prisma/query-helpers";
 import { watchRepository } from "~/adapters/repository/prisma/watch";
 import * as CourSelect from "~/components/CourSelect";
 import * as EpisodeFilter from "~/components/EpisodeFilter";
 import type { Cour } from "~/domain/cour/consts";
-import { getCourList } from "~/domain/cour/db";
-import {
-  generateWorkDateQuery,
-  getWorkIdsWithMinEpisodes,
-} from "~/domain/episode/filter";
+import { getCourList } from "~/domain/cour/util";
 import { getQuarterMetrics } from "~/usecases/getQuarterMetrics";
 import { db } from "~/utils/db.server";
 import { requireUserId } from "~/utils/session.server";
@@ -53,8 +51,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     }
   }
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
-  const watchingWorkIds = await getWorkIdsWithMinEpisodes(
-    db,
+  const watchingWorkIds = await episodeRepository.findWorkIdsWithMinEpisodes(
     cour,
     minEpisodes,
     {
@@ -115,7 +112,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     quarterMetrics,
     episodeRatingDistribution,
   ] = await Promise.all([
-    getCourList(db),
+    episodeRepository.findOldestPublishedAt().then(getCourList),
     watchingWorksPromise,
     bestEpisodesOnUserPromise,
     getQuarterMetrics({

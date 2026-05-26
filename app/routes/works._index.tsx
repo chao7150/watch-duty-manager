@@ -1,11 +1,15 @@
 import urlFrom from "url-from";
+import { episodeRepository } from "~/adapters/repository/prisma/episode";
 import * as CourSelect from "~/components/CourSelect";
 import * as EpisodeFilter from "~/components/EpisodeFilter";
 import * as WorkUI from "~/components/work/Work";
 import type { Cour } from "~/domain/cour/consts";
-import { getCourList } from "~/domain/cour/db";
-import { cour2expression, cour2symbol, symbol2cour } from "~/domain/cour/util";
-import { getWorkIdsWithMinEpisodes } from "~/domain/episode/filter";
+import {
+  cour2expression,
+  cour2symbol,
+  getCourList,
+  symbol2cour,
+} from "~/domain/cour/util";
 
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
@@ -31,7 +35,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   }
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
 
-  const workIds = await getWorkIdsWithMinEpisodes(db, cour, minEpisodes);
+  const workIds = await episodeRepository.findWorkIdsWithMinEpisodes(
+    cour,
+    minEpisodes,
+  );
 
   // workIds で絞り込んで作品情報を取得
   const worksPromise = db.work.findMany({
@@ -45,7 +52,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     },
     orderBy: { id: "asc" },
   });
-  const [works, cours] = await Promise.all([worksPromise, getCourList(db)]);
+  const [works, cours] = await Promise.all([
+    worksPromise,
+    episodeRepository.findOldestPublishedAt().then(getCourList),
+  ]);
   return {
     works,
     loggedIn: userId !== undefined,

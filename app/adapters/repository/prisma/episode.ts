@@ -1,3 +1,7 @@
+import type { Prisma } from "@prisma/client";
+
+import type { Cour } from "~/domain/cour/consts";
+import { cour2startDate, next } from "~/domain/cour/util";
 import type { EpisodeRepository } from "~/domain/episode/repository";
 import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
@@ -53,4 +57,33 @@ export const episodeRepository: EpisodeRepository = {
         having: { workId: { _count: { gte: havingCount } } },
       })
       .then((rows) => rows.map((r) => r.workId)),
+
+  findWorkIdsWithMinEpisodes: (cour, minEpisodes, additionalWhere = {}) => {
+    const where: Prisma.EpisodeWhereInput = {
+      ...generateEpisodeDateQuery(cour),
+      ...additionalWhere,
+    };
+    return db.episode
+      .groupBy({
+        by: ["workId"],
+        where,
+        _count: { workId: true },
+        having: { workId: { _count: { gte: minEpisodes } } },
+      })
+      .then((rows) => rows.map((r) => r.workId));
+  },
 };
+
+function generateEpisodeDateQuery(cour: Cour | null): Prisma.EpisodeWhereInput {
+  if (cour === null) {
+    return {};
+  }
+  const searchDate = cour2startDate(cour);
+  const endDate = cour2startDate(next(cour));
+  return {
+    publishedAt: {
+      gte: searchDate,
+      lte: endDate,
+    },
+  };
+}

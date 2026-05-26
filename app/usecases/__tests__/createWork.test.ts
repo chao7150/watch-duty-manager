@@ -25,6 +25,7 @@ const makeMockRepos = () => {
     deleteAndReorder: vi.fn(),
     findOldestPublishedAt: vi.fn(),
     groupByWorkIdWithCount: vi.fn(),
+    findWorkIdsWithMinEpisodes: vi.fn(),
   };
   return { workRepo, episodeRepo };
 };

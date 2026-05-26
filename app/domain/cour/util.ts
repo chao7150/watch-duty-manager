@@ -155,3 +155,10 @@ export const eachCourOfInterval = (first: Cour, last: Cour): Cour[] => {
   }
   return ret;
 };
+
+export const getCourList = (oldestPublishedAt: Date): Cour[] => {
+  return eachCourOfInterval(
+    date2cour(oldestPublishedAt),
+    date2cour(new Date()),
+  );
+};

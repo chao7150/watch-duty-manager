@@ -1,104 +1,24 @@
-import { db } from "~/utils/db.server";
+import { watchRepository } from "~/adapters/repository/prisma/watch";
+import { workRepository } from "~/adapters/repository/prisma/work";
+import { getWorkDetail } from "~/usecases/getWorkDetail";
 import { getUserId } from "~/utils/session.server";
-import { extractParams, isNumber } from "~/utils/type";
+import { extractParams } from "~/utils/type";
 
 import type { Route } from "../+types/route";
 
 export const loader = async ({ request, params }: Route.LoaderArgs) => {
   const userId = (await getUserId(request)) ?? undefined;
   const { workId } = extractParams(params, ["workId"]);
-  const workPromise = db.work.findUnique({
-    where: { id: parseInt(workId, 10) },
-    include: {
-      users: {
-        where: { userId },
-      },
-      episodes: {
-        orderBy: { count: "asc" },
-        ...(userId
-          ? {
-              include: {
-                EpisodeStatusOnUser: {
-                  where: { userId },
-                  select: { createdAt: true, rating: true, status: true },
-                },
-              },
-            }
-          : {}),
-      },
-    },
-  });
-  const subscriptionPromise =
-    userId !== undefined
-      ? db.subscribedWorksOnUser.findUnique({
-          where: { userId_workId: { userId, workId: parseInt(workId, 10) } },
-          select: { watchDelaySecFromPublish: true, watchUrl: true },
-        })
-      : Promise.resolve(undefined);
-  const ratingsPromise =
-    userId !== undefined
-      ? db.episodeStatusOnUser.findMany({
-          select: {
-            episode: {
-              select: {
-                count: true,
-              },
-            },
-            rating: true,
-          },
-          where: {
-            workId: parseInt(workId, 10),
-            userId,
-            status: "watched",
-          },
-          orderBy: {
-            episode: {
-              count: "asc",
-            },
-          },
-        })
-      : Promise.resolve([]);
-  const [work, subscription, ratings] = await Promise.all([
-    workPromise,
-    subscriptionPromise,
-    ratingsPromise,
-  ]);
-  if (work === null) {
-    throw Error("work not found");
-  }
-  if (userId === undefined) {
-    return {
-      work,
-      rating: 0,
-      ratings: [],
-      subscribed: false,
-      loggedIn: false,
-      workTags: [],
-      userTags: [],
-    };
-  }
-  const map = new Map<number, number | null>();
-  ratings.forEach((r) => {
-    map.set(r.episode.count, r.rating);
-  });
-  const nonNullRatings = ratings.map((r) => r.rating).filter(isNumber);
 
-  return {
-    // usersを残すと誰が視聴しているかpublicに見えてしまうので消す
-    work: { ...work, users: undefined },
-    rating:
-      nonNullRatings.length === 0
-        ? 0
-        : nonNullRatings.reduce((acc, val) => acc + val, 0) /
-          nonNullRatings.length,
-    ratings: Array.from({ length: work.episodes.length }).map((_, idx) => {
-      return { count: idx + 1, rating: map.get(idx + 1) ?? null };
-    }),
-    subscribed: work?.users.length === 1,
-    loggedIn: userId !== undefined,
-    delay: subscription?.watchDelaySecFromPublish ?? undefined,
-    url: subscription?.watchUrl ?? undefined,
-  };
+  const result = await getWorkDetail({
+    workRepo: workRepository,
+    watchRepo: watchRepository,
+  })({
+    workId: parseInt(workId, 10),
+    userId,
+  });
+
+  return result;
 };
 
 export type LoaderData = Awaited<ReturnType<typeof loader>>;

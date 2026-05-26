@@ -1,4 +1,5 @@
 import type { WorkRepository } from "~/domain/work/repository";
+import type { WorkDetail, WorkListItem } from "~/domain/work/types";
 import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
 
@@ -8,9 +9,63 @@ const isUniqueConstraintError = (e: unknown): boolean =>
   "code" in e &&
   (e as { code: unknown }).code === "P2002";
 
+const mapToWorkDetail = (work: any): WorkDetail => {
+  return {
+    id: work.id,
+    title: work.title,
+    publishedAt: work.publishedAt,
+    durationMin: work.durationMin,
+    officialSiteUrl: work.officialSiteUrl,
+    twitterId: work.twitterId,
+    hashtag: work.hashtag,
+    episodes: work.episodes
+      ? work.episodes.map((ep: any) => ({
+          count: ep.count,
+          publishedAt: ep.publishedAt,
+          title: ep.title,
+          description: ep.description,
+          EpisodeStatusOnUser: ep.EpisodeStatusOnUser
+            ? ep.EpisodeStatusOnUser.map((s: any) => ({
+                createdAt: s.createdAt,
+                rating: s.rating,
+                status: s.status,
+              }))
+            : undefined,
+        }))
+      : undefined,
+    users: work.users
+      ? work.users.map((u: any) => ({
+          userId: u.userId,
+        }))
+      : undefined,
+  };
+};
+
+const mapToWorkListItem = (work: any): WorkListItem => {
+  return {
+    id: work.id,
+    title: work.title,
+    publishedAt: work.publishedAt,
+    durationMin: work.durationMin,
+    officialSiteUrl: work.officialSiteUrl,
+    twitterId: work.twitterId,
+    hashtag: work.hashtag,
+    episodes: work.episodes
+      ? work.episodes.map((ep: any) => ({
+          count: ep.count,
+        }))
+      : undefined,
+    users: work.users
+      ? work.users.map((u: any) => ({
+          userId: u.userId,
+        }))
+      : undefined,
+  };
+};
+
 export const workRepository: WorkRepository = {
-  findById: (id, options) =>
-    db.work.findUnique({
+  findById: async (id, options) => {
+    const work = await db.work.findUnique({
       where: { id },
       include: {
         episodes: options.includeEpisodes
@@ -34,10 +89,12 @@ export const workRepository: WorkRepository = {
           ? { where: { userId: options.includeUsers.userId } }
           : false,
       },
-    }) as ReturnType<WorkRepository["findById"]>,
+    });
+    return work ? mapToWorkDetail(work) : null;
+  },
 
-  findManyByIds: (ids, options) =>
-    db.work.findMany({
+  findManyByIds: async (ids, options) => {
+    const works = await db.work.findMany({
       where: { id: { in: ids } },
       include: {
         episodes: options.includeUsers ? { where: { count: 1 } } : false,
@@ -46,7 +103,9 @@ export const workRepository: WorkRepository = {
           : false,
       },
       orderBy: { id: "asc" },
-    }) as ReturnType<WorkRepository["findManyByIds"]>,
+    });
+    return works.map(mapToWorkListItem);
+  },
 
   findManyByTitle: async (titles) => {
     try {

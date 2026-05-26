@@ -6,6 +6,7 @@ import { Err, Ok } from "~/utils/result";
 
 const makeMockWatchRepo = (): WatchRepository => ({
   findSubscribedWorks: vi.fn(),
+  findSubscribedWorksWithEpisodeStatus: vi.fn(),
   findUnwatchedEpisodes: vi.fn(),
   findWatchAchievementDates: vi.fn(),
   findRecentWatchAchievements: vi.fn(),

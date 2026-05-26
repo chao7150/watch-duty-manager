@@ -18,6 +18,7 @@ const FIXED_NOW = Temporal.ZonedDateTime.from({
 
 const makeMockWatchRepo = (): WatchRepository => ({
   findSubscribedWorks: vi.fn(),
+  findSubscribedWorksWithEpisodeStatus: vi.fn(),
   findUnwatchedEpisodes: vi.fn(),
   findWatchAchievementDates: vi.fn(),
   findRecentWatchAchievements: vi.fn(),
@@ -32,6 +33,7 @@ const makeMockMetricsRepo = (): MetricsRepository => ({
   findQuarterDuties: vi.fn(),
   findQuarterWatchAchievements: vi.fn(),
   findEpisodeRatingDistribution: vi.fn(),
+  findBestEpisodes: vi.fn(),
 });
 
 const dummyEpisode = (workId: number, count: number, daysAgo: number) => ({

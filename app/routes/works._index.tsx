@@ -1,17 +1,13 @@
 import urlFrom from "url-from";
 import { episodeRepository } from "~/adapters/repository/prisma/episode";
+import { workRepository } from "~/adapters/repository/prisma/work";
 import * as CourSelect from "~/components/CourSelect";
 import * as EpisodeFilter from "~/components/EpisodeFilter";
 import * as WorkUI from "~/components/work/Work";
 import type { Cour } from "~/domain/cour/consts";
-import {
-  cour2expression,
-  cour2symbol,
-  getCourList,
-  symbol2cour,
-} from "~/domain/cour/util";
+import { symbol2cour } from "~/domain/cour/util";
+import { getWorksList } from "~/usecases/getWorksList";
 
-import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 
 import type { Route } from "./+types/works._index";
@@ -35,39 +31,21 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   }
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
 
-  const workIds = await episodeRepository.findWorkIdsWithMinEpisodes(
+  const result = await getWorksList({
+    episodeRepo: episodeRepository,
+    workRepo: workRepository,
+  })({
+    userId,
     cour,
     minEpisodes,
-  );
-
-  // workIds で絞り込んで作品情報を取得
-  const worksPromise = db.work.findMany({
-    where: {
-      id: { in: workIds }, // workIds で絞り込み
-    },
-    include: {
-      // 非ログイン時は0件ヒットにするために空文字で検索
-      users: { where: { userId: userId ?? "" } },
-      episodes: { where: { count: 1 } }, // 初回エピソード取得用
-    },
-    orderBy: { id: "asc" },
   });
-  const [works, cours] = await Promise.all([
-    worksPromise,
-    episodeRepository.findOldestPublishedAt().then(getCourList),
-  ]);
+
   return {
-    works,
+    works: result.works,
     loggedIn: userId !== undefined,
-    selectedCourDate: cour && cour2symbol(cour),
-    courList: cours.map(
-      (cour) =>
-        [cour2expression(cour), `${cour.year}${cour.season}`] as [
-          string,
-          string,
-        ],
-    ),
-    minEpisodes,
+    courList: result.courList,
+    selectedCourDate: result.selectedCourDate ?? undefined,
+    minEpisodes: result.minEpisodes,
   };
 };
 
@@ -114,7 +92,7 @@ export default function Works({ loaderData }: Route.ComponentProps) {
                   loggedIn={loggedIn}
                   id={work.id}
                   title={work.title}
-                  subscribed={work.users.length === 1}
+                  subscribed={work.subscribed}
                 />
               </li>
             );

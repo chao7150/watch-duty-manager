@@ -9,6 +9,37 @@ export const watchRepository: WatchRepository = {
       select: { watchDelaySecFromPublish: true, workId: true, watchUrl: true },
     }),
 
+  findSubscribedWorksWithEpisodeStatus: (userId, workIds) =>
+    db.work
+      .findMany({
+        where: { id: { in: workIds } },
+        select: {
+          id: true,
+          title: true,
+          episodes: {
+            select: {
+              count: true,
+              publishedAt: true,
+              EpisodeStatusOnUser: {
+                where: { userId },
+                select: { rating: true, createdAt: true },
+              },
+            },
+          },
+        },
+      })
+      .then((works) =>
+        works.map((work) => ({
+          id: work.id,
+          title: work.title,
+          episodes: work.episodes.map((ep) => ({
+            count: ep.count,
+            publishedAt: ep.publishedAt,
+            status: ep.EpisodeStatusOnUser[0] ?? null,
+          })),
+        })),
+      ),
+
   findUnwatchedEpisodes: (userId, workIds, publishedUntil) =>
     db.episode.findMany({
       where: {

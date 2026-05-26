@@ -13,26 +13,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Temporal } from "temporal-polyfill";
 import { episodeRepository } from "~/adapters/repository/prisma/episode";
 import { metricsRepository } from "~/adapters/repository/prisma/metrics";
-import { generateWorkDateQuery } from "~/adapters/repository/prisma/query-helpers";
 import { watchRepository } from "~/adapters/repository/prisma/watch";
 import * as CourSelect from "~/components/CourSelect";
 import * as EpisodeFilter from "~/components/EpisodeFilter";
 import type { Cour } from "~/domain/cour/consts";
-import { getCourList } from "~/domain/cour/util";
-import { getQuarterMetrics } from "~/usecases/getQuarterMetrics";
-import { db } from "~/utils/db.server";
+import { symbol2cour } from "~/domain/cour/util";
+import { getMyDashboard } from "~/usecases/getMyDashboard";
 import { requireUserId } from "~/utils/session.server";
-import { isNumber } from "~/utils/type";
-import {
-  cour2expression,
-  cour2startZonedDateTime,
-  cour2symbol,
-  next,
-  symbol2cour,
-} from "../domain/cour/util";
 import type { Route } from "./+types/my._index";
 import { bindUrl as bindUrlForWorks$WorkId } from "./works.$workId/route";
 import { bindUrl as bindUrlForWorks$WorkId$Count } from "./works.$workId.$count";
@@ -51,116 +40,25 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     }
   }
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
-  const watchingWorkIds = await episodeRepository.findWorkIdsWithMinEpisodes(
+
+  const result = await getMyDashboard({
+    episodeRepo: episodeRepository,
+    watchRepo: watchRepository,
+    metricsRepo: metricsRepository,
+  })({
+    userId,
     cour,
     minEpisodes,
-    {
-      work: {
-        users: { some: { userId } },
-      },
-    },
-  );
-  const watchingWorksPromise = db.work.findMany({
-    where: {
-      id: { in: watchingWorkIds },
-    },
-    include: {
-      episodes: {
-        include: {
-          EpisodeStatusOnUser: { where: { userId, status: "watched" } },
-        },
-      },
-      users: {
-        where: { userId },
-      },
-    },
-  });
-  const bestEpisodesOnUserPromise = db.episodeStatusOnUser.findMany({
-    where: {
-      userId,
-      status: "watched",
-      episode: {
-        ...(cour === null ? {} : generateWorkDateQuery(cour).episodes?.some),
-      },
-    },
-    include: {
-      episode: {
-        include: {
-          work: true,
-        },
-      },
-    },
-    orderBy: { rating: "desc" },
-    take: 30,
-  });
-  const episodeRatingDistributionPromise = db.episodeStatusOnUser.groupBy({
-    by: ["rating"],
-    where: {
-      userId,
-      status: "watched",
-      episode: {
-        ...(cour === null ? {} : generateWorkDateQuery(cour).episodes?.some),
-      },
-    },
-    _count: { rating: true },
   });
 
-  const [
-    cours,
-    watchingWorks,
-    bestEpisodesOnUser,
-    quarterMetrics,
-    episodeRatingDistribution,
-  ] = await Promise.all([
-    episodeRepository.findOldestPublishedAt().then(getCourList),
-    watchingWorksPromise,
-    bestEpisodesOnUserPromise,
-    getQuarterMetrics({
-      watchRepo: watchRepository,
-      metricsRepo: metricsRepository,
-      userId,
-      now:
-        cour === null
-          ? Temporal.Now.zonedDateTimeISO("Asia/Tokyo")
-          : cour2startZonedDateTime(next(cour)).subtract({ milliseconds: 1 }),
-    })(),
-    episodeRatingDistributionPromise,
-  ]);
-  const filledEpisodeRatingDistribution: Array<{
-    rating: number;
-    count: number;
-  }> = [];
-  Array.from({ length: 11 }).forEach((_, i) => {
-    filledEpisodeRatingDistribution.push({
-      rating: i,
-      count:
-        episodeRatingDistribution.find((e) => e.rating === i)?._count.rating ??
-        0,
-    });
-  });
   return {
-    selectedCourDate: cour && cour2symbol(cour),
-    courList: cours.map(
-      (cour) =>
-        [cour2expression(cour), `${cour.year}${cour.season}`] as [
-          string,
-          string,
-        ],
-    ),
-    minEpisodes,
-    works: watchingWorks.map((work) => ({
-      ...work,
-      rating: work.episodes
-        .map((episode) => episode.EpisodeStatusOnUser[0]?.rating)
-        .filter(isNumber)
-        .reduce((acc, val, _, array) => acc + val / array.length, 0),
-      complete: work.episodes.filter(
-        (episode) => episode.EpisodeStatusOnUser.length === 1,
-      ).length,
-    })),
-    bestEpisodesOnUser,
-    quarterMetrics,
-    filledEpisodeRatingDistribution,
+    selectedCourDate: result.selectedCourDate ?? undefined,
+    courList: result.courList,
+    minEpisodes: result.minEpisodes,
+    works: result.works,
+    bestEpisodesOnUser: result.bestEpisodesOnUser,
+    quarterMetrics: result.quarterMetrics,
+    filledEpisodeRatingDistribution: result.filledEpisodeRatingDistribution,
   };
 };
 
@@ -177,14 +75,13 @@ const Component = ({ loaderData }: Route.ComponentProps) => {
   const [sort, setSort] = useState<"rating" | "complete">("rating");
   const [completeByPublished, setCompleteByPublished] = useState(true);
   const works = _w.map((w) => {
-    const watchedEpisodesDenominator = completeByPublished
-      ? w.episodes.filter((e) => new Date(e.publishedAt) < new Date()).length
+    const denominator = completeByPublished
+      ? w.watchedEpisodesDenominator
       : w.episodes.length;
     return {
       ...w,
-      watchedEpisodesDenominator,
-      sortKey:
-        sort === "rating" ? w.rating : w.complete / watchedEpisodesDenominator,
+      denominator,
+      sortKey: sort === "rating" ? w.rating : w.complete / denominator,
     };
   });
 
@@ -243,16 +140,12 @@ const Component = ({ loaderData }: Route.ComponentProps) => {
                   <meter
                     className="shrink-0"
                     min={0}
-                    max={work.watchedEpisodesDenominator}
-                    low={work.watchedEpisodesDenominator / 2}
+                    max={work.denominator}
+                    low={work.denominator / 2}
                     value={work.complete}
-                    title={`完走率: ${
-                      work.episodes.filter(
-                        (episode) => episode.EpisodeStatusOnUser.length === 1,
-                      ).length
-                    }/${work.watchedEpisodesDenominator}`}
+                    title={`完走率: ${work.complete}/${work.denominator}`}
                   >
-                    {work.complete}/{work.watchedEpisodesDenominator}
+                    {work.complete}/{work.denominator}
                   </meter>
                   <div>{work.rating.toFixed(1)}</div>
                   <Link to={bindUrlForWorks$WorkId({ workId: work.id })}>

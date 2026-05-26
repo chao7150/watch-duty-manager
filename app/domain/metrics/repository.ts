@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Cour } from "~/domain/cour/consts";
 
 export interface MetricsRepository {
   findWeekDuties(
@@ -21,6 +21,26 @@ export interface MetricsRepository {
 
   findEpisodeRatingDistribution(
     userId: string,
-    episodeWhere?: Prisma.EpisodeWhereInput,
+    cour: Cour | null,
   ): Promise<{ rating: number | null; _count: { rating: number } }[]>;
+
+  findBestEpisodes(
+    userId: string,
+    cour: Cour | null,
+    take?: number,
+  ): Promise<
+    {
+      rating: number | null;
+      workId: number;
+      count: number;
+      comment: string | null;
+      episode: {
+        count: number;
+        workId: number;
+        work: {
+          title: string;
+        };
+      };
+    }[]
+  >;
 }

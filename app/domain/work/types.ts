@@ -60,3 +60,22 @@ export interface BulkWorkInput {
   twitterId?: string;
   hashtag?: string;
 }
+
+export interface DashboardWorkEpisode {
+  count: number;
+  publishedAt: Date;
+  status: {
+    rating: number | null;
+    createdAt: Date;
+  } | null;
+}
+
+export interface DashboardWork extends Pick<WorkCore, "id" | "title"> {
+  episodes: DashboardWorkEpisode[];
+}
+
+export interface DashboardWorkWithStats extends DashboardWork {
+  rating: number;
+  completeCount: number;
+  watchedEpisodesDenominator: number;
+}

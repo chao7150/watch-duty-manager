@@ -9,6 +9,7 @@ const isUniqueConstraintError = (e: unknown): boolean =>
   "code" in e &&
   (e as { code: unknown }).code === "P2002";
 
+// biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
 const mapToWorkDetail = (work: any): WorkDetail => {
   return {
     id: work.id,
@@ -19,28 +20,38 @@ const mapToWorkDetail = (work: any): WorkDetail => {
     twitterId: work.twitterId,
     hashtag: work.hashtag,
     episodes: work.episodes
-      ? work.episodes.map((ep: any) => ({
-          count: ep.count,
-          publishedAt: ep.publishedAt,
-          title: ep.title,
-          description: ep.description,
-          EpisodeStatusOnUser: ep.EpisodeStatusOnUser
-            ? ep.EpisodeStatusOnUser.map((s: any) => ({
-                createdAt: s.createdAt,
-                rating: s.rating,
-                status: s.status,
-              }))
-            : undefined,
-        }))
+      ? work.episodes.map(
+          // biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
+          (ep: any) => ({
+            count: ep.count,
+            publishedAt: ep.publishedAt,
+            title: ep.title,
+            description: ep.description,
+            EpisodeStatusOnUser: ep.EpisodeStatusOnUser
+              ? ep.EpisodeStatusOnUser.map(
+                  // biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
+                  (s: any) => ({
+                    createdAt: s.createdAt,
+                    rating: s.rating,
+                    status: s.status,
+                  }),
+                )
+              : undefined,
+          }),
+        )
       : undefined,
     users: work.users
-      ? work.users.map((u: any) => ({
-          userId: u.userId,
-        }))
+      ? work.users.map(
+          // biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
+          (u: any) => ({
+            userId: u.userId,
+          }),
+        )
       : undefined,
   };
 };
 
+// biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
 const mapToWorkListItem = (work: any): WorkListItem => {
   return {
     id: work.id,
@@ -51,14 +62,20 @@ const mapToWorkListItem = (work: any): WorkListItem => {
     twitterId: work.twitterId,
     hashtag: work.hashtag,
     episodes: work.episodes
-      ? work.episodes.map((ep: any) => ({
-          count: ep.count,
-        }))
+      ? work.episodes.map(
+          // biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
+          (ep: any) => ({
+            count: ep.count,
+          }),
+        )
       : undefined,
     users: work.users
-      ? work.users.map((u: any) => ({
-          userId: u.userId,
-        }))
+      ? work.users.map(
+          // biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
+          (u: any) => ({
+            userId: u.userId,
+          }),
+        )
       : undefined,
   };
 };

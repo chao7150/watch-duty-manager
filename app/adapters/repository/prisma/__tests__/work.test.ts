@@ -37,6 +37,7 @@ describe("workRepository", () => {
         title: "エピソード付き作品",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
+      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = createResult!.id;
 
       await db.episode.createMany({
@@ -69,6 +70,7 @@ describe("workRepository", () => {
         title: "エピソードなしで取得",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
+      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = createResult!.id;
 
       const work = await workRepository.findById(workId, {
@@ -121,6 +123,7 @@ describe("workRepository", () => {
         title: "更新前タイトル",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
+      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = createResult!.id;
 
       const result = await workRepository.update(workId, {
@@ -147,6 +150,7 @@ describe("workRepository", () => {
         publishedAt: new Date("2024-02-01T04:00:00+09:00"),
       });
 
+      // biome-ignore lint/style/noNonNullAssertion: test
       const works = await workRepository.findManyByIds([r1!.id, r2!.id], {});
 
       expect(works).toHaveLength(2);

@@ -9,6 +9,7 @@ const createWorkWithEpisodes = async (title: string, episodeDates: Date[]) => {
     title,
     publishedAt: episodeDates[0],
   });
+  // biome-ignore lint/style/noNonNullAssertion: test
   const workId = work!.id;
 
   await db.episode.createMany({
@@ -29,6 +30,7 @@ describe("episodeRepository", () => {
         title: "エピソード一括作成",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
+      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = work!.id;
 
       const result = await episodeRepository.createMany([

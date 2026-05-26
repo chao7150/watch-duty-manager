@@ -1,6 +1,7 @@
+import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
 
-import { setOldestOfWork } from "../compute";
+import { computeTickets, setOldestOfWork } from "../compute";
 
 const d = (s: string) => new Date(s);
 
@@ -112,5 +113,169 @@ describe("setOldestOfWork", () => {
     setOldestOfWork(input);
     expect(input[0].publishedAt).toEqual(d1);
     expect(input[1].publishedAt).toEqual(d2);
+  });
+});
+
+describe("computeTickets", () => {
+  const now = Temporal.ZonedDateTime.from({
+    year: 2024,
+    month: 1,
+    day: 15,
+    hour: 12,
+    minute: 0,
+    second: 0,
+    millisecond: 0,
+    timeZone: "Asia/Tokyo",
+  });
+
+  it("公開日が現在時刻より前のエピソードのみをチケットとして返す", () => {
+    const episodes = [
+      {
+        workId: 1,
+        count: 1,
+        publishedAt: d("2024-01-10T04:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+      {
+        workId: 1,
+        count: 2,
+        publishedAt: d("2024-01-20T04:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+    ];
+    const subscribedWorks = [{ workId: 1, watchDelaySecFromPublish: 0 }];
+    expect(computeTickets(now, subscribedWorks, episodes)).toStrictEqual([
+      episodes[0],
+    ]);
+  });
+
+  it("視聴遅延設定（watchDelaySecFromPublish）が正しく適用される", () => {
+    const episodes = [
+      {
+        workId: 1,
+        count: 1,
+        publishedAt: d("2024-01-14T12:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+      {
+        workId: 1,
+        count: 2,
+        publishedAt: d("2024-01-14T12:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+    ];
+    const subscribedWorks = [{ workId: 1, watchDelaySecFromPublish: 86400 }];
+    expect(computeTickets(now, subscribedWorks, episodes)).toStrictEqual([]);
+  });
+
+  it("購読情報に一致しないworkIdは遅延0として扱う", () => {
+    const episodes = [
+      {
+        workId: 2,
+        count: 1,
+        publishedAt: d("2024-01-10T04:00:00+09:00"),
+        work: {
+          title: "B",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+    ];
+    const subscribedWorks = [{ workId: 1, watchDelaySecFromPublish: 999999 }];
+    expect(computeTickets(now, subscribedWorks, episodes)).toStrictEqual(
+      episodes,
+    );
+  });
+
+  it("空のエピソード配列では空配列を返す", () => {
+    expect(computeTickets(now, [], [])).toStrictEqual([]);
+  });
+
+  it("全てのエピソードが未来の場合は空配列を返す", () => {
+    const episodes = [
+      {
+        workId: 1,
+        count: 1,
+        publishedAt: d("2024-01-20T04:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+      {
+        workId: 1,
+        count: 2,
+        publishedAt: d("2024-01-25T04:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+    ];
+    expect(
+      computeTickets(
+        now,
+        [{ workId: 1, watchDelaySecFromPublish: 0 }],
+        episodes,
+      ),
+    ).toStrictEqual([]);
+  });
+
+  it("異なるworkIdごとに異なる遅延設定が適用される", () => {
+    const episodes = [
+      {
+        workId: 1,
+        count: 1,
+        publishedAt: d("2024-01-14T12:00:00+09:00"),
+        work: {
+          title: "A",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+      {
+        workId: 2,
+        count: 1,
+        publishedAt: d("2024-01-14T12:00:00+09:00"),
+        work: {
+          title: "B",
+          durationMin: 24,
+          hashtag: null,
+          officialSiteUrl: null,
+        },
+      },
+    ];
+    const subscribedWorks = [
+      { workId: 1, watchDelaySecFromPublish: 86400 },
+      { workId: 2, watchDelaySecFromPublish: 0 },
+    ];
+    const result = computeTickets(now, subscribedWorks, episodes);
+    expect(result).toStrictEqual([episodes[1]]);
   });
 });

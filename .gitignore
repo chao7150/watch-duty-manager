@@ -19,3 +19,4 @@ dump.sql
 /example
 *.tsbuildinfo
 .react-router/
+.antigravitycli

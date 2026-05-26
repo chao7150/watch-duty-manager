@@ -11,6 +11,7 @@
     "db:setup": "npx prisma db push && npx prisma db seed",
     "start": "react-router-serve ./build/server/index.js",
     "test": "SECRET=test-secret vitest run",
+    "test:integration": ". ./.env.test && npx prisma db push --skip-generate --accept-data-loss > /dev/null 2>&1 && npx vitest run --config vite.integration.mts",
     "test:tsc": "react-router typegen && tsc --noEmit --incremental",
     "test:tsc:watch": "tsc --noEmit --watch --incremental"
   },

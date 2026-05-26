@@ -8,8 +8,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [
-    !process.env.VITEST &&
-      reactRouter(),
+    !process.env.VITEST && reactRouter(),
     cjsInterop({
       dependencies: ["url-from", "react-use", "firebase-admin"],
     }),
@@ -24,6 +23,7 @@ export default defineConfig({
   },
   test: {
     include: ["app/**/*.test.ts", "app/**/*.test.tsx"],
+    exclude: ["app/adapters/repository/prisma/__tests__/**"],
     /* for example, use global to avoid globals imports (describe, test, expect): */
     // globals: true,
   },

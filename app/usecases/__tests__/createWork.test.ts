@@ -19,6 +19,7 @@ const makeMockRepos = () => {
     createMany: vi.fn(),
     update: vi.fn(),
     count: vi.fn(),
+    findAll: vi.fn(),
   };
   const episodeRepo: EpisodeRepository = {
     createMany: vi.fn(),

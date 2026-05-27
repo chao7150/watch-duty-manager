@@ -3,6 +3,12 @@ import type { WorkDetail, WorkListItem } from "~/domain/work/types";
 import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
 
+let cachedWorks: { id: number; title: string }[] | null = null;
+
+const clearWorksCache = () => {
+  cachedWorks = null;
+};
+
 const isUniqueConstraintError = (e: unknown): boolean =>
   e != null &&
   typeof e === "object" &&
@@ -143,6 +149,7 @@ export const workRepository: WorkRepository = {
   create: async (data) => {
     try {
       const work = await db.work.create({ data });
+      clearWorksCache();
       return Ok({ id: work.id });
     } catch (e) {
       if (isUniqueConstraintError(e)) {
@@ -162,6 +169,7 @@ export const workRepository: WorkRepository = {
   createMany: async (data) => {
     try {
       await db.work.createMany({ data });
+      clearWorksCache();
       return Ok(undefined);
     } catch (e) {
       if (isUniqueConstraintError(e)) {
@@ -181,6 +189,7 @@ export const workRepository: WorkRepository = {
   update: async (id, data) => {
     try {
       const work = await db.work.update({ where: { id }, data });
+      clearWorksCache();
       return Ok({ title: work.title });
     } catch (e) {
       return Err({
@@ -192,4 +201,15 @@ export const workRepository: WorkRepository = {
   },
 
   count: () => db.work.count(),
+  findAll: async () => {
+    if (cachedWorks !== null) {
+      return cachedWorks;
+    }
+    const works = await db.work.findMany({
+      select: { id: true, title: true },
+      orderBy: { id: "asc" },
+    });
+    cachedWorks = works;
+    return cachedWorks;
+  },
 };

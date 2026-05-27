@@ -40,4 +40,5 @@ export interface WorkRepository {
   ): Promise<Result<{ title: string }, AppError>>;
 
   count(): Promise<number>;
+  findAll(): Promise<{ id: number; title: string }[]>;
 }

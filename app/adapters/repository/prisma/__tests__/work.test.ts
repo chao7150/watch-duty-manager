@@ -159,4 +159,36 @@ describe("workRepository", () => {
       );
     });
   });
+
+  describe("findAll", () => {
+    it("作品の一覧を返し、作成や更新でキャッシュがクリアされる", async () => {
+      // 1. 初回の取得 (DBから取得してキャッシュ)
+      await workRepository.findAll();
+
+      // 2. 新規追加
+      const { ok: r1 } = await workRepository.create({
+        title: "キャッシュ検証1",
+        publishedAt: new Date("2024-01-01T04:00:00+09:00"),
+      });
+
+      // 3. 取得 (キャッシュがクリアされて新しい作品が含まれるはず)
+      const afterCreateWorks = await workRepository.findAll();
+      expect(afterCreateWorks.map((w) => w.title)).toContain("キャッシュ検証1");
+
+      // 4. 更新
+      // biome-ignore lint/style/noNonNullAssertion: test
+      await workRepository.update(r1!.id, {
+        title: "キャッシュ検証更新後",
+      });
+
+      // 5. 取得 (キャッシュがクリアされて更新後のタイトルになっているはず)
+      const afterUpdateWorks = await workRepository.findAll();
+      expect(afterUpdateWorks.map((w) => w.title)).toContain(
+        "キャッシュ検証更新後",
+      );
+      expect(afterUpdateWorks.map((w) => w.title)).not.toContain(
+        "キャッシュ検証1",
+      );
+    });
+  });
 });

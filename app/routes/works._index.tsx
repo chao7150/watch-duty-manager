@@ -9,8 +9,10 @@ import * as SearchInput from "~/components/SearchInput";
 import * as WorkUI from "~/components/work/Work";
 import type { Cour } from "~/domain/cour/consts";
 import { cour2expression, cour2symbol, symbol2cour } from "~/domain/cour/util";
+import type { WorksListItem } from "~/usecases/_shared/worksDto";
 import { getAvailableCours } from "~/usecases/getAvailableCours";
 import { getWorksList } from "~/usecases/getWorksList";
+import { searchWorks } from "~/usecases/searchWorks";
 
 import { getUserId } from "~/utils/session.server";
 
@@ -36,24 +38,48 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
   const query = url.searchParams.get("q") ?? undefined;
 
-  const [result, courList] = await Promise.all([
-    getWorksList({
-      episodeRepo: episodeRepository,
-      workRepo: workRepository,
-    })({
-      userId,
-      cour,
-      minEpisodes,
-      query,
-    }),
+  let works: WorksListItem[] = [];
+  let searchedWorks:
+    | {
+        currentCourWorks: WorksListItem[];
+        otherCourWorks: WorksListItem[];
+      }
+    | undefined;
+
+  const getWorksPromise =
+    query !== undefined && query.trim() !== ""
+      ? searchWorks({
+          episodeRepo: episodeRepository,
+          workRepo: workRepository,
+        })({
+          userId,
+          cour,
+          minEpisodes,
+          query,
+        }).then((res) => {
+          searchedWorks = res;
+        })
+      : getWorksList({
+          episodeRepo: episodeRepository,
+          workRepo: workRepository,
+        })({
+          userId,
+          cour,
+          minEpisodes,
+        }).then((res) => {
+          works = res;
+        });
+
+  const [_, courList] = await Promise.all([
+    getWorksPromise,
     getAvailableCours({
       episodeRepo: episodeRepository,
     })(),
   ]);
 
   return {
-    works: result.works,
-    searchedWorks: result.searchedWorks,
+    works,
+    searchedWorks,
     loggedIn: userId !== undefined,
     courList,
     selectedCourDate: cour ? cour2symbol(cour) : undefined,

@@ -6,7 +6,8 @@
   "license": "",
   "scripts": {
     "build": "react-router build",
-    "check": "biome check --write ./app",
+    "check": "biome check --write ./app && npm run check:depcruise",
+    "check:depcruise": "depcruise app --config .dependency-cruiser.cjs",
     "dev": "node -r dotenv/config node_modules/.bin/react-router dev --host 0.0.0.0",
     "db:setup": "npx prisma db push && npx prisma db seed",
     "start": "react-router-serve ./build/server/index.js",
@@ -40,6 +41,7 @@
     "@types/node": "^24.12.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "dependency-cruiser": "^17.4.2",
     "esbuild-register": "^3.6.0",
     "simple-git-hooks": "^2.13.1",
     "tailwindcss": "^4.3.0",

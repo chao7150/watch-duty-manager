@@ -8,7 +8,8 @@ import { useDebouncedSearch } from "~/components/hooks/useDebouncedSearch";
 import * as SearchInput from "~/components/SearchInput";
 import * as WorkUI from "~/components/work/Work";
 import type { Cour } from "~/domain/cour/consts";
-import { cour2expression, symbol2cour } from "~/domain/cour/util";
+import { cour2expression, cour2symbol, symbol2cour } from "~/domain/cour/util";
+import { getAvailableCours } from "~/usecases/getAvailableCours";
 import { getWorksList } from "~/usecases/getWorksList";
 
 import { getUserId } from "~/utils/session.server";
@@ -35,24 +36,29 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const minEpisodes = Number(url.searchParams.get("minEpisodes") ?? "3");
   const query = url.searchParams.get("q") ?? undefined;
 
-  const result = await getWorksList({
-    episodeRepo: episodeRepository,
-    workRepo: workRepository,
-  })({
-    userId,
-    cour,
-    minEpisodes,
-    query,
-  });
+  const [result, courList] = await Promise.all([
+    getWorksList({
+      episodeRepo: episodeRepository,
+      workRepo: workRepository,
+    })({
+      userId,
+      cour,
+      minEpisodes,
+      query,
+    }),
+    getAvailableCours({
+      episodeRepo: episodeRepository,
+    })(),
+  ]);
 
   return {
     works: result.works,
     searchedWorks: result.searchedWorks,
     loggedIn: userId !== undefined,
-    courList: result.courList,
-    selectedCourDate: result.selectedCourDate ?? undefined,
+    courList,
+    selectedCourDate: cour ? cour2symbol(cour) : undefined,
     selectedCourExpression: cour ? cour2expression(cour) : undefined,
-    minEpisodes: result.minEpisodes,
+    minEpisodes,
   };
 };
 

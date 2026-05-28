@@ -6,6 +6,10 @@ import type { EpisodeRepository } from "~/domain/episode/repository";
 import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
 
+let cachedOldestPublishedAt: Date | null = null;
+let cacheExpiredAt = 0;
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
 export const episodeRepository: EpisodeRepository = {
   createMany: async (data) => {
     try {
@@ -39,14 +43,22 @@ export const episodeRepository: EpisodeRepository = {
     }
   },
 
-  findOldestPublishedAt: () =>
-    db.episode
-      .findFirstOrThrow({
-        select: { publishedAt: true },
-        orderBy: { publishedAt: "asc" },
-        take: 1,
-      })
-      .then((e) => e.publishedAt),
+  findOldestPublishedAt: async () => {
+    const now = Date.now();
+    if (cachedOldestPublishedAt !== null && now < cacheExpiredAt) {
+      return cachedOldestPublishedAt;
+    }
+
+    const result = await db.episode.findFirstOrThrow({
+      select: { publishedAt: true },
+      orderBy: { publishedAt: "asc" },
+      take: 1,
+    });
+
+    cachedOldestPublishedAt = result.publishedAt;
+    cacheExpiredAt = now + CACHE_TTL_MS;
+    return cachedOldestPublishedAt;
+  },
 
   groupByWorkIdWithCount: (where, havingCount) =>
     db.episode

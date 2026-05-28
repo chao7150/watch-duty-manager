@@ -1,5 +1,4 @@
 import type { Cour } from "~/domain/cour/consts";
-import { cour2expression, cour2symbol, getCourList } from "~/domain/cour/util";
 import type { EpisodeRepository } from "~/domain/episode/repository";
 import type { WorkRepository } from "~/domain/work/repository";
 
@@ -15,9 +14,6 @@ export interface WorksListResult {
     currentCourWorks: WorksListItem[];
     otherCourWorks: WorksListItem[];
   };
-  courList: [string, string][];
-  selectedCourDate: string | null;
-  minEpisodes: number;
 }
 
 export const getWorksList =
@@ -48,19 +44,12 @@ export const getWorksList =
       );
 
       if (matched.length === 0) {
-        const oldestPublishedAt = await episodeRepo.findOldestPublishedAt();
-        const cours = getCourList(oldestPublishedAt);
         return {
           works: [],
           searchedWorks: {
             currentCourWorks: [],
             otherCourWorks: [],
           },
-          courList: cours.map(
-            (c) => [cour2expression(c), cour2symbol(c)] as [string, string],
-          ),
-          selectedCourDate: cour ? cour2symbol(cour) : null,
-          minEpisodes,
         };
       }
 
@@ -87,20 +76,12 @@ export const getWorksList =
         }
       }
 
-      const oldestPublishedAt = await episodeRepo.findOldestPublishedAt();
-      const cours = getCourList(oldestPublishedAt);
-
       return {
         works: [],
         searchedWorks: {
           currentCourWorks,
           otherCourWorks,
         },
-        courList: cours.map(
-          (c) => [cour2expression(c), cour2symbol(c)] as [string, string],
-        ),
-        selectedCourDate: cour ? cour2symbol(cour) : null,
-        minEpisodes,
       };
     }
 
@@ -114,19 +95,11 @@ export const getWorksList =
       includeUsers: userId !== null ? { userId } : undefined,
     });
 
-    const oldestPublishedAt = await episodeRepo.findOldestPublishedAt();
-    const cours = getCourList(oldestPublishedAt);
-
     return {
       works: works.map((w) => ({
         id: w.id,
         title: w.title,
         subscribed: (w.users?.length ?? 0) === 1,
       })),
-      courList: cours.map(
-        (c) => [cour2expression(c), cour2symbol(c)] as [string, string],
-      ),
-      selectedCourDate: cour ? cour2symbol(cour) : null,
-      minEpisodes,
     };
   };

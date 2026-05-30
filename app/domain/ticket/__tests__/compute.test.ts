@@ -117,7 +117,7 @@ describe("setOldestOfWork", () => {
 });
 
 describe("computeTickets", () => {
-  const now = Temporal.ZonedDateTime.from({
+  const limit = Temporal.ZonedDateTime.from({
     year: 2024,
     month: 1,
     day: 15,
@@ -128,7 +128,7 @@ describe("computeTickets", () => {
     timeZone: "Asia/Tokyo",
   });
 
-  it("公開日が現在時刻より前のエピソードのみをチケットとして返す", () => {
+  it("公開日が上限時刻より前のエピソードのみをチケットとして返す", () => {
     const episodes = [
       {
         workId: 1,
@@ -154,7 +154,7 @@ describe("computeTickets", () => {
       },
     ];
     const subscribedWorks = [{ workId: 1, watchDelaySecFromPublish: 0 }];
-    expect(computeTickets(now, subscribedWorks, episodes)).toStrictEqual([
+    expect(computeTickets(limit, subscribedWorks, episodes)).toStrictEqual([
       episodes[0],
     ]);
   });
@@ -185,7 +185,7 @@ describe("computeTickets", () => {
       },
     ];
     const subscribedWorks = [{ workId: 1, watchDelaySecFromPublish: 86400 }];
-    expect(computeTickets(now, subscribedWorks, episodes)).toStrictEqual([]);
+    expect(computeTickets(limit, subscribedWorks, episodes)).toStrictEqual([]);
   });
 
   it("購読情報に一致しないworkIdは遅延0として扱う", () => {
@@ -203,13 +203,13 @@ describe("computeTickets", () => {
       },
     ];
     const subscribedWorks = [{ workId: 1, watchDelaySecFromPublish: 999999 }];
-    expect(computeTickets(now, subscribedWorks, episodes)).toStrictEqual(
+    expect(computeTickets(limit, subscribedWorks, episodes)).toStrictEqual(
       episodes,
     );
   });
 
   it("空のエピソード配列では空配列を返す", () => {
-    expect(computeTickets(now, [], [])).toStrictEqual([]);
+    expect(computeTickets(limit, [], [])).toStrictEqual([]);
   });
 
   it("全てのエピソードが未来の場合は空配列を返す", () => {
@@ -239,7 +239,7 @@ describe("computeTickets", () => {
     ];
     expect(
       computeTickets(
-        now,
+        limit,
         [{ workId: 1, watchDelaySecFromPublish: 0 }],
         episodes,
       ),
@@ -275,7 +275,7 @@ describe("computeTickets", () => {
       { workId: 1, watchDelaySecFromPublish: 86400 },
       { workId: 2, watchDelaySecFromPublish: 0 },
     ];
-    const result = computeTickets(now, subscribedWorks, episodes);
+    const result = computeTickets(limit, subscribedWorks, episodes);
     expect(result).toStrictEqual([episodes[1]]);
   });
 });

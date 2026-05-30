@@ -2,10 +2,10 @@ import type { Temporal } from "temporal-polyfill";
 import type { TicketEpisode } from "~/domain/watch/types";
 
 /**
- * 視聴遅延設定に基づいて、現在時刻より前に公開済みのエピソードのみをフィルタする。
+ * 視聴遅延設定に基づいて、指定された上限時刻より前に公開・視聴可能になるエピソードのみをフィルタする。
  */
 export const computeTickets = (
-  now: Temporal.ZonedDateTime,
+  limit: Temporal.ZonedDateTime,
   subscribedWorks: ReadonlyArray<{
     workId: number;
     watchDelaySecFromPublish: number;
@@ -16,7 +16,7 @@ export const computeTickets = (
     const delay =
       subscribedWorks.find((s) => s.workId === ep.workId)
         ?.watchDelaySecFromPublish ?? 0;
-    return ep.publishedAt.getTime() + delay * 1000 < now.epochMilliseconds;
+    return ep.publishedAt.getTime() + delay * 1000 < limit.epochMilliseconds;
   });
 };
 

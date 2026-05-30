@@ -72,7 +72,11 @@ export const getDashboard = (deps: {
       metricsRepo.findQuarterDuties(userId, quarterStart, weekEnd),
     ]);
 
-    const tickets = computeTickets(now, subscribedWorks, rawEpisodes);
+    const tickets = computeTickets(
+      now.add({ days: 1 }),
+      subscribedWorks,
+      rawEpisodes,
+    );
     const weekWatchAchievements = countOccurrence(
       weekWatchAchievementDates.map((w) => getAnimeDate(w.createdAt)),
     );

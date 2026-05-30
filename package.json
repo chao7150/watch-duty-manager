@@ -57,7 +57,7 @@
     "seed": "node --experimental-strip-types prisma/seed.ts"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx biome check --staged --write"
+    "pre-commit": "npx biome check --staged --write --no-errors-on-unmatched"
   },
   "sideEffects": false
 }

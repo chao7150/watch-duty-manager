@@ -13,8 +13,21 @@ const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 export const episodeRepository: EpisodeRepository = {
   createMany: async (data) => {
     try {
-      const result = await db.episode.createMany({ data });
-      return Ok({ count: result.count });
+      await db.$transaction(async (tx) => {
+        await Promise.all(
+          data.map((episode) => {
+            const { workId, ...rest } = episode;
+            return tx.episode.create({
+              data: {
+                ...rest,
+                work: { connect: { id: workId } },
+                knowledgeNode: { create: {} },
+              },
+            });
+          }),
+        );
+      });
+      return Ok({ count: data.length });
     } catch (e) {
       return Err({
         type: "db" as const,
@@ -26,13 +39,35 @@ export const episodeRepository: EpisodeRepository = {
 
   deleteAndReorder: async (workId, count) => {
     try {
-      await db.$transaction([
-        db.episode.delete({ where: { workId_count: { workId, count } } }),
-        db.episode.updateMany({
+      await db.$transaction(async (tx) => {
+        // 1. 削除対象エピソードの knowledgeNodeId を取得
+        const episode = await tx.episode.findUnique({
+          where: { workId_count: { workId, count } },
+          select: { knowledgeNodeId: true },
+        });
+
+        if (!episode) {
+          throw new Error(
+            `Episode not found: workId=${workId}, count=${count}`,
+          );
+        }
+
+        // 2. エピソードを削除
+        await tx.episode.delete({
+          where: { workId_count: { workId, count } },
+        });
+
+        // 3. 対応する KnowledgeNode を削除
+        await tx.knowledgeNode.delete({
+          where: { id: episode.knowledgeNodeId },
+        });
+
+        // 4. 後続エピソードの count を詰める
+        await tx.episode.updateMany({
           where: { workId, count: { gt: count } },
           data: { count: { decrement: 1 } },
-        }),
-      ]);
+        });
+      });
       return Ok(undefined);
     } catch (e) {
       return Err({

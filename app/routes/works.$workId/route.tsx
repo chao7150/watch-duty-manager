@@ -3,6 +3,7 @@ import { Link, useMatches } from "react-router";
 
 import urlFrom from "url-from";
 import * as WorkSubscribeForm from "~/components/work/WorkSubscribeForm";
+import { bindUrl as bindUrlForKnowledgeDetail } from "~/routes/knowledge.$nodeId";
 import type { Route } from "./+types/route";
 import * as EpisodeRatingChartSection from "./components/episode-rating-chart-section";
 import * as EpisodeScheduleSection from "./components/episode-schedule-section";
@@ -41,6 +42,14 @@ export default function Component({ loaderData }: Route.ComponentProps) {
         <h2 className="flex items-center">
           <Link to={bindUrl({ workId: work.id })}>{work.title}</Link>
         </h2>
+        <div className="ml-4 flex items-center">
+          <Link
+            to={bindUrlForKnowledgeDetail({ nodeId: work.knowledgeNodeId })}
+            className="text-xs bg-dark hover:opacity-80 text-link px-3 py-1.5 rounded-md border border-outline"
+          >
+            Knowledge Graph
+          </Link>
+        </div>
         {loggedIn && (
           <>
             <div className="ml-4">

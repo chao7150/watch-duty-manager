@@ -6,10 +6,12 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // まず、既存のデータをクリア
+  await prisma.knowledgeEdge.deleteMany();
   await prisma.episodeStatusOnUser.deleteMany();
   await prisma.subscribedWorksOnUser.deleteMany();
   await prisma.episode.deleteMany();
   await prisma.work.deleteMany();
+  await prisma.knowledgeNode.deleteMany();
 
   // サンプル作品データ
   const sampleWorks = [
@@ -65,7 +67,12 @@ async function main() {
   for (const workData of sampleWorks) {
     const { episodeCount, ...workWithoutEpisodeCount } = workData;
     const work = await prisma.work.create({
-      data: workWithoutEpisodeCount,
+      data: {
+        ...workWithoutEpisodeCount,
+        knowledgeNode: {
+          create: {},
+        },
+      },
     });
     createdWorks.push({ ...work, episodeCount });
     console.log(`✅ Created work: ${work.title} (ID: ${work.id})`);
@@ -74,26 +81,31 @@ async function main() {
   // エピソードを作成
   let totalEpisodes = 0;
   for (const work of createdWorks) {
-    const episodes = [];
+    let createdCount = 0;
     for (let i = 1; i <= work.episodeCount; i++) {
       // 週間間隔でエピソードを配置
       const episodeDate = new Date(work.publishedAt);
       episodeDate.setDate(episodeDate.getDate() + (i - 1) * 7);
 
-      episodes.push({
-        workId: work.id,
-        count: i,
-        publishedAt: episodeDate,
-        title: `第${i}話`,
-        description: `${work.title}の第${i}話です。`,
+      await prisma.episode.create({
+        data: {
+          work: {
+            connect: { id: work.id },
+          },
+          count: i,
+          publishedAt: episodeDate,
+          title: `第${i}話`,
+          description: `${work.title}の第${i}話です。`,
+          knowledgeNode: {
+            create: {},
+          },
+        },
       });
+      createdCount++;
     }
 
-    await prisma.episode.createMany({
-      data: episodes,
-    });
-    totalEpisodes += episodes.length;
-    console.log(`📺 Created ${episodes.length} episodes for ${work.title}`);
+    totalEpisodes += createdCount;
+    console.log(`📺 Created ${createdCount} episodes for ${work.title}`);
   }
 
   console.log(`🎉 Seeding completed!`);

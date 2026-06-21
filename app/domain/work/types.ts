@@ -17,6 +17,7 @@ export interface WorkUpdateInput {
 
 export interface WorkCore {
   id: number;
+  knowledgeNodeId: number;
   title: string;
   publishedAt: Date;
   durationMin: number;

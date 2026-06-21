@@ -14,6 +14,7 @@ import * as MenuIcon from "~/components/Icons/Menu";
 import * as MobileNavigation from "~/components/mobileNavigation";
 
 import { cour2symbol, date2cour } from "~/domain/cour/util";
+import { bindUrl as bindUrlForKnowledge } from "~/routes/knowledge._index";
 import { bindUrl as bindUrlForMy } from "~/routes/my";
 import { bindUrl as bindUrlForWorks } from "~/routes/works._index";
 
@@ -132,6 +133,9 @@ function LayoutBody({
               </li>
               <li>
                 <Link to="/create">Create</Link>
+              </li>
+              <li>
+                <Link to={bindUrlForKnowledge({})}>Knowledge</Link>
               </li>
               <li>
                 <Link

@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import urlFrom from "url-from";
 
 import { db } from "~/utils/db.server";
@@ -210,6 +211,15 @@ export default function Component({ loaderData }: Route.ComponentProps) {
             </>
           );
         })}
+        <dt className="text-text-weak">ナレッジ</dt>
+        <dd>
+          <Link
+            to={`/knowledge/${episode.knowledgeNodeId}`}
+            className="text-xs text-text-weak hover:underline"
+          >
+            Knowledge Graph
+          </Link>
+        </dd>
       </dl>
     </div>
   );

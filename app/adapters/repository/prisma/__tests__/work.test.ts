@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { episodeRepository } from "~/adapters/repository/prisma/episode";
 import { workRepository } from "~/adapters/repository/prisma/work";
-import { db } from "~/utils/db.server";
 
 describe("workRepository", () => {
   describe("create", () => {
@@ -37,23 +37,20 @@ describe("workRepository", () => {
         title: "エピソード付き作品",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
-      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = createResult!.id;
 
-      await db.episode.createMany({
-        data: [
-          {
-            workId,
-            count: 1,
-            publishedAt: new Date("2024-01-08T04:00:00+09:00"),
-          },
-          {
-            workId,
-            count: 2,
-            publishedAt: new Date("2024-01-15T04:00:00+09:00"),
-          },
-        ],
-      });
+      await episodeRepository.createMany([
+        {
+          workId,
+          count: 1,
+          publishedAt: new Date("2024-01-08T04:00:00+09:00"),
+        },
+        {
+          workId,
+          count: 2,
+          publishedAt: new Date("2024-01-15T04:00:00+09:00"),
+        },
+      ]);
 
       const work = await workRepository.findById(workId, {
         includeEpisodes: true,
@@ -70,7 +67,6 @@ describe("workRepository", () => {
         title: "エピソードなしで取得",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
-      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = createResult!.id;
 
       const work = await workRepository.findById(workId, {
@@ -123,7 +119,6 @@ describe("workRepository", () => {
         title: "更新前タイトル",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
-      // biome-ignore lint/style/noNonNullAssertion: test
       const workId = createResult!.id;
 
       const result = await workRepository.update(workId, {
@@ -150,7 +145,6 @@ describe("workRepository", () => {
         publishedAt: new Date("2024-02-01T04:00:00+09:00"),
       });
 
-      // biome-ignore lint/style/noNonNullAssertion: test
       const works = await workRepository.findManyByIds([r1!.id, r2!.id], {});
 
       expect(works).toHaveLength(2);
@@ -176,7 +170,6 @@ describe("workRepository", () => {
       expect(afterCreateWorks.map((w) => w.title)).toContain("キャッシュ検証1");
 
       // 4. 更新
-      // biome-ignore lint/style/noNonNullAssertion: test
       await workRepository.update(r1!.id, {
         title: "キャッシュ検証更新後",
       });

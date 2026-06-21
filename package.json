@@ -27,6 +27,7 @@
     "prisma": "^6.18.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-force-graph-2d": "^1.29.1",
     "react-multi-date-picker": "^4.5.2",
     "react-router": "^7.15.1",
     "recharts": "^3.8.1",

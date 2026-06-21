@@ -29,6 +29,7 @@ const dummyWorkListItem = (
   hasUser: boolean,
 ): WorkListItem => ({
   id,
+  knowledgeNodeId: id,
   title,
   publishedAt: new Date(),
   durationMin: 24,

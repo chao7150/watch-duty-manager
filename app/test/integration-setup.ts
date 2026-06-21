@@ -7,10 +7,12 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await db.knowledgeEdge.deleteMany();
   await db.episodeStatusOnUser.deleteMany();
   await db.subscribedWorksOnUser.deleteMany();
   await db.episode.deleteMany();
   await db.work.deleteMany();
+  await db.knowledgeNode.deleteMany();
 });
 
 afterAll(async () => {

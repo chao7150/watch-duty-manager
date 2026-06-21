@@ -16,6 +16,9 @@ datasource db {
 // アニメ作品
 model Work {
   id              Int                     @id @default(autoincrement())
+  knowledgeNodeId Int                     @unique
+  knowledgeNode   KnowledgeNode           @relation(fields: [knowledgeNodeId], references: [id], onDelete: Restrict)
+
   episodes        Episode[]
   title           String                  @unique
   publishedAt     DateTime
@@ -28,6 +31,10 @@ model Work {
 
 // アニメの単話
 model Episode {
+  id              Int                   @id @default(autoincrement())
+  knowledgeNodeId Int                   @unique
+  knowledgeNode   KnowledgeNode         @relation(fields: [knowledgeNodeId], references: [id], onDelete: Restrict)
+
   work                Work                  @relation(fields: [workId], references: [id])
   workId              Int
   count               Int
@@ -36,7 +43,7 @@ model Episode {
   description         String?
   EpisodeStatusOnUser EpisodeStatusOnUser[]
 
-  @@id(fields: [workId, count])
+  @@unique([workId, count])
 }
 
 model SubscribedWorksOnUser {
@@ -61,3 +68,36 @@ model EpisodeStatusOnUser {
 
   @@id(fields: [userId, workId, count])
 }
+
+model KnowledgeNode {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  content   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  work    Work?
+  episode Episode?
+
+  outgoingEdges KnowledgeEdge[] @relation("FromNode")
+  incomingEdges KnowledgeEdge[] @relation("ToNode")
+
+  @@index([name])
+}
+
+model KnowledgeEdge {
+  id        Int      @id @default(autoincrement())
+  fromId    Int
+  toId      Int
+  edgeType  String
+  createdAt DateTime @default(now())
+
+  from KnowledgeNode @relation("FromNode", fields: [fromId], references: [id], onDelete: Cascade)
+  to   KnowledgeNode @relation("ToNode", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, edgeType])
+  @@index([fromId])
+  @@index([toId])
+  @@index([edgeType])
+}
+

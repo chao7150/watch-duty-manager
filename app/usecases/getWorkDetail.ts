@@ -18,6 +18,7 @@ export interface WorkDetailEpisode {
 export interface WorkDetailResult {
   work: {
     id: number;
+    knowledgeNodeId: number;
     title: string;
     publishedAt: Date;
     durationMin: number;

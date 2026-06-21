@@ -36,6 +36,7 @@ export const Component: React.FC<Props> = ({ userId }) => {
         })}
       />
       <ListItem text="Create" to="/create" />
+      <ListItem text="Knowledge" to="/knowledge" />
       <ListItem
         text="Help"
         to="https://chao7150.notion.site/wdm-help-82a9677f1ae545e7be3ee110a2c40068?pvs=4"

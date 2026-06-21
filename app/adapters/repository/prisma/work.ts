@@ -2,6 +2,7 @@ import type { WorkRepository } from "~/domain/work/repository";
 import type { WorkDetail, WorkListItem } from "~/domain/work/types";
 import { db } from "~/utils/db.server";
 import { Err, Ok } from "~/utils/result";
+import { isPrismaError, prismaErrorAssorter } from "./prisma-error";
 
 let cachedWorks: { id: number; title: string }[] | null = null;
 
@@ -9,16 +10,11 @@ const clearWorksCache = () => {
   cachedWorks = null;
 };
 
-const isUniqueConstraintError = (e: unknown): boolean =>
-  e != null &&
-  typeof e === "object" &&
-  "code" in e &&
-  (e as { code: unknown }).code === "P2002";
-
 // biome-ignore lint/suspicious/noExplicitAny: prisma dynamic include
 const mapToWorkDetail = (work: any): WorkDetail => {
   return {
     id: work.id,
+    knowledgeNodeId: work.knowledgeNodeId,
     title: work.title,
     publishedAt: work.publishedAt,
     durationMin: work.durationMin,
@@ -61,6 +57,7 @@ const mapToWorkDetail = (work: any): WorkDetail => {
 const mapToWorkListItem = (work: any): WorkListItem => {
   return {
     id: work.id,
+    knowledgeNodeId: work.knowledgeNodeId,
     title: work.title,
     publishedAt: work.publishedAt,
     durationMin: work.durationMin,
@@ -148,15 +145,29 @@ export const workRepository: WorkRepository = {
 
   create: async (data) => {
     try {
-      const work = await db.work.create({ data });
+      const work = await db.work.create({
+        data: {
+          ...data,
+          knowledgeNode: { create: {} },
+        },
+      });
       clearWorksCache();
       return Ok({ id: work.id });
     } catch (e) {
-      if (isUniqueConstraintError(e)) {
-        return Err({
-          type: "unique_constraint" as const,
-          duplicatedFields: ["title"],
-        });
+      if (isPrismaError(e)) {
+        switch (prismaErrorAssorter(e)) {
+          case "P2002":
+            return Err({
+              type: "unique_constraint" as const,
+              duplicatedFields: ["title"],
+            });
+          default:
+            return Err({
+              type: "db" as const,
+              message: "work create failed",
+              cause: e,
+            });
+        }
       }
       return Err({
         type: "db" as const,
@@ -168,15 +179,35 @@ export const workRepository: WorkRepository = {
 
   createMany: async (data) => {
     try {
-      await db.work.createMany({ data });
+      await db.$transaction(async (tx) => {
+        await Promise.all(
+          data.map((item) =>
+            tx.work.create({
+              data: {
+                ...item,
+                knowledgeNode: { create: {} },
+              },
+            }),
+          ),
+        );
+      });
       clearWorksCache();
       return Ok(undefined);
     } catch (e) {
-      if (isUniqueConstraintError(e)) {
-        return Err({
-          type: "unique_constraint" as const,
-          duplicatedFields: ["title"],
-        });
+      if (isPrismaError(e)) {
+        switch (prismaErrorAssorter(e)) {
+          case "P2002":
+            return Err({
+              type: "unique_constraint" as const,
+              duplicatedFields: ["title"],
+            });
+          default:
+            return Err({
+              type: "db" as const,
+              message: "work createMany failed",
+              cause: e,
+            });
+        }
       }
       return Err({
         type: "db" as const,

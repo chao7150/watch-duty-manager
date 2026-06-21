@@ -40,12 +40,13 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
   const _action = formData.get("_action")?.toString();
 
   if (_action === "update_node") {
-    const name = formData.get("name")?.toString() || "";
+    const nameRaw = formData.get("name");
+    const name = nameRaw !== null ? nameRaw.toString() : undefined;
     const content = formData.get("content")?.toString() || "";
     const result = await updateKnowledgeNode({
       knowledgeRepo: knowledgeRepository,
     })(nodeId, {
-      name,
+      ...(name !== undefined ? { name } : {}),
       content: content || null,
     });
 
@@ -175,10 +176,6 @@ export default function KnowledgeDetail({
   const searchFetcher = useFetcher<typeof searchNodesLoader>();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const availableSuggestions = (searchFetcher.data?.nodes ?? []).filter(
-    (n) => !existingTargets.has(n.id),
-  );
-
   const currentNodeEdgeTypes = [
     ...new Set(node.outgoing.map((e) => e.edgeType)),
   ];
@@ -196,6 +193,10 @@ export default function KnowledgeDetail({
     node.outgoing
       .filter((e) => e.edgeType === edgeTypeQuery)
       .map((e) => e.node.id),
+  );
+
+  const availableSuggestions = (searchFetcher.data?.nodes ?? []).filter(
+    (n) => !existingTargets.has(n.id),
   );
 
   useEffect(() => {
@@ -273,7 +274,7 @@ export default function KnowledgeDetail({
                     元のページを見る
                   </Link>
                 )}
-                {node.kind === "knowledge" && !isEditing && (
+                {!isEditing && (
                   <button
                     type="button"
                     className="text-xs bg-dark hover:opacity-80 text-text px-3 py-1.5 rounded-md border border-outline"
@@ -287,22 +288,24 @@ export default function KnowledgeDetail({
 
             {isEditing ? (
               <Form method="post" className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-text-weak mb-1"
-                  >
-                    名前
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    defaultValue={node.label}
-                    required
-                    className="w-full px-3 py-2 border border-outline rounded-md focus:outline-none focus:ring-1 focus:ring-link focus:border-link"
-                  />
-                </div>
+                {node.kind === "knowledge" && (
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-text-weak mb-1"
+                    >
+                      名前
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      defaultValue={node.label}
+                      required
+                      className="w-full px-3 py-2 border border-outline rounded-md focus:outline-none focus:ring-1 focus:ring-link focus:border-link"
+                    />
+                  </div>
+                )}
                 <div>
                   <label
                     htmlFor="content"
@@ -334,23 +337,25 @@ export default function KnowledgeDetail({
                   >
                     キャンセル
                   </button>
-                  <button
-                    type="submit"
-                    name="_action"
-                    value="delete_node"
-                    className="py-2 px-4 rounded-md text-sm font-medium text-red border border-red border-opacity-40 bg-accent-area hover:opacity-80 focus:outline-none"
-                    onClick={(e) => {
-                      if (
-                        !confirm(
-                          "本当にこのノードを削除しますか？接続するエッジもすべて削除されます。",
-                        )
-                      ) {
-                        e.preventDefault();
-                      }
-                    }}
-                  >
-                    削除
-                  </button>
+                  {node.kind === "knowledge" && (
+                    <button
+                      type="submit"
+                      name="_action"
+                      value="delete_node"
+                      className="py-2 px-4 rounded-md text-sm font-medium text-red border border-red border-opacity-40 bg-accent-area hover:opacity-80 focus:outline-none"
+                      onClick={(e) => {
+                        if (
+                          !confirm(
+                            "本当にこのノードを削除しますか？接続するエッジもすべて削除されます。",
+                          )
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      削除
+                    </button>
+                  )}
                 </div>
               </Form>
             ) : (

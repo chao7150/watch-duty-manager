@@ -155,6 +155,10 @@ npm run dev
 
 ## Prisma マイグレーション
 - `prisma/schema.prisma` を変更したときは `npx prisma migrate dev --name <name>` を実行する
+- **既存テーブルに必須カラム（特にFK列）を追加する場合は、データ移行を1マイグレーション内に手書きで含めること**。`migrate dev` はDDLしか自動生成しないため、空テーブルでは通っても既存データのある本番では失敗する（`P3009`）。手順は **(1) NULL許容で列追加 → (2) 既存行をbackfill → (3) NOT NULL化＋FK追加** を同一マイグレーションSQLにまとめる
+  - 実例: `knowledgeNodeId` を Work/Episode に後付けした際、backfill を欠いたため本番（既存データあり）で `MODIFY ... NOT NULL` が失敗した。Work/Episode ごとに空の `KnowledgeNode` を 1:1 で作って紐付ける backfill が必要だった
+- **既に適用済みのマイグレーションファイルは編集しない**。`_prisma_migrations` の checksum と不整合になり、`migrate deploy`/`migrate status` がエラーになる。修正が必要なら新しいマイグレーションを追加する
+- 本番で `P3009`（失敗マイグレーションが残存）になった場合は、DBを手動で目的状態まで修復してから `npx prisma migrate resolve --applied <migration_name>` で適用済みに記録する。作業前に必ず `mysqldump` でバックアップを取得すること
 
 ---
 

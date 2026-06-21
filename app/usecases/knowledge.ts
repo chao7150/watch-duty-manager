@@ -30,7 +30,7 @@ export const updateKnowledgeNode =
   (repos: { knowledgeRepo: KnowledgeRepository }) =>
   async (
     id: number,
-    input: { name: string; content?: string | null },
+    input: { name?: string; content?: string | null },
   ): Promise<Result<void, AppError>> => {
     return repos.knowledgeRepo.updateNode(id, input);
   };

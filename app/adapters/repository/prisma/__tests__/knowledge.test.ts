@@ -51,9 +51,9 @@ describe("knowledgeRepository", () => {
       expect(updated?.content).toBe("説明後");
     });
 
-    it("Work由来のノードは更新できずvalidationエラーになる", async () => {
+    it("Work由来のノードは name を更新しようとするとvalidationエラーになる", async () => {
       const { ok: work } = await workRepository.create({
-        title: "Work由来ノード編集不可テスト",
+        title: "Work由来ノード name 編集不可テスト",
         publishedAt: new Date("2024-01-01T04:00:00+09:00"),
       });
 
@@ -69,6 +69,31 @@ describe("knowledgeRepository", () => {
       if (result.err?.type === "validation") {
         expect(result.err.message).toContain("編集できません");
       }
+    });
+
+    it("Work由来のノードでも content のみ更新できる", async () => {
+      const { ok: work } = await workRepository.create({
+        title: "Work由来ノード content 編集テスト",
+        publishedAt: new Date("2024-01-01T04:00:00+09:00"),
+      });
+
+      const workDetail = await workRepository.findById(work!.id, {});
+      const result = await knowledgeRepository.updateNode(
+        workDetail!.knowledgeNodeId,
+        {
+          content: "Work由来ノードの補足説明",
+        },
+      );
+
+      expect(result.err).toBeUndefined();
+
+      const updated = await knowledgeRepository.findById(
+        workDetail!.knowledgeNodeId,
+      );
+      expect(updated?.content).toBe("Work由来ノードの補足説明");
+      // name (label) は Work.title のままで変わらない
+      expect(updated?.kind).toBe("work");
+      expect(updated?.label).toBe("Work由来ノード content 編集テスト");
     });
 
     // TODO: 空文字でのvalidationエラーが返らない問題がある（not_foundエラーになる）

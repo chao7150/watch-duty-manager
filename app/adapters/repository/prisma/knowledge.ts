@@ -305,14 +305,6 @@ export const knowledgeRepository: KnowledgeRepository = {
   },
 
   updateNode: async (id, data) => {
-    const trimmedName = data.name.trim();
-    if (trimmedName.length === 0) {
-      return Err({
-        type: "validation",
-        message: "名前を入力してください",
-      });
-    }
-
     try {
       const node = await db.knowledgeNode.findUnique({
         where: { id },
@@ -327,19 +319,35 @@ export const knowledgeRepository: KnowledgeRepository = {
         });
       }
 
-      if (node.work || node.episode) {
-        return Err({
-          type: "validation",
-          message: "作品またはエピソード由来の知識ノードは編集できません",
-        });
+      const isDerived = !!(node.work || node.episode);
+
+      const updateData: { name?: string; content?: string | null } = {};
+
+      if (data.name !== undefined) {
+        const trimmedName = data.name.trim();
+        if (trimmedName.length === 0) {
+          return Err({
+            type: "validation",
+            message: "名前を入力してください",
+          });
+        }
+        if (isDerived) {
+          return Err({
+            type: "validation",
+            message:
+              "作品またはエピソード由来の知識ノードの名前は編集できません",
+          });
+        }
+        updateData.name = trimmedName;
+      }
+
+      if (data.content !== undefined) {
+        updateData.content = data.content;
       }
 
       await db.knowledgeNode.update({
         where: { id },
-        data: {
-          name: trimmedName,
-          content: data.content,
-        },
+        data: updateData,
       });
       return Ok(undefined);
     } catch (e) {

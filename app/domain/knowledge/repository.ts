@@ -31,7 +31,7 @@ export interface KnowledgeRepository {
   }): Promise<Result<{ id: number }, AppError>>;
   updateNode(
     id: number,
-    data: { name: string; content?: string | null },
+    data: { name?: string; content?: string | null },
   ): Promise<Result<void, AppError>>;
   deleteNode(id: number): Promise<Result<void, AppError>>;
   createEdge(data: {

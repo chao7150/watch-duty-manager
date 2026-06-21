@@ -19,13 +19,7 @@ export const bindUrl = urlFrom`/knowledge`;
 
 export const loader = async () => {
   const { nodes, edges } = await knowledgeRepository.findManyWithEdges();
-  const connectedNodeIds = new Set<number>();
-  for (const e of edges) {
-    connectedNodeIds.add(e.fromId);
-    connectedNodeIds.add(e.toId);
-  }
-  const filteredNodes = nodes.filter((n) => connectedNodeIds.has(n.id));
-  return { nodes: filteredNodes, edges };
+  return { nodes, edges };
 };
 
 export const action = async ({ request }: Route.ActionArgs) => {

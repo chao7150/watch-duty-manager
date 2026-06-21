@@ -111,22 +111,31 @@ export const knowledgeRepository: KnowledgeRepository = {
   },
 
   findManyWithEdges: async () => {
-    const [nodes, edges] = await Promise.all([
-      db.knowledgeNode.findMany({
-        include: {
-          work: true,
-          episode: {
+    const edges = await db.knowledgeEdge.findMany({
+      select: { fromId: true, toId: true, edgeType: true },
+    });
+
+    const connectedNodeIds = new Set<number>();
+    for (const e of edges) {
+      connectedNodeIds.add(e.fromId);
+      connectedNodeIds.add(e.toId);
+    }
+
+    const nodes =
+      connectedNodeIds.size === 0
+        ? []
+        : await db.knowledgeNode.findMany({
+            where: { id: { in: [...connectedNodeIds] } },
             include: {
               work: true,
+              episode: {
+                include: {
+                  work: true,
+                },
+              },
             },
-          },
-        },
-        orderBy: { id: "asc" },
-      }),
-      db.knowledgeEdge.findMany({
-        select: { fromId: true, toId: true, edgeType: true },
-      }),
-    ]);
+            orderBy: { id: "asc" },
+          });
 
     return {
       nodes: nodes.map((n) => {

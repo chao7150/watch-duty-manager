@@ -4,6 +4,7 @@ import { episodeRepository } from "~/adapters/repository/prisma/episode";
 import { watchRepository } from "~/adapters/repository/prisma/watch";
 import { workRepository } from "~/adapters/repository/prisma/work";
 import { addEpisodes } from "~/usecases/addEpisodes";
+import { bulkWatchEpisodes } from "~/usecases/bulkWatchEpisodes";
 import { deleteEpisode } from "~/usecases/deleteEpisode";
 import { editWatchSettings } from "~/usecases/editWatchSettings";
 import { editWork } from "~/usecases/editWork";
@@ -94,6 +95,27 @@ export const action = async ({ request, params }: Route.ActionArgs) => {
         userId,
         workId,
       );
+      if (result.err) {
+        return data(
+          { message: errorToMessage(result.err), hasError: true },
+          { status: errorToStatus(result.err) },
+        );
+      }
+      return data(
+        { message: result.ok.successMessage, hasError: false },
+        { status: 200 },
+      );
+    }
+
+    case "bulkWatch": {
+      const userId = await requireUserId(request);
+      const { count: _count } = extractParams(Object.fromEntries(formData), [
+        "count",
+      ]);
+      const count = Number(_count);
+      const result = await bulkWatchEpisodes({
+        watchRepo: watchRepository,
+      })(userId, workId, count, new Date());
       if (result.err) {
         return data(
           { message: errorToMessage(result.err), hasError: true },

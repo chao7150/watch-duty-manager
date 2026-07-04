@@ -21,6 +21,8 @@ export const Component: React.FC<Props> = ({
   skipped,
 }) => {
   const fetcher = useFetcher();
+  const skipFetcher = useFetcher({ key: `skip-${workId}-${count}` });
+  const bulkWatchFetcher = useFetcher({ key: `bulkWatch-${workId}-${count}` });
   const [ratingEnabled, setRatingEnabled] = useState(true);
   const { ref, onToggle } = useCloseDetailsOnClickAway();
 
@@ -60,67 +62,90 @@ export const Component: React.FC<Props> = ({
             </Button.Component>
           </fetcher.Form>
         ) : (
-          <fetcher.Form
-            className="flex flex-col gap-2 w-full"
-            method="POST"
-            action={`/works/${workId}/${count}?index`}
-          >
-            <div className="flex justify-between gap-4">
-              <label className="flex items-center">
-                <span className="hidden">rating enabled</span>
-                <input
-                  type="checkbox"
-                  title="レーティングを登録する"
-                  checked={ratingEnabled}
-                  onChange={(e) => setRatingEnabled(e.target.checked)}
-                />
-              </label>
-              <label className="flex-1">
-                <span className="hidden">rating</span>
-                <input
-                  disabled={!ratingEnabled}
-                  className="w-full"
-                  name="rating"
-                  type="range"
-                  min="0"
-                  max="10"
-                  list={`tickmarks-${workId}-${count}`}
-                  defaultValue={5}
-                />
-                <datalist id={`tickmarks-${workId}-${count}`}>
-                  <option value="0"></option>
-                  <option value="1"></option>
-                  <option value="2"></option>
-                  <option value="3"></option>
-                  <option value="4"></option>
-                  <option value="5"></option>
-                  <option value="6"></option>
-                  <option value="7"></option>
-                  <option value="8"></option>
-                  <option value="9"></option>
-                  <option value="10"></option>
-                </datalist>
-              </label>
-            </div>
-            <label>
-              <span className="hidden">comment</span>
-              <textarea
-                className="resize w-full min-w-[200px]"
-                name="comment"
-              ></textarea>
-            </label>
-            <Button.Component type="submit" name="_action" value="watch">
-              {fetcher.state === "idle" ? "視聴した" : "送信中"}
-            </Button.Component>
-            <button
-              type="submit"
-              name="_action"
-              value="skip"
-              className="self-end text-text-weak text-sm"
+          <>
+            <fetcher.Form
+              className="flex flex-col gap-2 w-full"
+              method="POST"
+              action={`/works/${workId}/${count}?index`}
             >
-              スキップ
-            </button>
-          </fetcher.Form>
+              <div className="flex justify-between gap-4">
+                <label className="flex items-center">
+                  <span className="hidden">rating enabled</span>
+                  <input
+                    type="checkbox"
+                    title="レーティングを登録する"
+                    checked={ratingEnabled}
+                    onChange={(e) => setRatingEnabled(e.target.checked)}
+                  />
+                </label>
+                <label className="flex-1">
+                  <span className="hidden">rating</span>
+                  <input
+                    disabled={!ratingEnabled}
+                    className="w-full"
+                    name="rating"
+                    type="range"
+                    min="0"
+                    max="10"
+                    list={`tickmarks-${workId}-${count}`}
+                    defaultValue={5}
+                  />
+                  <datalist id={`tickmarks-${workId}-${count}`}>
+                    <option value="0"></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                    <option value="4"></option>
+                    <option value="5"></option>
+                    <option value="6"></option>
+                    <option value="7"></option>
+                    <option value="8"></option>
+                    <option value="9"></option>
+                    <option value="10"></option>
+                  </datalist>
+                </label>
+              </div>
+              <label>
+                <span className="hidden">comment</span>
+                <textarea
+                  className="resize w-full min-w-[200px]"
+                  name="comment"
+                ></textarea>
+              </label>
+              <Button.Component
+                type="submit"
+                name="_action"
+                value="watch"
+                className="py-2 font-semibold"
+              >
+                {fetcher.state === "idle" ? "視聴した" : "送信中"}
+              </Button.Component>
+            </fetcher.Form>
+            <div className="flex justify-center gap-8 border-t border-outline pt-3 mt-3">
+              <skipFetcher.Form
+                method="POST"
+                action={`/works/${workId}/${count}?index`}
+              >
+                <Button.LinkText.Component
+                  type="submit"
+                  name="_action"
+                  value="skip"
+                  fetcherState={skipFetcher.state}
+                  idleText="スキップ"
+                />
+              </skipFetcher.Form>
+              <bulkWatchFetcher.Form method="POST" action={`/works/${workId}`}>
+                <input type="hidden" name="count" value={count} />
+                <Button.LinkText.Component
+                  type="submit"
+                  name="_action"
+                  value="bulkWatch"
+                  fetcherState={bulkWatchFetcher.state}
+                  idleText="ここまで全部見た"
+                />
+              </bulkWatchFetcher.Form>
+            </div>
+          </>
         )}
       </div>
     </details>

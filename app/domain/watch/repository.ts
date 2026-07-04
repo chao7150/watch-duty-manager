@@ -6,6 +6,24 @@ import type {
 } from "./types";
 
 export interface WatchRepository {
+  /**
+   * 指定話数以下・公開済みで、かつユーザーが未登録（watched/skipped いずれもなし）のエピソード話数を取得
+   */
+  findUnwatchedEpisodeCounts(
+    userId: string,
+    workId: number,
+    params: { untilCount: number; publishedUntil: Date },
+  ): Promise<number[]>;
+
+  /**
+   * 指定話数のエピソードを watched で一括登録（skipDuplicates で既存レコードは上書きしない）
+   */
+  createWatchedStatuses(
+    userId: string,
+    workId: number,
+    counts: number[],
+  ): Promise<Result<void, AppError>>;
+
   findSubscribedWorks(userId: string): Promise<SubscribedWorkSummary[]>;
 
   findSubscribedWorksWithEpisodeStatus(

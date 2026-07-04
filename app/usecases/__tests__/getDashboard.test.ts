@@ -26,6 +26,8 @@ const makeMockWatchRepo = (): WatchRepository => ({
   unsubscribe: vi.fn(),
   updateWatchSettings: vi.fn(),
   findSubscription: vi.fn(),
+  findUnwatchedEpisodeCounts: vi.fn(),
+  createWatchedStatuses: vi.fn(),
 });
 
 const makeMockMetricsRepo = (): MetricsRepository => ({

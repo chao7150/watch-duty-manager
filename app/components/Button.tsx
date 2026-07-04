@@ -18,3 +18,28 @@ export const Component: React.FC<Props> = ({
     </button>
   );
 };
+
+type LinkTextProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  fetcherState: "idle" | "submitting" | "loading";
+  idleText: string;
+};
+
+const LinkTextComponent: React.FC<LinkTextProps> = ({
+  fetcherState,
+  idleText,
+  className,
+  ...props
+}) => {
+  return (
+    <button
+      className={`text-sm text-text-weak border-b border-dashed border-text-weak pb-0.5 hover:text-text hover:border-solid hover:border-text bg-transparent ${className ?? ""}`}
+      {...props}
+    >
+      {fetcherState === "idle" ? idleText : "送信中"}
+    </button>
+  );
+};
+
+export const LinkText = {
+  Component: LinkTextComponent,
+};

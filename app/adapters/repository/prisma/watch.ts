@@ -129,4 +129,50 @@ export const watchRepository: WatchRepository = {
       where: { userId_workId: { userId, workId } },
       select: { workId: true, watchDelaySecFromPublish: true, watchUrl: true },
     }),
+
+  findUnwatchedEpisodeCounts: (
+    userId,
+    workId,
+    { untilCount, publishedUntil },
+  ) =>
+    db.episode
+      .findMany({
+        where: {
+          AND: [
+            { workId },
+            { count: { lte: untilCount } },
+            { publishedAt: { lte: publishedUntil } },
+            {
+              EpisodeStatusOnUser: {
+                none: { userId },
+              },
+            },
+          ],
+        },
+        select: { count: true },
+        orderBy: { count: "asc" },
+      })
+      .then((episodes) => episodes.map((ep) => ep.count)),
+
+  createWatchedStatuses: async (userId, workId, counts) => {
+    try {
+      await db.episodeStatusOnUser.createMany({
+        data: counts.map((count) => ({
+          userId,
+          workId,
+          count,
+          status: "watched" as const,
+          createdAt: new Date(),
+        })),
+        skipDuplicates: true,
+      });
+      return Ok(undefined);
+    } catch (e) {
+      return Err({
+        type: "db" as const,
+        message: "createWatchedStatuses failed",
+        cause: e,
+      });
+    }
+  },
 };

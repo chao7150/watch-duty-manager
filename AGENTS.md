@@ -40,7 +40,8 @@
     - `_shared/` ... 複数ユースケース間共有のDTO・共通定義（他ユースケースに依存禁止）
   - `utils/` ... 基盤ユーティリティ（`db.server.ts`, `firebase.server.ts`, `session.server.ts`, `result.ts`, `validator.ts`, `type.ts`, `date.ts`）
   - `test/` ... テスト用ファクトリ・インテグレーションセットアップ
-- `prisma/` ... Prisma スキーマ・マイグレーション・seed
+- `prisma/` ... Prisma スキーマ・マイグレーション・seed（`generated/` は `prisma generate` が出力する Prisma Client。git 管理外）
+- `prisma.config.ts` ... Prisma CLI の設定（schema/migrations/seed/datasource URL）
 - `container/` ... Docker Compose（`compose.local.yml`）・MySQL 設定
 - `docs/` ... 設計文書（知識グラフ設計等）
 - `example/` ... サンプルデータ（CSV）
@@ -54,7 +55,7 @@
 # 使用技術
 
 - フロントエンド: React 19, React Router 7, TypeScript, Tailwind CSS v4, Recharts, react-multi-date-picker
-- バックエンド: Node.js (>=24), Prisma ORM 6, MySQL 8
+- バックエンド: Node.js (>=24), Prisma ORM 7（`prisma-client` generator + `@prisma/adapter-mariadb`）, MySQL 8
 - 認証: Firebase Authentication（`firebase` + `firebase-admin`）+ Cookie Session
 - 日付処理: Temporal API（`temporal-polyfill`）。date-fns は非推奨
 - テスト: Vitest 4
@@ -133,7 +134,9 @@
 - インテグレーションテスト: `npm run test:integration`（`.env.test` を読み込み prisma db push 後に vitest run）
 - リント/フォーマット: `npm run check`（`biome check --write ./app && depcruise app`）
 - 開発サーバー: `npm run dev`（`react-router dev --host 0.0.0.0`、dotenv で `.env` 読み込み）
-- ビルド: `npm run build`（`react-router build`）
+- ビルド: `npm run build`（`prisma generate && react-router build`）
+- Prisma Client 生成: `npm run generate`（`prisma generate`）
+- マイグレーション: `npm run migrate`（`prisma migrate dev`）
 - 本番起動: `npm run start`（`react-router-serve ./build/server/index.js`）
 - DB セットアップ: `npm run db:setup`（`prisma db push && prisma db seed`）
 

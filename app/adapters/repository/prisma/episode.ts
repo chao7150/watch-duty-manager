@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "#prisma/client";
 
 import type { Cour } from "~/domain/cour/consts";
 import { cour2startDate, next } from "~/domain/cour/util";

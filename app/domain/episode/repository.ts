@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "#prisma/client";
 
 import type { AppError, Result } from "~/utils/result";
 import type { EpisodeInput } from "./types";

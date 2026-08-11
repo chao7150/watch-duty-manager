@@ -12,8 +12,6 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 RUN npm ci
-# Prismaクライアントの生成
-RUN npx prisma generate
 
 # ステージ3: ビルド
 FROM node:24-alpine AS builder
@@ -25,9 +23,10 @@ COPY .gitignore ./
 COPY tsconfig.json ./
 COPY vite.config.mts ./
 COPY react-router.config.ts ./
+COPY prisma.config.ts ./
 COPY prisma ./prisma/
 COPY app ./app/
-# ビルド実行
+# ビルド実行（prisma generate を含む）
 RUN npm run build
 
 # ステージ4: 本番イメージ
@@ -40,10 +39,9 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # 本番依存関係のみコピー
 COPY --from=deps --chown=remix:nodejs /app/node_modules ./node_modules
-COPY --from=dev-deps --chown=remix:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=dev-deps --chown=remix:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder --chown=remix:nodejs /app/build ./build
 COPY --chown=remix:nodejs package*.json ./
+COPY --chown=remix:nodejs prisma.config.ts ./
 COPY --chown=remix:nodejs prisma ./prisma/
 
 # 非rootユーザーに切り替え

@@ -20,3 +20,4 @@ dump.sql
 *.tsbuildinfo
 .react-router/
 .antigravitycli
+/prisma/generated

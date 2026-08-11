@@ -1,13 +1,13 @@
-import * as admin from "firebase-admin";
-import { applicationDefault } from "firebase-admin/app";
+import {
+  type App,
+  applicationDefault,
+  getApps,
+  initializeApp,
+} from "firebase-admin/app";
 
-export function getAdmin(): admin.app.App {
-  if (admin.apps.length > 0) {
-    return admin.apps[0] as admin.app.App;
-  } else {
-    const app = admin.initializeApp({
-      credential: applicationDefault(),
-    });
-    return app;
+export function getAdmin(): App {
+  if (getApps().length > 0) {
+    return getApps()[0];
   }
+  return initializeApp({ credential: applicationDefault() });
 }

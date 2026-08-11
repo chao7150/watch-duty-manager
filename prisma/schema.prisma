@@ -4,13 +4,12 @@
 // このファイルを変更したときは npx prisma migrate dev --name hogehoge を実行する
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider = "prisma-client"
+  output   = "./generated"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 // アニメ作品

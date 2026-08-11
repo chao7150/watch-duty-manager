@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     !process.env.VITEST && reactRouter(),
     cjsInterop({
-      dependencies: ["url-from", "react-use", "firebase-admin"],
+      dependencies: ["url-from"],
     }),
     tailwindcss(),
   ],

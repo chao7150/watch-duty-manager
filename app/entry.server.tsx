@@ -3,7 +3,7 @@ import { createReadableStreamFromReadable } from "@react-router/node";
 import { isbot } from "isbot";
 
 import { renderToPipeableStream } from "react-dom/server";
-import type { AppLoadContext, EntryContext } from "react-router";
+import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 
 const ABORT_DELAY = 5_000;
@@ -13,10 +13,6 @@ export default function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   reactRouterContext: EntryContext,
-  // This is ignored so we can keep it in the template for visibility.  Feel
-  // free to delete this parameter in your app if you're not using it!
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _loadContext: AppLoadContext,
 ) {
   return isBotRequest(request.headers.get("user-agent"))
     ? handleBotRequest(

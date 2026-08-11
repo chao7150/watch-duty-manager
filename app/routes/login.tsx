@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth as getAdminAuth } from "firebase-admin/auth";
 
 import { useCallback, useState } from "react";
 import { redirect, useNavigate } from "react-router";
@@ -31,8 +32,8 @@ export const action = async ({ request }: Route.ActionArgs) => {
     return new Response("Authorization header must be set", { status: 400 });
   }
   const idToken = authorizationHeader.substring(7, authorizationHeader.length);
-  const admin = getAdmin();
-  const decodedToken = await admin.auth().verifyIdToken(idToken);
+  const app = getAdmin();
+  const decodedToken = await getAdminAuth(app).verifyIdToken(idToken);
   const uid = decodedToken.uid;
   const session = await getSession();
   session.set("uid", uid);

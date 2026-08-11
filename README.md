@@ -14,7 +14,7 @@
 ## 技術スタック
 
 - React Router 7
-- Prisma/MySQL
+- Prisma ORM 7（driver adapter: `@prisma/adapter-mariadb`）/MySQL
 - Firebase Authentication
 
 ## 開発
@@ -36,7 +36,7 @@ npm run dev  # 開発サーバー起動
 
 ```bash
 npm i
-sudo nerdctl compose -f container/compose.local.yml up -d db
+docker compose -f container/compose.local.yml up -d db
 npx prisma generate
 npm run db:setup  # 初回のみ
 npm run dev
